@@ -2161,4 +2161,120 @@
 - **Analysis:** "Author", "Software Tester", credit descriptions use QLatin1String instead of tr().
 - **Impact:** Credit roles always English in About dialog.
 
-*Report generated over 8+ waves of parallel subagent auditing, followed by synthesis analysis.*
+---
+
+## Wave 10 — Hotkeys, PrompterView, Clipboard, Conversion, WASM, Dependencies
+
+### [W10-HTK-01] autoRepeat=true for ALL QHotkey shortcuts — non-velocity actions broken when held
+- **File:** src/globalhotkeys.cpp:1116
+- **Severity:** Critical
+- **Category:** Logic
+- **Analysis:** m_setHotkeyShortcut passes true for autoRepeat unconditionally. Holding TogglePrompter/Pause/Stop/Reverse floods with repeated activated() signals. Toggle actions rapidly flip on/off.
+- **Impact:** All non-velocity hotkeys broken when held. Toggle-type actions rapidly flip state.
+
+### [W10-HTK-02] QHotkey::setShortcut return value silently ignored — no failure detection
+- **File:** src/globalhotkeys.cpp:1116
+- **Severity:** High
+- **Category:** Edge Case
+- **Analysis:** bool return indicating successful OS registration discarded. Failed registrations (OS conflict, duplicate, Wayland limitation) silently produce non-functional hotkeys.
+- **Impact:** Broken hotkeys give zero user feedback. User has no way to know registration failed.
+
+### [W10-PMV-01] font.pixelSize evaluates to 0 before first layout pass — crash hazard
+- **File:** src/prompter/PrompterView.qml:242
+- **Severity:** High
+- **Category:** QML/UI
+- **Analysis:** WYSIWYG branch: fontSize depends on __vw = width/100. Before QML layout assigns width=0, fontSize=0. Requires pixelSize>0 for text rendering.
+- **Impact:** Debug assertion failure; release builds may render invisible text or layout collapse at startup.
+
+### [W10-PMV-02] Circular ShaderEffectSource dependency — shadow ghost on first frame
+- **File:** src/prompter/PrompterView.qml:230-233, Prompter.qml:744-770
+- **Severity:** Medium
+- **Category:** QML/UI
+- **Analysis:** ShaderEffectSource captures prompter with layer effect applied, feeds back as shadow texture. One-frame-lag ghosting.
+- **Impact:** Missing/shadow flash on first paint; ghosting during rapid scroll on Metal/WASM.
+
+### [W10-CLP-01] Paste-without-formatting fails when clipboard lacks text/plain
+- **File:** src/documenthandler.cpp:1346-1348
+- **Severity:** High
+- **Category:** Edge Case
+- **Analysis:** paste(true) calls mimeData->text(). If clipboard has HTML but no text/plain MIME (some apps omit it), returns empty → nothing inserted.
+- **Impact:** Ctrl+Shift+V silently does nothing. Should fall back to stripping HTML tags.
+
+### [W10-CLP-02] Remote image URLs in pasted HTML cause unsanctioned network requests
+- **File:** src/documenthandler.cpp:1246-1334, 1425-1455
+- **Severity:** Medium
+- **Category:** Security
+- **Analysis:** filterHtml doesn't remove img tags with remote src. insertHtmlAt pre-loads remote images synchronously. Pasted web content causes tracking-able network requests.
+- **Impact:** Privacy leak — user IP revealed to remote servers when pasting web content.
+
+### [W10-CNV2-01] Default stylesheet has invalid CSS color quoting — exported HTML broken in browsers
+- **File:** src/documenthandler.cpp:184-189
+- **Severity:** High
+- **Category:** Type Safety
+- **Analysis:** color:\"#FFFFFF\" and border-color:\"#404040\" — quoted color values invalid per CSS spec. toHtml() embeds this verbatim. Browsers fail to interpret.
+- **Impact:** Saved HTML documents lose foreground/border colors when viewed in browsers.
+
+### [W10-CNV2-02] No markdown export — round-trip silently destroys all formatting
+- **File:** src/documenthandler.cpp:1138-1177
+- **Severity:** High
+- **Category:** Logic
+- **Analysis:** Markdown imported via Qt::MarkdownText but saveAs only branches HTML/plain. .md extension → toPlainText() stripping all formatting. toMarkdown() never called.
+- **Impact:** Opening .md, editing with formatting, saving → all bold/italic/images/hyperlinks destroyed.
+
+### [W10-CNV2-03] import() uses fromStdString on non-Windows — encoding corruption
+- **File:** src/documenthandler.cpp:1096
+- **Severity:** High
+- **Category:** Type Safety
+- **Analysis:** Non-Win path: QString::fromStdString(bytes.toStdString()) — assumes locale encoding in Qt5, UTF-8 in Qt6. LibreOffice output may use different encoding.
+- **Impact:** Imported ODT/DOCX/DOC/RTF documents may contain garbled characters on macOS/Linux.
+
+### [W10-SWT-01] CloseActions switch drops RecentLocal/RecentRemote — recent document open silently lost after save
+- **File:** src/prompter/Prompter.qml:2479
+- **Severity:** High
+- **Category:** Logic
+- **Analysis:** FileDialog.onAccepted switch handles 5 of 8 CloseActions values. RecentLocal/RecentRemote missing. Line 2302 switch correctly handles all 8. Save dialog path loses intent.
+- **Impact:** User triggers recent-document-open, prompted to save, saves, and recent document never opens.
+
+### [W10-SWT-02] Same bug in IosSaveDialog.onAccepted path
+- **File:** src/prompter/Prompter.qml:2500
+- **Severity:** High
+- **Category:** Logic
+- **Analysis:** Identical omission in iOS save dialog switch.
+- **Impact:** Same silent loss of recent-document-load intent on iOS.
+
+### [W10-DEP-01] Missing vcpkg.json manifest — vcpkg manifest mode installs nothing
+- **File:** vcpkg-configuration.json (no companion vcpkg.json)
+- **Severity:** Critical
+- **Category:** Platform/Build
+- **Analysis:** vcpkg-configuration.json present but no vcpkg.json. vcpkg manifest mode reads vcpkg.json for ports to install. Without it, zero dependencies installed.
+- **Impact:** vcpkg-based builds completely broken. Windows CI/CD using vcpkg cannot configure.
+
+### [W10-WSM-01] Infinite reload loop on unauthorized WASM host — app unusable
+- **File:** src/prompter/Prompter.qml:439, src/wasmintegration.cpp:189-194
+- **Severity:** Critical
+- **Category:** Platform/Build
+- **Analysis:** Every toggle() calls officialHost() which calls QCoreApplication::quit() on unauthorized hosts. aboutToQuit → location.reload() → same host → restart cycle.
+- **Impact:** App enters inescapable reload loop on any host other than localhost/qprompt.app.
+
+### [W10-WSM-02] Global file-picker state overwritten by re-entrant calls — wrong file delivered
+- **File:** src/wasmintegration.cpp:37-40, 64-88, 164-171
+- **Severity:** Medium
+- **Category:** Platform/Build
+- **Analysis:** Static s_pending* globals for file picker with no re-entrancy guard. Second call before first dialog completes overwrites state; first dialog delivers to second caller's objects.
+- **Impact:** Wrong file/image delivered to wrong QML property on rapid multi-click.
+
+### [W10-PLF-01] BSD detection broken — FreeBSD enters wrong code paths
+- **File:** CMakeLists.txt:250,487
+- **Severity:** Critical
+- **Category:** Platform/Build
+- **Analysis:** CMake has no standard `BSD` variable. `${BSD}` never set → `NOT BSD` always true → FreeBSD routes through wrong FetchContent/find_package and wrong CPack generator.
+- **Impact:** FreeBSD build completely misconfigured. Wrong dependency resolution and packaging.
+
+### [W10-PLF-02] QHotkey_FOUND never set in FetchContent path — built but never linked
+- **File:** CMakeLists.txt:252-258, src/CMakeLists.txt:495-500
+- **Severity:** High
+- **Category:** Platform/Build
+- **Analysis:** FetchContent_MakeAvailable(QHotkey) processes but doesn't set QHotkey_FOUND CMake variable. add_definitions and target_link_libraries gated on it → never executed.
+- **Impact:** QHotkey compiled by FetchContent but never linked. Global hotkey functionality silently disabled on Windows/macOS/Linux+BSD FetchContent builds.
+
+*Report generated over 10+ waves of parallel subagent auditing, followed by synthesis analysis.*
