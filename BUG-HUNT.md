@@ -2944,4 +2944,164 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** Entries contain type="vanished" — strings removed from source but not cleaned with `lupdate -no-obsolete`. Remnants of old format filters and bar-position labels.
 - **Impact:** Bloated .ts files; translators see nonexistent strings in Qt Linguist; outdated translations count against completion stats.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-31.*
+---
+
+## Wave 32 — Strings, Q_PROPERTY, Enums, DPI, Settings
+
+### [STR-N01] main.cpp:158 QLatin1String iterator-pair UB from two unrelated string literals
+- **File:** main.cpp:158
+- **Severity:** High
+- **Analysis:** `QLatin1String("file", "File to copy.")` matches the iterator-pair constructor `QLatin1StringView(const char *first, const char *last)`. Pointer subtraction between two unrelated string literals is undefined behavior. Resulting QLatin1StringView has arbitrary m_size — garbage content.
+- **Impact:** `--help` output contains garbage or crashes during argument parsing.
+
+### [NOTIFY-01] setAutoReload doesn't emit autoReloadChanged NOTIFY signal
+- **File:** documenthandler.cpp:909-919, documenthandler.h:120,300
+- **Severity:** Medium
+- **Analysis:** Q_PROPERTY declares NOTIFY autoReloadChanged. Signal exists. `setAutoReload()` sets `m_autoReload` but never emits. Every other WRITE method in DocumentHandler emits its NOTIFY — this is the single exception. QML bindings reading `document.autoReload` become stale after any C++ write.
+- **Impact:** QML bindings never update when autoReload changed from C++.
+
+### [NOTIFY-02] availableDictionariesChanged NOTIFY signal never emitted
+- **File:** documenthandler.h:137,318
+- **Severity:** Low
+- **Analysis:** Q_PROPERTY `availableDictionaries` declares NOTIFY. Signal declared but zero emits in entire codebase. Underlying `SpellChecker::availableDictionaries()` is a static disk-scan — results can't change at runtime — so signal is semantically dead.
+- **Impact:** No current impact. Future dynamic dictionary loading would fail to notify QML.
+
+### [MIX-01] spellchecker.cpp:98 size_t→int narrowing in languages() reserve
+- **File:** spellchecker.cpp:98
+- **Severity:** Low
+- **Analysis:** `out.reserve(static_cast<int>(m_dicts.size()))` — size_t to signed 32-bit narrowing. While dictionary count is small, the conversion is a correctness violation.
+- **Impact:** No current runtime impact; code quality issue.
+
+### [ENUM-01] documenthandler.cpp:1108 updateContents switch no default — silent data loss
+- **File:** documenthandler.cpp:1108
+- **Severity:** Medium
+- **Analysis:** updateContents unconditionally clears document via `cursor.removeSelectedText()` before switch on format. No default case. If format is Qt::UnknownText (-1) or future value, document destroyed with zero content inserted.
+- **Impact:** Silent data loss if unexpected format value reaches the function.
+
+### [DPI-01] TimerClock.qml:127 devicePixelRatio in raw arithmetic with magic multiplier
+- **File:** TimerClock.qml:127
+- **Severity:** Medium
+- **Analysis:** `screen.devicePixelRatio` used in font-size calculation with `<< 3` multiplier. Fractional HiDPI (150%, 175%) produces inconsistent scaling misaligned with rest of UI.
+- **Impact:** Timer font too small/large on fractional HiDPI.
+
+### [DPI-02] MarkersDrawer.qml:37 drawer minimumWidth hardcoded to 260px
+- **File:** MarkersDrawer.qml:37
+- **Severity:** Low
+- **Analysis:** `minimumWidth: 260` in px. On 200% DPI this is 130 logical px — drawer too narrow to read marker labels.
+- **Impact:** Unusable drawer on high DPI.
+
+### [DPI-03] Find.qml:38 searchBarWidth:724 hardcoded in px
+- **File:** Find.qml:38
+- **Severity:** Low
+- **Analysis:** Hardcoded pixel width ignores DPI scaling.
+- **Impact:** Search bar width wrong on non-default scaling.
+
+### [DPI-04] InputsOverlay.qml:33 height:680 hardcoded
+- **File:** InputsOverlay.qml:33
+- **Severity:** Medium
+- **Analysis:** Overlay height 680px hardcoded. On 1920x1080 at 200% DPI, overlay exceeds screen height.
+- **Impact:** Content clipped or unreachable on small HiDPI screens.
+
+### [GEO-01] main.qml initial 728px height too large for 1366x768 laptops
+- **File:** main.qml:77-78, +windows/main.qml
+- **Severity:** Low
+- **Analysis:** Initial window 1220x728. On 1366x768 laptops, 728 + taskbar (~40px) exceeds desktop area. Window clipped by WM on first launch.
+- **Impact:** User must resize window on first launch.
+
+### [GEO-02] main.qml persists x/y/width/height with zero validation
+- **File:** main.qml:85-91, +windows/main.qml
+- **Severity:** Medium
+- **Analysis:** Settings save/restore window geometry without screen-bounds validation. Remove external monitor → restart places window off-screen. No recovery mechanism.
+- **Impact:** Unreachable window requiring manual settings reset.
+
+### [GEO-03] +android/main.qml no minimumWidth/minimumHeight
+- **File:** +android/main.qml
+- **Severity:** Low
+- **Analysis:** Unlike base and Windows variants (min 351x291), Android has no minimum size. Layout may break on very small screens.
+- **Impact:** UI layout corruption on small Android screens.
+
+### [UNIT-01] ProgressIndicator.qml:46 Units.ShortDuration with no Kirigami import
+- **File:** ProgressIndicator.qml:46
+- **Severity:** High
+- **Analysis:** `duration: Units.ShortDuration` but file has no Kirigami import. `Units` resolves to `undefined` — animation never runs. Loading indicator dead.
+- **Impact:** Progress indicator invisible; users see no loading feedback.
+
+### [UNIT-02] PrompterView.qml 7x Units.ShortDuration with no Kirigami import
+- **File:** PrompterView.qml:80,87,103,132,139,155,185
+- **Severity:** High
+- **Analysis:** 7 fade/slide animations use `duration: Units.ShortDuration` but file only imports QtQuick and QtCore. All transitions dead — opacity, scale, y-position changes snap instantly.
+- **Impact:** Jerky prompter transitions instead of smooth animations.
+
+### [UNIT-03] PrompterBackground.qml:160 Units.LongDuration no Kirigami import
+- **File:** PrompterBackground.qml:160
+- **Severity:** Medium
+- **Analysis:** Opacity animation `duration: Units.LongDuration` with no Kirigami import. Snap transition instead of smooth fade.
+- **Impact:** Background opacity changes abruptly.
+
+### [UNIT-04] Flip.qml:34,41 two Units.LongDuration no Kirigami import
+- **File:** Flip.qml:34,41
+- **Severity:** Medium
+- **Analysis:** xScale/yScale behavior animations use Units.LongDuration without Kirigami import. Flips snap instantly.
+- **Impact:** Flip transitions instantaneous instead of animated.
+
+### [UNIT-05] pointer_0.qml:72 Units.VeryLongDuration no Kirigami import
+- **File:** pointer_0.qml:72
+- **Severity:** Low
+- **Analysis:** strokeColor animation with Units.VeryLongDuration — no Kirigami import. Arrow pointer color changes snap instantly.
+- **Impact:** Pointer color transitions instantaneous.
+
+### [UNIT-06] Find.qml:92 Units.ShortDuration with namespaced Kirigami import
+- **File:** Find.qml:92
+- **Severity:** Medium
+- **Analysis:** Imported as `Kirigami`, but uses bare `Units.ShortDuration`. Should be `Kirigami.Units.ShortDuration`.
+- **Impact:** Find bar slide animation dead.
+
+### [UNIT-07] ReadRegionOverlay.qml 3x Units.ShortDuration with namespaced import
+- **File:** ReadRegionOverlay.qml:546,610,616
+- **Severity:** Medium
+- **Analysis:** Three animation durations use bare `Units.ShortDuration` with namespaced `Kirigami` import. Pointer/overlay position transitions dead.
+- **Impact:** Read region position changes snap instead of animating.
+
+### [AR-01] PrompterView.qml:53-58 Rotation debug feature clips on extreme aspect ratios
+- **File:** PrompterView.qml:53-58
+- **Severity:** Low
+- **Analysis:** "theforce" debug Rotation `origin.x: parent.width*0.15; angle: 77`. On ultrawide 21:9 or tablet portrait, rotated content clips severely outside viewport.
+- **Impact:** Debug feature visual corruption on extreme aspect ratios.
+
+### [SAFE-01] +android/main.qml zero safe area insets
+- **File:** +android/main.qml
+- **Severity:** Medium
+- **Analysis:** Full-screen Android window lacks safe area margins. Content obscured by camera notch and gesture navigation pill on modern devices (Pixel, Galaxy S).
+- **Impact:** UI elements hidden behind notch/pill on modern Android devices.
+
+### [SAFE-02] ReadRegionOverlay screenMiddle ignores notch/status bar height
+- **File:** ReadRegionOverlay.qml:132-134
+- **Severity:** Medium
+- **Analysis:** screenMiddle calculation uses raw `screen.height` without subtracting status bar/notch height. On notched devices, reading region "middle" is physically offset downward.
+- **Impact:** Read region misaligned on iPhones and notched Android devices.
+
+### [SET-01] macOS/iOS: QSettings split across two preference domains
+- **Files:** documenthandler.cpp, globalhotkeys.cpp
+- **Severity:** High
+- **Analysis:** C++ uses `QSettings(organizationDomain(), applicationName())` → domain `com.cuperino.qprompt`. QML Settings and default `QSettings()` → domain `Cuperino/qprompt`. Two separate preference files on macOS/iOS. C++ keys (autoReload, hotkeys, paths) stored in different domain than QML keys (background, prompter, scroll, editor, etc.).
+- **Impact:** Settings written by C++ invisible to QML and vice versa.
+
+### [SET-02] factoryReset() incomplete on macOS/iOS — domain-path settings survive
+- **File:** qmlutil.hpp:135-137
+- **Severity:** High
+- **Analysis:** `QSettings().clear()` only clears default organization-name domain. All C++ settings in `com.cuperino.qprompt` domain survive. Hotkeys, spellcheck languages, auto-reload, LibreOffice path persist after "factory reset."
+- **Impact:** Factory reset leaves stale state; user believes settings cleared but critical prefs persist.
+
+### [SET-03] QString "true" used as default for boolean QSettings value
+- **File:** documenthandler.cpp:137
+- **Severity:** Low
+- **Analysis:** `settings.value("editor/autoReload", "true").toBool()` — default is QString "true" while stored value is bool. Relies on implicit QVariant cross-type conversion.
+- **Impact:** Fragile — any code using `.toString()` would get type mismatch.
+
+### [SET-04] spellCheckLanguages read without explicit default value
+- **File:** documenthandler.cpp:153
+- **Severity:** Low
+- **Analysis:** `settings.value("editor/spellCheckLanguages").toStringList()` — no default argument. Relies on implicit empty-QStringList-from-invalid-QVariant behavior.
+- **Impact:** Code quality — inconsistent with all other settings.value() calls.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-32.*
