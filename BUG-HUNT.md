@@ -3341,4 +3341,98 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** Conflict check only covers `prompter.keys.*`. User can assign same key+modifier to local AND global. Both fire — undefined behavior.
 - **Impact:** Double-execution on keypress if conflict created.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-33.*
+---
+
+## Wave 34 — Loader, Parsing, Props, Network, Init Order
+
+### [LDR-N01] InputsOverlay typeof null guard fails — null.item crash on rapid close
+- **File:** InputsOverlay.qml:105-112,562-569
+- **Severity:** Medium
+- **Analysis:** `typeof children[i].item !== "undefined"` — `typeof null === "object"`, so the guard passes when Loader.item is null. `item.checked = false` throws TypeError. Reachable when overlay closes before async Loaders complete.
+- **Impact:** Crash on rapid overlay open/close.
+
+### [PARSE-N01] insertImageAt() stores image resource with file:// key but looks up via plain path
+- **File:** documenthandler.cpp:1766-1769
+- **Severity:** Medium
+- **Analysis:** `addResource(ImageResource, imageUrl, image)` uses full file:// QUrl. `imageFormat.setName(imageUrl.toLocalFile())` stores plain path. Later `imageAt()`/`imageRect()` lookup via `QUrl(imgFmt.name())` misses because plain-path QUrl != file:// QUrl. Remote image path (line 1753) correctly uses `.toString()` for both.
+- **Impact:** Image dimension retrieval broken for locally inserted images (drag-and-drop from filesystem).
+
+### [PARSE-N02] MarkersModel::keySearch() hits=1 limits search to first marker only
+- **File:** markersmodel.cpp:120
+- **Severity:** Medium
+- **Analysis:** `match(index(0), KeyRole, key, 1, ...)` — hits=1 returns only first match. Variable name is plural (`markersThatMatchShortcut`). Multiple markers with same key at different positions: only first found, second unreachable.
+- **Impact:** Key-based marker navigation (Ctrl+key) misses markers beyond first match.
+
+### [PROP-N01] on__FullScreenChanged handler casing mismatch — never fires
+- **File:** main.qml:36-37
+- **Severity:** High
+- **Analysis:** Property declared `__fullScreen` (lowercase `f`). Handler written `on__FullScreenChanged` (uppercase `F`). Auto-generated handler name doesn't match. Same bug class as FINAL-09 (`on__IChanged`). `AppController.wasm.toggleBrowserFullscreen()` never called.
+- **Impact:** WASM native browser Fullscreen API never invoked; fullscreen only within browser tab frame.
+
+### [PROP-N02] setCursorPosition → reset() — 12-signal storm, no debounce
+- **File:** documenthandler.cpp:455-463,1187-1201
+- **Severity:** Medium
+- **Analysis:** setCursorPosition unconditionally calls reset() emitting 12 NOTIFY signals + synchronous document reads. No throttling, coalescing, or change-detection. During typing (10-30 Hz) or smooth scrolling (60 Hz): 120-720 emissions/sec + synchronous doc reads.
+- **Impact:** Severe QML binding churn. UI stuttering, battery drain on mobile/WASM.
+
+### [PROP-N03] setMarker/setKeyMarker/setMarkerHref silently trigger full document reparse
+- **File:** documenthandler.cpp:720,775,804
+- **Severity:** Low
+- **Analysis:** All three Q_PROPERTY WRITE methods call `setMarkersListDirty()`, triggering O(n) parse() on next toggle(). Neither Q_PROPERTY name nor NOTIFY signal hints at this side effect.
+- **Impact:** First prompter start after adding marker slower than expected. Toggle latency between Edit/Prompting states.
+
+### [NET-N04] No transfer timeout on any QNetworkRequest
+- **File:** documenthandler.cpp:882-884,1739
+- **Severity:** Medium
+- **Analysis:** No `setTransferTimeout()` call. Qt default: 0 (infinite). Hanging server blocks request forever with no abort path or user feedback.
+- **Impact:** App hangs indefinitely on unreachable network resources.
+
+### [NET-N05] loadFromNetwork() hardcodes http:// scheme — never upgrades to HTTPS
+- **File:** documenthandler.cpp:872
+- **Severity:** Medium
+- **Analysis:** `resultingUrl.setScheme("http")` always forces HTTP for relative URLs. HTTPS URL treated as relative → downgraded to plaintext HTTP.
+- **Impact:** MITM exposure when loading remote documents.
+
+### [NET-N06] loadFromNetwork() validates original URL, not constructed resultingUrl
+- **File:** documenthandler.cpp:881
+- **Severity:** Low
+- **Analysis:** `if (url.isValid())` checks input URL, not the constructed `resultingUrl`. If construction produces malformed URL (beyond already-documented R4-EXP-03 host/path swap), guard passes, bad request issued.
+- **Impact:** Masked URL construction errors reach network layer.
+
+### [URL-N01] reload() constructs file:// URL by string concatenation without encoding
+- **File:** documenthandler.cpp:860
+- **Severity:** Medium
+- **Analysis:** `QUrl("file://" + fileUrl)` — no percent-encoding. Paths with spaces, #, ?, or non-ASCII chars produce malformed QUrl. load() fails to round-trip back via `QQmlFile::urlToLocalFileOrQrc()`.
+- **Impact:** Auto-reload broken for files with special characters in path.
+
+### [DISK-N01] saveCustomWordsToDisk() non-atomic write — data loss on power failure
+- **File:** spellchecker.cpp:383-397
+- **Severity:** Low
+- **Analysis:** Writes directly to target file (no temp-file-and-rename). QFile::open failure silently returns void. QTextStream::status never checked. Power loss or disk full leaves corrupted/truncated custom dictionary.
+- **Impact:** Custom dictionary corruption on crash/power loss during save.
+
+### [INIT-N01] Velocity modifier ComboBox model has 2 entries, switch handles 4 cases
+- **File:** InputsOverlay.qml:423-425,430-441
+- **Severity:** Medium
+- **Analysis:** ComboBox lists only Alt and Ctrl. `onActivated` switch handles cases 0-3 including Shift (2) and Meta (3), which are unreachable. Commented-out hotkey tab version correctly lists all 4.
+- **Impact:** Users cannot select Shift or Meta as velocity modifier.
+
+### [INIT-N02] Find.qml SearchField placeholderText always empty — no guidance text
+- **File:** Find.qml:183
+- **Severity:** Low
+- **Analysis:** `placeholderText: ""` hardcoded empty. Never populated with "Search..." or equivalent. Field renders blank until user types.
+- **Impact:** Search bar lacks placeholder guidance.
+
+### [INIT-N03] ReadRegionOverlay screenMiddle uses root.y from cross-file id resolution
+- **File:** ReadRegionOverlay.qml:132-134
+- **Severity:** Low
+- **Analysis:** `root.y` resolves through parent scope chain (ReadRegionOverlay → PrompterView → PrompterPage → ApplicationWindow). Fragile: if component loaded in different context, resolution changes silently. root also used inside ShaderEffect contexts.
+- **Impact:** Works by accident. Screen-middle miscalculation if component hierarchy changes.
+
+### [INIT-N04] PrompterView ShaderEffectSource.sourceItem references prompter id declared later
+- **File:** PrompterView.qml:230-236
+- **Severity:** Low
+- **Analysis:** ShaderEffectSource at line 230 references `prompter` id declared at line 235 below. QML bindings lazy, but internal sourceItem resolution may attempt immediate access during construction.
+- **Impact:** First rendered frame may lack prompter text shadows; resolves on next frame.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-34.*
