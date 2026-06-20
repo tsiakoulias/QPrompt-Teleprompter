@@ -2716,4 +2716,79 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** Commented-out FileProvider references qtprovider_paths but actual file is filepaths.xml. Resource-not-found if uncommented.
 - **Impact:** Build error if FileProvider block ever activated.
 
-*Report includes waves 1-10, synthesis, re-run deep audits, waves 27-28.*
+---
+
+## Wave 29 — Shadowing, Focus, Version Guars, Const&, Dialog Sizing, JSON, QList
+
+### [SHADOW-01] id: rotation shadows Item.rotation property
+- **File:** Prompter.qml:1280
+- **Severity:** Low
+- **Analysis:** Rotation transform has id: rotation. Flipable inherits Item.rotation (qreal). Bare rotation resolves to Rotation object, not the float.
+- **Impact:** Future code reading bare rotation gets wrong type.
+
+### [SHADOW-02] id: flow shadows Flow.flow property
+- **File:** EditorToolbar.qml:184
+- **Severity:** Low
+- **Analysis:** Flow layout has id: flow. Flow.flow is direction enum. Bare flow resolves to Flow item. Reading flow direction requires awkward flow.flow.
+- **Impact:** Error-prone property access.
+
+### [FOC-N01] focus: true is JS label in atEndLoopDelay SpinBox
+- **File:** Prompter.qml:1311
+- **Severity:** Low
+- **Analysis:** onValueModified uses colon instead of =. SpinBox never gets focus after value change.
+
+### [FOC-N02] Same JS label bug in countdownConfiguration SpinBoxes (2 instances)
+- **File:** PrompterPage.qml:1093,1114
+- **Severity:** Low
+- **Analysis:** __iterations and __disappearWithin SpinBoxes both have focus: true (colon) instead of assignment.
+
+### [FOC-N03] Tab/Backtab asymmetry — Backtab silently unhandled
+- **File:** Prompter.qml:2170-2173
+- **Severity:** Low
+- **Analysis:** Keys.onPressed handles Qt.Key_Tab but not Qt.Key_Backtab. Users can Tab forward but cannot Shift+Tab backward to return.
+- **Impact:** One-directional keyboard accessibility navigation.
+
+### [VER-01] Qt::MarkdownText version guard 0x050F00 (5.15) — API added in 5.14
+- **File:** documenthandler.cpp:958
+- **Severity:** Low
+- **Analysis:** guard uses Qt 5.15 (0x050F00) but MarkdownText was introduced in Qt 5.14 (0x050E00). Qt 5.14 users silently get plain text import instead of markdown.
+
+### [CPY-01] 5 Q_INVOKABLE methods pass QString by value instead of const&
+- **Files:** markersmodel.h:68, documenthandler.h:213,215,227, systemfontchooserdialog.h:53
+- **Severity:** Low
+- **Analysis:** extendLastMarker, setKeyMarker, setMarkerHref, replaceSelected, setFontFamily all take QString by value but only read (never mutate). Unnecessary heap allocation per call.
+
+### [DSZ-01] InputsOverlay hardcoded height:680 — overflows on phones
+- **File:** InputsOverlay.qml:33
+- **Severity:** Medium
+- **Analysis:** No Math.min with screen height. On phones (~500dp usable), content exceeds viewport with no scroll.
+
+### [DSZ-02] pointerConfiguration OverlaySheet no vertical ScrollView
+- **File:** PrompterPage.qml:1426-1445
+- **Severity:** Medium
+- **Analysis:** PointerSettings ~600-800px implicit height. No vertical ScrollView/Flickable. Overflows on small screens.
+
+### [DSZ-03] Magic number 68 in ListView height binding
+- **File:** InputsOverlay.qml:83
+- **Severity:** Low
+- **Analysis:** `height: keyConfigurationOverlay.height - inputSettingsTabs.height - 68` — brittle constant that doesn't reference Kirigami header/units.
+
+### [JSN-01] i.d.authentication accessed without undefined guard
+- **File:** Prompter.qml:373-374
+- **Severity:** High
+- **Analysis:** Even after successful JSON.parse, code assumes i.d and i.d.authentication exist. {"op":0} (no d) → TypeError crash.
+- **Impact:** Crash on OBS v4, non-OBS services, or protocol changes.
+
+### [JSN-02] ws.sendTextMessage() called without checking WebSocket status
+- **File:** Prompter.qml:383,413
+- **Severity:** Medium
+- **Analysis:** No check for ws.status === WebSocket.Open before sending. Non-Open socket silently discards messages.
+- **Impact:** OBS commands silently lost if connection dropped.
+
+### [QCN-01] O(n²) contains()-in-loop during custom words file load
+- **File:** spellchecker.cpp:370-374
+- **Severity:** Low
+- **Analysis:** while-loop calls contains() on growing unsorted list. Total cost O(n²). QSet dedup then sort would be O(n log n).
+- **Impact:** Quadratic startup time with large custom dictionaries.
+
+*Report: waves 1-10, synthesis, re-run deep audits, waves 27-29.*
