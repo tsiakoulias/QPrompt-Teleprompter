@@ -3435,4 +3435,146 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** ShaderEffectSource at line 230 references `prompter` id declared at line 235 below. QML bindings lazy, but internal sourceItem resolution may attempt immediate access during construction.
 - **Impact:** First rendered frame may lack prompter text shadows; resolves on next frame.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-34.*
+---
+
+## Wave 35 — Combos, Visibility, Scroll Math, Naming, Casts, Actions
+
+### [CMB-N01] autoReloadSeconds SpinBox from binding circular — clamps to 1 when all-zero
+- **File:** PrompterPage.qml:1381
+- **Severity:** Medium
+- **Analysis:** `from: value>0 || autoReloadMinutes.value>0 || autoReloadHours.value>0 ? -1 : 1`. Own-value self-reference creates binding loop. When all three time fields reach 0, from=1 but value=0, silently clamped to 1. Also, when hours=1 and seconds=0, from=-1 and seconds CAN be 0 — preventing-all-zeros logic is inconsistently applied.
+- **Impact:** Cannot set all three auto-reload time fields to zero; seconds forced to 1.
+
+### [CMB-N02] autoReloadMinutes SpinBox from contains redundant circular self-reference
+- **File:** PrompterPage.qml:1356
+- **Severity:** Low
+- **Analysis:** `from: value>0 || autoReloadMinutes.value>0 || autoReloadHours.value>0 ? -1 : 0` — `value` and `autoReloadMinutes.value` are the same property. Redundant circular binding.
+- **Impact:** Binding loop warning; no functional impact.
+
+### [CMB-N03] LanguageSettingsOverlay ListView currentIndex always -1 — wrong indexOf() call
+- **File:** LanguageSettingsOverlay.qml:73
+- **Severity:** Medium
+- **Analysis:** `currentIndex: languageSelector.model.indexOf(languageSelector.currentIndex)` — Array.indexOf() uses strict equality (===). Searches for number in array of objects `{text:..., value:...}` — never matches. Returns -1 always. Correct pattern used elsewhere: `comboBox.highlightedIndex`.
+- **Impact:** Selected language never highlighted in dropdown popup.
+
+### [VIS-N04] Countdown crosshair frame renders orphan lines when enabled=false
+- **File:** Countdown.qml:151-178
+- **Severity:** Low
+- **Analysis:** `Shape { id: frame }` (crosshair lines) has no visible binding. All other countdown elements guard with `visible: countdown.enabled`. When disabled but Prompter in Standby, only orphan crosshair lines render.
+- **Impact:** Meaningless hairline crosshairs visible during standby with countdown disabled.
+
+### [VIS-N05] velocityDragOverlay blocks all interaction during indicator fade-out (~500ms dead zone)
+- **File:** PrompterPage.qml:913-919,865-872
+- **Severity:** Medium
+- **Analysis:** velocityDragOverlay visible bound to velocityIndicator.visible (stays true during fade-out). Fade animation hides indicator visually over ~500ms but overlay blocks all clicks/mouse movement across entire viewport the whole time.
+- **Impact:** 500ms dead zone after velocity indicator timeout where user cannot interact.
+
+### [SCRL-N01] __jitterMargin: fractional result from modulus violates 0/1 toggle design
+- **File:** Prompter.qml:114
+- **Severity:** Medium
+- **Analysis:** `(__tikTok+viewport.__baseSpeed+viewport.__curvature+fontSize)%2` — real operands produce fractional remainder via JS `%`. Designed as 0/1 subpixel toggle but yields arbitrary fractional values. Combined with FINAL-09 (__tikTok stuck at 0), jitter becomes static fraction from slider positions.
+- **Impact:** Subpixel jitter function permanently broken; produces static fraction instead of alternating.
+
+### [SCRL-N02] __destination typed int truncates real-valued position
+- **File:** Prompter.qml:125
+- **Severity:** Medium
+- **Analysis:** RHS involves `editor.height` (real), `fontSize` (real), `topMargin` (real). Result truncated to `int` by property type. Behavior animation only receives integer target — loses subpixel precision. __jitterMargin fractional offset (SCRL-N01) is discarded by truncation.
+- **Impact:** Position animation loses subpixel smoothness.
+
+### [SCRL-N03] setVelocity() triggers two conflicting scroll animations with intermediate velocity
+- **File:** Prompter.qml:605-613
+- **Severity:** Medium
+- **Analysis:** Sets `__i = velocity-1`, writes `position = __destination` (triggers Behavior toward wrong target), then `__i = velocity`, writes `position = __destination` (re-targets mid-flight). Two back-to-back assignments cause NumberAnimation to start then re-target.
+- **Impact:** Visible jitter/flicker when pressing velocity preset hotkeys (Ctrl+1..0).
+
+### [SCRL-N04] __speed non-zero when __i=0 and __curvature=0 (Math.pow(0,0)===1)
+- **File:** Prompter.qml:118-119
+- **Severity:** Low
+- **Analysis:** ECMAScript: `Math.pow(0,0) === 1`. When curvature slider at minimum and velocity stopped, `__speed = __baseSpeed * 1` instead of 0. Masked in main animation path (__destination==position when __i==0, timeToArrival==0). But TimerClock.updateTimer() fallback produces inconsistent ETA.
+- **Impact:** Inconsistent time-to-end display when curvature=0.
+
+### [SCRL-N05] __speedLimit check is dead logic — always true
+- **File:** Prompter.qml:129,494,510
+- **Severity:** Low
+- **Analysis:** `__speedLimit = __vw * 100` (~1920px × 100 = ~192,000). `__velocity < this.__speedLimit` (velocity typically < 100). Guard condition always true for normal operation. Mirror in decreaseVelocity also always true.
+- **Impact:** Dead code — speed limit boundary never reached.
+
+### [SCRL-N06] __timeToEnd uses unexplained 2× factor
+- **File:** Prompter.qml:122, TimerClock.qml:66
+- **Severity:** Low
+- **Analysis:** `2 * (editor.height + fontSize - __travelDistance) / __relativeSpeed` doubles estimated remaining time versus standard distance/rate formula. No documentation. TimerClock fallback shares same pattern — may be intentional but undocumented.
+- **Impact:** ETA display may be 2× actual; impossible to distinguish intentional vs accidental.
+
+### [TYP-N01] Misspelled method name: loadFromNetworkFinihed (missing 's')
+- **File:** documenthandler.cpp:145,888, documenthandler.h:274
+- **Severity:** Low
+- **Analysis:** "Finihed" instead of "Finished." Consistent across all 3 locations.
+- **Impact:** Developer confusion — typo search failures.
+
+### [TYP-N02] Misspelled parameter: withoutFormating (missing 't')
+- **File:** documenthandler.h:225, documenthandler.cpp:1336,1347
+- **Severity:** Low
+- **Analysis:** "Formating" instead of "Formatting." Consistent across declaration, definition, usage.
+- **Impact:** Developer confusion; code-search failures.
+
+### [TYP-N03] Inconsistent `_` vs `m_` member prefix: _markersModel, _fileSystemWatcher
+- **File:** documenthandler.h:343-344
+- **Severity:** Low
+- **Analysis:** Two members use `_` prefix while all 15+ other members use `m_`. MEM-01/MEM-02 reference these but never flag convention break.
+- **Impact:** Code style inconsistency.
+
+### [TYP-N04] Inconsistent m_ method naming: m_initializeSource — mixed underscore+camelCase
+- **File:** abstractinputsource.h:50, globalhotkeys.h:150
+- **Severity:** Low
+- **Analysis:** Underscore inside name joins "initialize" and "Source." Other m_ methods use pure camelCase: m_setGlobalShortcut, m_setActionShortcut, m_setHotkeyShortcut.
+- **Impact:** Code style inconsistency.
+
+### [TYP-N05] Uninitialized member m_documentComesFromNetwork
+- **File:** documenthandler.h:338, documenthandler.cpp:123-130
+- **Severity:** Low
+- **Analysis:** Bool member absent from constructor initializer list and never assigned in constructor body. First write in setDocumentComesFromNetwork() (called from loadFromNetworkFinihed:896 or load:1039). QML property comesFromNetwork can be read before either path.
+- **Impact:** Undefined bool if QML reads property before document load completes.
+
+### [TYP-N06] 9 getters copy-paste double-textCursor() pattern — null check on stale cursor
+- **File:** documenthandler.cpp: alignment(548), bold(565), italic(581), underline(597), strike(613), subscript(629), superscript(648), fontCapitalization(669), regularMarker(694)
+- **Severity:** Low
+- **Analysis:** LOG-07 flags namedMarker() double-textCursor(). Same pattern in 9 more getters: null-check local QTextCursor, then read from fresh textCursor() call. Null check meaningless — cursor may have changed.
+- **Impact:** Rare stale formatting state. Formatting toolbar may show wrong indicator.
+
+### [CAST-N01] setFontCapitalization static_cast with no range validation — reachable from QML
+- **File:** documenthandler.cpp:677
+- **Severity:** Medium
+- **Analysis:** `static_cast<QFont::Capitalization>(capitalization)` — Q_INVOKABLE takes arbitrary int from QML. QFont::Capitalization valid range [0,4]. Passing 5, -1, 100 from QML → out-of-range enum → UB. Same class as TYP-02 (LayoutDirection) but different enum.
+- **Impact:** Undefined behavior if QML passes invalid capitalization value.
+
+### [IMG-N01] Missing go-previous-symbolic.svg — back-navigation icon blank on Android/Windows
+- **File:** +android/main.qml:575, +windows/main.qml:631
+- **Severity:** Medium
+- **Analysis:** `source: "qrc:/qt/qml/com/cuperino/qprompt/icons/go-previous-symbolic.svg"` — file doesn't exist. Bypasses icon theme entirely with direct URL. Correct: `image://icon/go-previous-symbolic` or icon theme lookup.
+- **Impact:** Back-navigation arrow permanently invisible when pageStack has layers.
+
+### [ACT-N05] +windows main.qml Controls Settings submenu missing OBS Settings action
+- **File:** +windows/main.qml vs main.qml:261-270
+- **Severity:** Medium
+- **Analysis:** Base main.qml includes OBS Settings in Controls Settings. +windows omits it. Since +windows has no Labs.MenuBar (dead code per IMP-N01), Windows users have zero menu access to OBS configuration.
+- **Impact:** Windows users cannot reach OBS WebSocket settings.
+
+### [ACT-N06] +windows main.qml Performance tweaks missing enableBarsSetting
+- **File:** +windows/main.qml:320-391 vs main.qml:374-386
+- **Severity:** Low
+- **Analysis:** Disable-bars-overlay toggle missing from +windows global menu. Context-drawer access still works via readRegionBarsButton.
+- **Impact:** Windows users missing menu toggle for bars overlay.
+
+### [ACT-N07] namedBookmarkButton: checkable button opens dialog — stale indicator after first click
+- **File:** EditorToolbar.qml:225-236
+- **Severity:** Medium
+- **Analysis:** checkable with checked binding to document.namedMarker. onClicked opens dialog instead of toggling property. Binding breaks on first click; indicator never re-syncs. Worse than R2-EDT-03 because formatting buttons re-sync each click — this one permanently desyncs.
+- **Impact:** Named-marker button shows stale checkmark after first use.
+
+### [ACT-N08] All checkable Labs.MenuItems inherit R2-EDT-03 binding-break pattern
+- **File:** main.qml:617-922
+- **Severity:** Medium (masked — Labs.MenuBar dead per IMP-N01)
+- **Analysis:** Every checkable Labs.MenuItem (Bold/Italic/Underline, Full Screen, Indicators, Position items, scroll/dial) has `checked: binding` + `onTriggered: property = checked`. On first click, native checkmark toggles imperatively → QML binding breaks. Currently masked because Qt 6 drops Qt.labs.platform Menu/MenuBar.
+- **Impact:** If ever migrated to working native menu API, ALL checkable items decay after first use.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-35.*
