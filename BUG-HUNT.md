@@ -2832,4 +2832,116 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** Right-click toggles only opacity (0 ↔ 1), leaving visible=true. When opacity=0 but visible=true: middle-click reactivation blocked, full-screen MouseArea consumes input, auto-dismiss Connection fires inconsistently.
 - **Impact:** Velocity indicator stuck in invisible-but-interactive state; requires second right-click to recover.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-30.*
+---
+
+## Wave 31 — Headers, I/O, Bindings, WASM, Bounds, i18n
+
+### [HDR-N01] promptsession.h not in CMakeLists.txt — SessionModel/DataPoint dead code
+- **File:** src/promptsession.h, src/promptsess.cpp, src/CMakeLists.txt
+- **Severity:** Low
+- **Analysis:** promptsession.h/cpp exist on disk but are not listed in any CMakeLists.txt. No other file includes promptsession.h. The entire file is never MOC-processed, never compiled. LOG-01/LOG-02 bugs have zero runtime impact.
+- **Impact:** Orphaned dead code clutters tree; bugs in this file can't manifest.
+
+### [HDR-N02] telemetry.h not in CMakeLists.txt — Telemetry dead code
+- **File:** src/telemetry.h, src/telemetry.cpp, src/CMakeLists.txt
+- **Severity:** Low
+- **Analysis:** Same as HDR-N01. Telemetry Q_OBJECT class never MOC-processed. All methods already commented out; source still exists on disk.
+- **Impact:** Build hygiene — orphaned .h/.cpp create false expectations of functionality.
+
+### [IO-N01] saveAs() leaves _fileSystemWatcher permanently blocked on open failure
+- **File:** documenthandler.cpp:1143,1161
+- **Severity:** Medium
+- **Analysis:** `_fileSystemWatcher->blockSignals(true)` at line 1143. If `file.open()` fails at line 1159, early-return at 1161 skips `QTimer::singleShot(2600, ...)` at 1170 that calls `unblockFileWatcher()`. Watcher stays blocked forever — auto-reload dead after any failed save.
+- **Impact:** User must restart app or trigger successful save to recover auto-reload.
+
+### [IO-N02] save() constructs QUrl without file:// scheme — broken on non-Windows
+- **File:** documenthandler.cpp:1183-1184
+- **Severity:** High
+- **Analysis:** `QUrl::setUrl(QUrl::toPercentEncoding(fileName, "/:"))` passes raw path like `C:/Users/...` without `file://` prefix. `QUrl::setUrl()` parses drive letter as URL scheme. `toLocalFile()` garbled on Linux/macOS — Ctrl+S broken for files with absolute paths.
+- **Impact:** Save-in-place broken on Linux/macOS.
+
+### [IO-N03] iossavedialog.mm QFile::write() return value unchecked
+- **File:** iossavedialog.mm:92
+- **Severity:** Medium
+- **Analysis:** `tempFile.write(htmlContent.toUtf8())` return value discarded. Disk-full or I/O error → partial/corrupt file presented to UIDocumentPicker silently.
+- **Impact:** Silent data corruption on iOS when storage is full.
+
+### [QML-BND-01] countdownAnimation.running binding permanently broken after first iteration
+- **File:** Countdown.qml:100,119
+- **Severity:** High
+- **Analysis:** `running: countdown.running` (line 100) is a declarative binding. Inside `onFinished`, `running = true` (line 119) imperatively assigns — permanently breaking the binding. `running` can never be set to false again via binding. Standby/Ready states have no PropertyChanges for countdownAnimation.
+- **Impact:** After first countdown iteration, sweep animation runs silently consuming CPU in Standby/Ready. If user cancels mid-cycle, animation runs indefinitely.
+
+### [QML-BND-02] clock.__iteration binding broken by post-decrement in animation handler
+- **File:** Countdown.qml:76,116,121
+- **Severity:** Medium
+- **Analysis:** `property int __iteration: countdown.__iterations - 1` (line 76) is a declarative binding. Line 116 (`clock.__iteration--`) and 121 (direct assignment) imperatively write to it, breaking the binding. If `__iterations` changes while countdown is running, clock uses stale value.
+- **Impact:** Stale iteration count if config changes mid-countdown.
+
+### [QML-BND-03] ReadRegionOverlay onDestruction — harmless dead code
+- **File:** ReadRegionOverlay.qml:86-89
+- **Severity:** None (info)
+- **Analysis:** `Component.onDestruction` sets positionState during teardown. Children already destroyed (QML bottom-up destruct), Settings already persists via alias. No practical effect.
+- **Impact:** None. Redundant code.
+
+### [WSM-N01] Synchronous QImage::load() from HTTP blocks WASM main thread
+- **File:** documenthandler.cpp:1449-1451,1733
+- **Severity:** High
+- **Analysis:** `image.load(src)` with HTTP URL → synchronous XMLHttpRequest on WASM. Deprecated in Chrome/Firefox/Safari. Blocks UI thread for entire request duration.
+- **Impact:** Multi-second UI freezes on WASM during image paste with remote URLs; browser console deprecation warnings.
+
+### [WSM-N02] WASM preventSleep() falls through to desktop #else — always returns false
+- **File:** documenthandler.cpp:1929-1931
+- **Severity:** Low
+- **Analysis:** `#ifdef` chain covers Android/iOS, but no WASM guard. Falls to generic `#else` returning `false & prevent` (including `&` typo from TYP-04). No Web Screen Wake Lock API integration.
+- **Impact:** `preventSleep(true)` silently no-ops on WASM. Missing guard blocks future Web API integration.
+
+### [QRC-N01] icons.qrc contains duplicate \<file\> entry
+- **File:** src/icons/icons.qrc:45,47
+- **Severity:** Low
+- **Analysis:** Identical `<file alias="gnumeric-object-scrollbar.svg">16/gnumeric-object-scrollbar.svg</file>` at lines 45 and 47. Resource compiler embeds same SVG twice.
+- **Impact:** Slightly bloated binary.
+
+### [QRC-N02] Four .qrc files are dead code — never referenced by CMakeLists.txt
+- **Files:** src/icons/icons.qrc, src/fonts/fonts.qrc, src/fonts/chinese.qrc, src/prompter/pointers/pointers.qrc
+- **Severity:** Low
+- **Analysis:** All resources are actually compiled via `qt_add_resources()` and `qt_add_qml_module()` in src/CMakeLists.txt. Standalone .qrc files never included. fonts.qrc references wrong file paths vs CMakeLists.txt; pointers.qrc has different RESOURCE_PREFIX.
+- **Impact:** Misleading artifact; developers may edit wrong resource definitions.
+
+### [CMAKE-N01] WASM build excludes TelemetryPage.qml and RemotePage.qml
+- **File:** src/CMakeLists.txt:106-121, main.qml:175-181
+- **Severity:** Low
+- **Analysis:** Unlike +windows/+android which compile these pages, WASM `qprompt_frontend_sources` excludes them. If menu entries ever uncommented, WASM crashes with missing QML type.
+- **Impact:** WASM-specific crash risk if telemetry/remote features are enabled.
+
+### [OOB-N01] MarkersModel::data() — m_data.at() without row < rowCount() guard
+- **File:** markersmodel.cpp:40-43
+- **Severity:** Medium
+- **Analysis:** `index.isValid()` only checks row>=0, column>=0, model!=nullptr. If row >= m_data.size(), `QList::at()` throws or asserts. `removeMarker()` already has the correct guard.
+- **Impact:** Crash if QML passes out-of-range row to data().
+
+### [OOB-N02] SessionModel::data() — same missing row bounds guard
+- **File:** promptsession.cpp:40-43
+- **Severity:** Medium
+- **Analysis:** Identical to OOB-N01. `isValid()` does not enforce row < m_data.size().
+- **Impact:** Crash on out-of-range index access.
+
+### [OOB-N03] alignment() fetches textCursor() twice — stale cursor race
+- **File:** documenthandler.cpp:547-550
+- **Severity:** Low
+- **Analysis:** Double textCursor() fetch — first null-checked, second reads alignment from potentially different position if cursorPosition changed between calls.
+- **Impact:** Formatting toolbar shows wrong alignment in rare race conditions.
+
+### [I18N-N01] Stale source-location line numbers in all 20 .ts files
+- **Files:** po/*.ts (20 files)
+- **Severity:** Low
+- **Analysis:** lupdate not re-run after code changes. Example: `documenthandler.cpp:446` in .ts maps to actual `documenthandler.cpp:739`. Qt Linguist "Go to Source" navigates to wrong code. lupdate merge heuristic may duplicate entries.
+- **Impact:** Translator tooling UX degraded; potential duplicate translation entries.
+
+### [I18N-N02] Vanished translation entries not purged across 13 language files
+- **Files:** 13 of 20 .ts files (de:14, es:14, pt_PT:13, ru:13, uk:13, zh:13, pt_BR:10, cs:8, fr:8, fi:4, ko:4, nl:4, oc:2)
+- **Severity:** Low
+- **Analysis:** Entries contain type="vanished" — strings removed from source but not cleaned with `lupdate -no-obsolete`. Remnants of old format filters and bar-position labels.
+- **Impact:** Bloated .ts files; translators see nonexistent strings in Qt Linguist; outdated translations count against completion stats.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-31.*
