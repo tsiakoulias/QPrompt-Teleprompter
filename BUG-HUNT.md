@@ -2277,4 +2277,351 @@
 - **Analysis:** FetchContent_MakeAvailable(QHotkey) processes but doesn't set QHotkey_FOUND CMake variable. add_definitions and target_link_libraries gated on it → never executed.
 - **Impact:** QHotkey compiled by FetchContent but never linked. Global hotkey functionality silently disabled on Windows/macOS/Linux+BSD FetchContent builds.
 
-*Report generated over 10+ waves of parallel subagent auditing, followed by synthesis analysis.*
+---
+
+## Round 7 — Re-Run Deep Audits (Waves 11R)
+
+---
+
+### Translation Files (42 bugs across 20 .ts files)
+
+### [TS-01] Finnish welcome guide → Dutch (not Finnish)
+- **File:** po/qprompt_fi.ts:656 — `welcome_nl.html` should be `welcome_fi.html`
+
+### [TS-02] Arabic file `ar_EG` vs UI `ar_AE` mismatch
+- **File:** po/qprompt_ar.ts:3 — `language="ar_EG"` but LanguageSettingsOverlay.qml uses `ar_AE`
+
+### [TS-03] Korean UI `ko_KO` vs file `ko_KR` mismatch  
+- **File:** src/kirigami_ui/LanguageSettingsOverlay.qml:127 — `"ko_KO"` invalid; file uses `ko_KR`
+
+### [TS-04] French "Saved" → verb "Enregistrer" (should be adjective "Enregistré")
+- **File:** po/qprompt_fr.ts:679
+
+### [TS-05] Finnish/French/Korean/Italian "Saved" → verb with stray `&amp;` accelerator
+- **Files:** po/qprompt_fi.ts:678, po/qprompt_ko.ts:677, po/qprompt_it.ts:679
+
+### [TS-06] Czech/French "Language settings" → "Pointer settings" (copy-paste error)
+- **Files:** po/qprompt_cs.ts:354, po/qprompt_fr.ts:353
+
+### [TS-07] Finnish/French/Korean "Colors for prompter states" → "Toggle Prompter State"
+- **Files:** po/qprompt_fi.ts:462, po/qprompt_fr.ts:463
+
+### [TS-08] French "Prompting:" → "Start prompter"
+- **File:** po/qprompt_fr.ts:478
+
+### [TS-09] Finnish/French/Korean/Dutch "Vertical offset" → "Velocity"
+- **Files:** po/qprompt_fi.ts:560, po/qprompt_fr.ts:561, po/qprompt_ko.ts:559, po/qprompt_nl.ts:561
+
+### [TS-10] Finnish/Korean "Next reload starts at" → "Step acceleration"
+- **Files:** po/qprompt_fi.ts:158, po/qprompt_ko.ts:158
+
+### [TS-11] French/Finnish/Korean "No pointers" → "Both pointers" (opposite meaning)
+- **Files:** po/qprompt_fr.ts:1003, po/qprompt_fi.ts:981, po/qprompt_ko.ts:980
+
+### [TS-12] French "Alt" key → "Tout" (means "All")
+- **File:** po/qprompt_fr.ts:270
+
+### [TS-13] French "Set velocity to 0–10" (all 11) → identical "Vitesse de départ"
+- **File:** po/qprompt_fr.ts:276-337
+
+### [TS-14] French "Clear color" → "Light color"
+- **File:** po/qprompt_fr.ts:1048
+
+### [TS-15] Finnish/Korean right pointer reuse → left pointer (swapped)
+- **Files:** po/qprompt_fi.ts:494, po/qprompt_ko.ts:493
+
+### [TS-16] Paragraph spacing: 8 languages strip trailing `%` from `<pre>%1%</pre>`
+- **Files:** po/qprompt_cs.ts:128, po/qprompt_de.ts:132, po/qprompt_es.ts:132, po/qprompt_fr.ts:128, po/qprompt_fi.ts:128, po/qprompt_ko.ts:128, po/qprompt_nl.ts:128, po/qprompt_zh.ts:128
+
+### [TS-17] Line width: 7 languages add spurious `%` to `<pre>%1</pre>`
+- **Files:** po/qprompt_de.ts:539, po/qprompt_es.ts:543, po/qprompt_fi.ts:529, po/qprompt_fr.ts:530, po/qprompt_ko.ts:528, po/qprompt_nl.ts:530, po/qprompt_pt_BR.ts:539, po/qprompt_zh.ts:539
+
+### [TS-18] Orphan files: Hebrew and Polish exist but UI entries commented out
+- **Files:** po/qprompt_he.ts, po/qprompt_pl.ts
+
+---
+
+### iPadOS Platform Gaps (16 sites)
+
+Qt 6.2+ returns `"ipados"` on iPads. These 16 sites check only `"ios"`:
+
+| Bug | File:Line | What breaks on iPad |
+|---|---|---|
+| IPAD-01 | qt/WindowDragger.qml:26 | Window drag MouseArea enabled (should be disabled) |
+| IPAD-02 | EditorToolbar.qml:88 | Formatting tools not auto-hidden |
+| IPAD-03 | EditorToolbar.qml:784 | Wheel throttle button visible |
+| IPAD-04 | EditorToolbar.qml:797 | Window stay-on-top button may be visible |
+| IPAD-05 | main.qml:996 | Wrong toolbar header style (None instead of ToolBar) |
+| IPAD-06 | MarkersDrawer.qml:93 | "Edit" marker action incorrectly visible |
+| IPAD-07 | Prompter.qml:806 | Wheel MouseArea incorrectly enabled |
+| IPAD-08 | Prompter.qml:994 | Wrong text rendering path |
+| IPAD-09 | Prompter.qml:2235 | Passive notification incorrectly shown |
+| IPAD-10 | Prompter.qml:2278 | Falls to generic saveDialog instead of IosSaveDialog |
+| IPAD-11 | Prompter.qml:2492 | IosSaveDialog Connections disabled |
+| IPAD-12 | PrompterBackground.qml:107 | Non-native ColorDialog |
+| IPAD-13 | PrompterPage.qml:1009 | Non-native text ColorDialog |
+| IPAD-14 | PrompterPage.qml:1024 | Non-native highlight ColorDialog |
+| IPAD-15 | TimerClock.qml:200 | Non-native timer ColorDialog |
+| IPAD-16 | PointerSettings.qml:653 | Broken indexOf logic for ColorDialog |
+
+---
+
+### Hotkey System (8 bugs)
+
+### [HTK-01] KGlobalAccel default permanently destroyed on first user customization
+- **File:** globalhotkeys.cpp:1130,1138
+- **Severity:** Critical
+- **Analysis:** `removeAllShortcuts()` at line 1130 clears BOTH custom AND default. Then `defaultShortcut()` at 1138 reads already-cleared default (empty). Empty list set as permanent default at 1140. Every customization irreversibly erases factory defaults.
+- **Impact:** KDE "Defaults" button becomes destructive. Only fix: delete KGlobalAccel config file.
+
+### [HTK-02] User shortcuts never persisted when only Use_GlobalAccel defined (no QHotkey)
+- **File:** globalhotkeys.cpp:831
+- **Severity:** High
+- **Analysis:** QSettings save block gated on `#ifdef QHotkey_FOUND`. On KDE-only Linux builds, shortcuts work in-session but all customizations lost on restart.
+- **Impact:** Linux users without QHotkey lose shortcuts every restart.
+
+### [HTK-03] KGlobalAccel defaults silently zeroed on non-Wayland when QHotkey co-exists
+- **File:** globalhotkeys.cpp:1123-1127,1132
+- **Severity:** High
+- **Analysis:** On non-Wayland platforms, key/modifiers overwritten to unknown/NoModifier before setting as default. If QHotkey::setShortcut fails silently, zero fallback.
+- **Impact:** No-fallback failure; switching X11→Wayland loses all hotkey config.
+
+### [HTK-04] Wrong enum type `Qt::KeyboardModifier` (singular) for modifier variable
+- **File:** globalhotkeys.cpp:566
+- **Severity:** Medium
+- **Analysis:** Declared as singular enum, not QFlags. Multi-modifier values produce UB via static_cast. Currently masked on mainstream compilers but formally UB.
+- **Impact:** UBSan/strict MSVC could truncate multi-modifier combos.
+
+### [HTK-05] VelocityTo0 default shortcut uses `Qt::Key_acute` — unreachable dead key
+- **File:** globalhotkeys.cpp:657
+- **Severity:** Medium
+- **Analysis:** Qt::Key_acute is a combining diacritical dead key, not a physical keycap on US/ANSI keyboards. Ctrl+acute can never be generated by physical input.
+- **Impact:** "Set Velocity to 0" non-functional out of box on all US keyboards.
+
+### [HTK-06] Pause (Ctrl+Space) and Stop (Meta+Space) conflict — Meta+Space captured by OS
+- **File:** globalhotkeys.cpp:581,586
+- **Severity:** Medium
+- **Analysis:** Stop uses Meta/Win+Space. On Windows (Start menu), GNOME (input source), macOS (Spotlight) — captured by OS. Never reaches QPrompt.
+- **Impact:** Stop hotkey non-functional by default on all 3 major platforms.
+
+### [HTK-07] Double `removeAllShortcuts()` IPC round-trip in customization path
+- **File:** globalhotkeys.cpp:1130,1139
+- **Severity:** Low
+- **Analysis:** Called unconditionally at 1130, then again at 1139 in `!setAsDefault` branch. Redundant D-Bus round-trip to kglobalacceld.
+- **Impact:** Minor latency during bulk shortcut import.
+
+### [HTK-08] key/modifiers parameters silently discarded mid-function on non-Wayland
+- **File:** globalhotkeys.cpp:1123-1127
+- **Severity:** Low
+- **Analysis:** By-value params overwritten to unknown/NoModifier. Function signature misleadingly suggests original values are used.
+- **Impact:** Code clarity/auditability hazard; obscured HTK-01/HTK-03 during audit.
+
+---
+
+### QML Scope/Context (20 files referencing ApplicationWindow properties from wrong root)
+
+These component files reference `root.__isMobile`, `root.shadows`, `root.pageStack`, `root.theforce`, etc. — but their root items are plain Item/Flickable/MouseArea/ToolBar/etc., not ApplicationWindow. They depend on outer-scope `id: root` resolution:
+
+| Bug | File | Missing properties (via root.xxx) |
+|---|---|---|
+| SCP-01 | ReadRegionOverlay.qml:191 | `root.isMobile` typo (should be `__isMobile` with double underscore) |
+| SCP-02 | ReadRegionOverlay.qml:145 | `root.shadows` |
+| SCP-03 | PrompterView.qml:50,56,115,200 | `root.__isMobile`, `root.visibility`, `root.theforce` |
+| SCP-04 | Find.qml:47,69,78 | `root.__isMobile` |
+| SCP-05 | TimerClock.qml:127 | `root.width`, `root.height` (ambiguous — Item vs Window dims) |
+| SCP-06 | CursorAutoHide.qml:28,31,43,56 | `root.pageStack`, `root.activeFocusItem` |
+| SCP-07 | ProgressIndicator.qml:34 | `root.__isMobile` |
+| SCP-08 | ProjectionsManager.qml:74,75,180,188,194,195,204 | `root.__isMobile`, `root.showMaximized()`, `root.screen`, `root.__windowStayOnTop`, `root.__translucidBackground`, `root.pageStack` |
+| SCP-09 | Countdown.qml:196 | `root.forceQtTextRenderer` |
+| SCP-10 | Prompter.qml | 40+ refs to `root.pageStack`, `root.__isMobile`, `root.onDiscard`, `root.shadows`, `root.recentDocuments`, etc. |
+| SCP-11 | PrompterBackground.qml:34,49,108 | `root.background.__backgroundColor` |
+| SCP-12 | EditorToolbar.qml | 30+ refs to `root.__isMobile`, `root.__opacity`, `root.pageStack`, etc. |
+| SCP-13 | PrompterPage.qml:559,717,739,1064,1290 | `root.shadows`, `root.__fullScreen`, `root.theforce`, `root.minimumWidth`, `root.recentDocuments` |
+| SCP-14 | TelemetryPage.qml:72-154 (11 sites) | `root.__telemetry` |
+| SCP-15 | WheelSettingsOverlay.qml:37,54,73,82,87 | `root.pageStack`, `root.__scrollAsDial`, `root.__throttleWheel`, `root.__wheelThrottleFactor` |
+| SCP-16 | LanguageSettingsOverlay.qml:37,41,65 | `root.minimumWidth`, `root.pageStack`, `root.height` |
+| SCP-17 | LayoutDirectionSettingsOverlay.qml:40,44,45 | `root.pageStack` |
+| SCP-18 | InputsOverlay.qml:32 | `root.minimumWidth` |
+| SCP-19 | PointerSettings.qml:422 | `root.minimumHeight` |
+| SCP-20 | WindowDragger.qml:41,45 | `root.x`, `root.y` (uses MouseArea's own x/y, not window position) |
+
+All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml. None declare `id: root` on their own top-level item.
+
+---
+
+### Countdown / Timer State Machine (8 bugs)
+
+### [TMR-01] Countdown→Prompting auto-transition via state++ bypasses toggle() entirely
+- **File:** Countdown.qml:123
+- **Severity:** High
+- **Analysis:** `prompter.state++` directly increments from Countdown to Prompting, skipping toggle() which does: timer.reset(), document.parse(), preventSleep(true), addMissingProjections(), overlay position fix, loop stop check.
+- **Impact:** Timer not reset. Sleep prevention off. Stale/unparsed document displayed. Missing projections.
+
+### [TMR-02] timer.updateTimer() runs before timer.startTimer() on Prompting entry
+- **File:** Prompter.qml:3093 vs :3113
+- **Severity:** Medium
+- **Analysis:** onStateChanged fires before transitions. updateTimer() computes elapsedMilliseconds with stale startTime. Then startTimer() uses corrupted elapsed value.
+- **Impact:** First 333ms tick shows bogus elapsed time (~tens of seconds phantom).
+
+### [TMR-03] dissolveIn animation re-triggered entering Running from Ready — flicker
+- **File:** Countdown.qml:274-276,289-291
+- **Severity:** Medium
+- **Analysis:** Both Ready and Running states set dissolveIn.running=true. Ready→Running: dissolveIn restarts from 0 while opacity=1, causing 1→0→1 flicker.
+- **Impact:** Visible flash when "Begin countdown" clicked.
+
+### [TMR-04] Countdown arc hypotenuse uses geometric center instead of arc center
+- **File:** Countdown.qml:79
+- **Severity:** Low
+- **Analysis:** Formula uses centreX but arc drawn at offsetCentre. When editorXOffset ≠ 0, radius too small for corners.
+- **Impact:** Countdown arc may not extend to screen edges when editor is scrolled.
+
+### [TMR-05] ScriptAction `paintReady` references non-existent function
+- **File:** Countdown.qml:318
+- **Severity:** Low
+- **Analysis:** No `paintReady` function exists anywhere. Silent no-op.
+- **Impact:** Standby→Ready transition has no script behavior; incomplete feature.
+
+### [TMR-06] dissolveOut starts too early when disappearWithin > 1
+- **File:** Countdown.qml:110-113,145
+- **Severity:** Low
+- **Analysis:** dissolveOut always 1000ms but starts disappearWithin-1 iterations before end. If disappearWithin=3, animation completes before final iteration.
+- **Impact:** Countdown overlay fully transparent while still counting; prompter text visible prematurely.
+
+### [TMR-07] countdownAnimation restart uses non-idempotent running=true
+- **File:** Countdown.qml:119
+- **Severity:** Low
+- **Analysis:** Assigning running=true to already-running animation (from PropertyChanges) may be ignored on some Qt versions.
+- **Impact:** Countdown may freeze between iterations on certain Qt builds.
+
+### [TMR-08] timer.running not explicitly set in Countdown state — relies on revert behavior
+- **File:** Prompter.qml:2980-3026
+- **Severity:** Low
+- **Analysis:** Only Prompting state sets timer.running. If transition interrupted, timer could accumulate elapsed during countdown.
+- **Impact:** Timer display incorrect if state machine interrupted.
+
+---
+
+### SpellChecker (10 bugs)
+
+### [SPL2-11] addCustomWord trims but removeCustomWord does not — asymmetry
+- **File:** spellchecker.cpp:309 vs 328
+- **Severity:** Medium
+- **Analysis:** addCustomWord calls word.trimmed(); removeCustomWord uses raw word.indexOf(). "hello" stored but " hello " cannot be removed.
+
+### [SPL2-12] Case-sensitive contains/indexOf but case-insensitive sort — duplicates
+- **File:** spellchecker.cpp:312,328 vs 316-319
+- **Severity:** Medium
+- **Analysis:** Duplicate detection case-sensitive; sort case-insensitive. "Hello" + "hello" both pass contains check. Case variants accumulate permanently.
+
+### [SPL2-13] saveCustomWordsToDisk has void return — callers cannot detect I/O failure
+- **File:** spellchecker.cpp:383,390-392
+- **Severity:** Medium
+- **Analysis:** Void function with silent return on file open failure. addCustomWord/removeCustomWord report success despite no persistence.
+
+### [SPL2-14] Cached QRC dicts never invalidated after app update
+- **File:** spellchecker.cpp:193-202
+- **Severity:** Medium
+- **Analysis:** exists() gate prevents re-copy. Stale dictionaries used forever after app update.
+
+### [SPL2-15] spell() returns true when no dicts loaded — silent no-op
+- **File:** spellchecker.cpp:106-107
+- **Severity:** Medium
+- **Analysis:** m_dicts.empty() → return true. Indistinguishable from correctly-spelled word. isValid() exists but never checked by callers.
+
+### [SPL2-16] QDir::mkpath return unchecked — dict cache directory may silently not exist
+- **File:** spellchecker.cpp:196,351
+- **Severity:** Low
+
+### [SPL2-17] QFile::setPermissions return unchecked — cached dict may be unreadable
+- **File:** spellchecker.cpp:200
+- **Severity:** Low
+
+### [SPL2-18] Hunspell::add return value unchecked at 4 call sites
+- **File:** spellchecker.cpp:139,173,179,321
+- **Severity:** Low
+
+### [SPL2-19] availableDictionaries enumerates .dic without verifying .aff exists
+- **File:** spellchecker.cpp:250-256
+- **Severity:** Low
+
+### [SPL2-20] loadCustomWordsFromDisk redundant exists() before open()
+- **File:** spellchecker.cpp:365-368
+- **Severity:** Low
+
+---
+
+### Build / WASM (2 bugs)
+
+### [WSM-03] readAsDataURL causes quadruple in-memory copy of file content
+- **File:** wasmintegration.cpp:129-144
+- **Severity:** High
+- **Analysis:** readAsDataURL base64-encodes (~+33%). Then TextEncoder Uint8Array, malloc+HEAPU8, QString::fromUtf8. 10MB image → 75MB peak memory.
+- **Impact:** Memory exhaustion + UI freeze on large file pick. Should use readAsArrayBuffer.
+
+### [BLD-05] .env.android references Qt 5.15.2 — project requires Qt 6.8.2+
+- **File:** .env.android:6
+- **Severity:** Medium
+- **Analysis:** `export Qt5_android=$ADIR/Qt/5.15.2/android/` — stale Qt 5 configuration.
+- **Impact:** Android builds fail for developers following this file.
+
+---
+
+### QML Events / Interaction (10 bugs)
+
+### [EVT-01] velocityDragArea (z:5) blocks viewport.mouse (z:0) wheel events
+- **File:** PrompterPage.qml:875 vs PrompterView.qml:254
+- **Severity:** High
+- **Analysis:** velocityDragArea fills viewport at z:5, no wheel handler, no propagateComposedEvents. viewport.mouse at z:0 never receives wheel events.
+- **Impact:** Mouse wheel scrolling non-functional during normal operation.
+
+### [EVT-02] Zero inputMethodHints on any TextField — IME broken for CJK/Indic
+- **File:** Prompter.qml:936, PrompterPage.qml, EditorToolbar.qml (15+ TextFields)
+- **Severity:** High
+- **Analysis:** No inputMethodHints on any field. Virtual keyboard can't show correct layout. CJK composition events blocked.
+- **Impact:** CJK/Indic users cannot compose. Mobile keyboard shows wrong layout. Accessibility barrier.
+
+### [EVT-03] velocityDragOverlay (z:7) steals clicks from control buttons (z:6)
+- **File:** PrompterPage.qml:914 vs PrompterView.qml:61
+- **Severity:** High
+- **Analysis:** Overlay at z:7 above controls at z:6. LeftButton dismisses immediately, button never gets click.
+- **Impact:** All control buttons require double-click when velocity indicator visible.
+
+### [EVT-04] Drag breaks editor.x declarative binding permanently
+- **File:** Prompter.qml:1984,958
+- **Severity:** High
+- **Analysis:** drag.target: editor writes x imperatively, breaks `x: contentsPlacement*(prompter.width) + 20` binding.
+- **Impact:** After one drag, editor horizontal position frozen. Resize/orientation changes no-op.
+
+### [EVT-05] Drag breaks positionHandler.x declarative binding permanently
+- **File:** Prompter.qml:2018,926
+- **Severity:** High
+- **Analysis:** Same pattern. drag.target breaks x binding; coordinate system becomes inconsistent.
+
+### [EVT-06] Drag breaks stopwatch.x binding permanently
+- **File:** TimerClock.qml:178,130
+- **Severity:** Medium
+- **Analysis:** Same pattern. After one drag, stopwatch no longer re-centers on resize.
+
+### [EVT-07] TabBar currentIndex binding broken on first TabButton click
+- **File:** PointerSettings.qml:266,248
+- **Severity:** Medium
+- **Analysis:** TabBar sets currentIndex imperatively, breaking binding to pointerSettings.pointerKind. Two-way sync dead after first click.
+
+### [EVT-08] Two additional checkable ToolButton binding breakage instances
+- **File:** EditorToolbar.qml:913-918,1541-1556
+- **Severity:** Medium
+- **Analysis:** opacity toggle and overlay bars toggle not in R2-EDT-03 list but suffer same binding-breakage pattern.
+
+### [EVT-09] Flow ToolSeparator visibility compares y of potentially invisible rows
+- **File:** EditorToolbar.qml:246-249,284-287,309-312,347-350,433-437,549-552,710-713,774-777
+- **Severity:** Low
+- **Analysis:** Separator visibility uses row.y when row may be invisible (y=0), matching visible row at y=0 → false positive separator.
+
+### [EVT-10] Nested MouseAreas with hoverEnabled steal hover from parent Buttons
+- **File:** ProjectionsManager.qml:347-354,376-383,405-412
+- **Severity:** Low
+- **Analysis:** Child MouseArea hoverEnabled:true fills parent Button. Button's hovered property never fires → flat highlight missing.
+
+---
+
+*Report generated over 10+ initial waves, synthesis analysis, and re-run deep audits.*
