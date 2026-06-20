@@ -3677,4 +3677,134 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** `setDefaultStyleSheet("body{...color:\"#FFFFFF\";...}")` — white text on light prompter background before user applies formatting. Q_PROPERTY textColor overrides at QTextCursor level only for newly typed/selected text.
 - **Impact:** White text invisible on light backgrounds until user manually changes text color.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-36.*
+---
+
+## Wave 37 — Events, States, Sizing, Const, Persistence
+
+### [EVT-N10] Editor Ctrl+Letter shortcuts don't accept event — marker key-search double-fires
+- **File:** Prompter.qml:2123-2161
+- **Severity:** Medium
+- **Analysis:** Ctrl+B/I/U/T/L/R/E/M toggles format but doesn't set `event.accepted = true`. Event bubbles to Prompter Flickable Keys.onPressed, calls `document.keySearch(event.key)` — searches for named markers by bare key code. Ctrl+B may simultaneously bold text AND scroll to B-marker.
+- **Impact:** Unintended prompter scroll during text editing when named markers exist.
+
+### [EVT-N11] windowStayOnTopButton lacks focusPolicy — unreachable via keyboard
+- **File:** EditorToolbar.qml:794-804
+- **Severity:** Low
+- **Analysis:** All 20+ ToolButtons in toolbar set `focusPolicy: Qt.TabFocus`. This one defaults to Qt.NoFocus — only toggle button without keyboard access.
+- **Impact:** Keyboard users cannot Tab to Stay-on-Top toggle. Accessibility gap.
+
+### [EVT-N12] velocityDragArea and viewport.mouse share z:5 — wheel dispatch ambiguous
+- **File:** PrompterPage.qml:875-877 vs PrompterView.qml:3083
+- **Severity:** Low
+- **Analysis:** Same-z siblings in Prompting state. velocityDragArea (no wheel handler) declared later → sits "on top" of viewport.mouse (has wheel handler). Qt version-dependent: may silently consume wheel events even without onWheel.
+- **Impact:** Wheel scrolling may fail intermittently during prompting on some Qt builds.
+
+### [STATE-N01] Shadowed Prompting→Editing transition — velocity default never saved
+- **File:** Prompter.qml:3119-3137
+- **Severity:** High
+- **Analysis:** Two transitions target `to: Editing`. First (line 3119) matches and runs only `timer.stopTimer()`. Second (line 3127, guarded by `from: Prompting`) saves `__iDefault = prompter.__i` and calls `cursorAutoHide.reset()` — but QML selects first matching transition. Velocity-save code is dead.
+- **Impact:** User's last prompting velocity never saved as new default. __iDefault stays at initial value forever.
+
+### [STATE-N02] Find.toggle() uses !visible instead of !isOpen — can't close during Prompting
+- **File:** Find.qml:51
+- **Severity:** Medium
+- **Analysis:** `toggle()` computes `isOpen = !visible` but `visible` is bound to `height>0` which is false during Prompting/Countdown regardless of `isOpen`. When isOpen=true and state=Prompting: `isOpen = !false = true` — no change. Find stays logically open.
+- **Impact:** Find bar reappears unexpectedly when returning to Editing after pressing close shortcut during prompting.
+
+### [STATE-N03] Countdown Running restarts dissolveIn unnecessarily — visual dim-to-bright flash
+- **File:** Countdown.qml:289
+- **Severity:** Low
+- **Analysis:** Entering Running sets `dissolveIn.running = true`. Exiting Ready reverts dissolveIn to default `running: false`. Running then restarts from 0→1 even though countdown already fully visible.
+- **Impact:** Brief dim-to-bright flash when countdown begins.
+
+### [STATE-N04] loop animation cancel() state change overridden by toggle() due to QML batching
+- **File:** Prompter.qml:900-907
+- **Severity:** Low
+- **Analysis:** SequentialAnimation's final ScriptAction calls `prompter.cancel()` (sets state=Editing) then `prompter.toggle()` (overwrites state). QML batches in same JS execution — only toggle()'s final state takes effect. cancel() state transition dead.
+- **Impact:** Dead code — cancel() effects never run except side effect `cursorAutoHide.reset()` which gets immediately undone.
+
+### [SIZE-N01] concentricCircles Shape has conflicting anchors.fill + anchors.centerIn
+- **File:** Countdown.qml:207-209
+- **Severity:** Medium
+- **Analysis:** `anchors.fill: parent` sets left/right/top/bottom. `anchors.centerIn: parent` sets horizontalCenter/verticalCenter. Both simultaneously — prohibited in Qt Quick. QML anchor conflict warning; positioning unpredictable.
+- **Impact:** Concentric circles may be mispositioned on some Qt builds.
+
+### [SIZE-N02] Three Button children of Row have dead anchors.bottom declarations
+- **File:** PrompterView.qml:148,163,179
+- **Severity:** Low
+- **Analysis:** Positioner children (Row) ignore manual anchors. Three `anchors.bottom: parent.bottom` declarations are silently dead.
+- **Impact:** Dead code — zero effect.
+
+### [CONST-N01] getMarkerKey() not const — pure reader without side effects
+- **File:** documenthandler.h:214, documenthandler.cpp:746
+- **Severity:** Low
+- **Analysis:** Reads cursor anchor names, converts to display string. Zero member mutation. Should be const.
+- **Impact:** Cannot be called on const DocumentHandler&.
+
+### [CONST-N02] getMarkerHref() not const — identical pattern
+- **File:** documenthandler.h:216, documenthandler.cpp:779
+- **Severity:** Low
+- **Analysis:** Same as CONST-N01 — pure reader.
+- **Impact:** Same.
+
+### [CONST-N03] MarkersModel::previousMarker(), nextMarker(), keySearch(), binarySearch() not const
+- **File:** markersmodel.h:62,63,64,78, markersmodel.cpp:117,151,205,217
+- **Severity:** Low
+- **Analysis:** Four pure-read query methods (binarySearch recursive, previous/next/keySearch call binarySearch/data) declared non-const. Transitive — binarySearch non-const forces all callers non-const.
+- **Impact:** Cannot be called on const MarkersModel&.
+
+### [CONST-N04] GlobalHotkeys::globalShortcutKey(Action) not const — Q_INVOKABLE pure query
+- **File:** globalhotkeys.h:147, globalhotkeys.cpp:108
+- **Severity:** Low
+- **Analysis:** Queries QHotkey::shortcut() (const) and KGlobalAccel::shortcut() (const). No mutation. Called from QML via AppController.
+- **Impact:** Blocks const-correct usage.
+
+### [CONST-N05] Unnecessary copy via const auto instead of const auto& in extendLastMarker
+- **File:** markersmodel.cpp:111
+- **Severity:** Low
+- **Analysis:** `const auto last = m_data.last()` — QList::last() returns T&. const auto deduces to const Marker (strips reference), causing full struct copy. Only .text.length() read then discarded.
+- **Impact:** Unnecessary heap copy on every marker extension during document parse.
+
+### [SAVE-N01] loadFromNetworkFinihed sets m_fileUrl to phantom QTemporaryFile path
+- **File:** documenthandler.cpp:897,144
+- **Severity:** Medium
+- **Analysis:** m_cache is new QTemporaryFile(this) never opened. `m_cache->fileName()` returns auto-generated temp name with no file on disk. m_fileUrl set to this phantom path. Title bar shows garbage; save() constructs broken URL.
+- **Impact:** Corrupted file URL after every network load. Save-in-place broken.
+
+### [SAVE-N02] iOS save flow never updates C++ m_fileUrl — file URL perpetually stale
+- **File:** Prompter.qml:2493-2506, iossavedialog.mm:36-46
+- **Severity:** High
+- **Analysis:** iOS saves entirely outside C++ DocumentHandler. accepted(fileUrl) received in QML but never calls `document.saveAs(fileUrl)`. fileUrl is READ-only Q_PROPERTY (no WRITE). Can't update m_fileUrl. editor.lastDocument records stale URL.
+- **Impact:** After iOS save, Ctrl+S/auto-save writes to wrong location. Title bar and recent docs show wrong URL.
+
+### [SAVE-N03] saveAs() never updates _fileSystemWatcher — watches stale file after save-as
+- **File:** documenthandler.cpp:1023-1028,1138-1176
+- **Severity:** Medium
+- **Analysis:** Watcher path only configured in load(). saveAs() updates m_fileUrl but never adds new path to watcher. Old path still watched — external change to old file triggers auto-reload, replacing current content. New path not watched — external changes undetected.
+- **Impact:** Auto-reload can silently replace content with old file after save-as.
+
+### [SAVE-N04] save() unnecessary QString→std::string→QString round-trip through locale encoding
+- **File:** documenthandler.cpp:1183
+- **Severity:** Low
+- **Analysis:** `QString::fromStdString(QUrl::toPercentEncoding(...).toStdString())` — useless conversion. Qt 5: locale-dependent encoding corrupts non-ASCII paths.
+- **Impact:** Non-ASCII file paths corrupted during save under Qt 5.
+
+### [SAVE-N05] save() broken on Android content:// URIs — empty filename
+- **File:** documenthandler.cpp:1181-1184
+- **Severity:** Low
+- **Analysis:** `QQmlFile::urlToLocalFileOrQrc()` can't resolve content:// URIs, returns empty string. Propagates through encoding to saveAs("") → open fails with confusing empty-path error.
+- **Impact:** Ctrl+S always fails on Android for files from FileDialog.
+
+### [LOAD-N01] TOCTOU race between QFile::exists() and file.open() in load()
+- **File:** documenthandler.cpp:944-947
+- **Severity:** Medium
+- **Analysis:** File can be deleted/replaced between exists() check and open() call. If vanishes: open fails, content block skipped, but m_fileUrl set and fileUrlChanged emitted anyway. clearUndoRedoStacks() called despite nothing loaded. No error emitted.
+- **Impact:** Silent empty document with wrong file URL after race. Undo history lost for no reason.
+
+### [LOAD-N02] reset() emits 12 NOTIFY signals when open() fails but exists() succeeds
+- **File:** documenthandler.cpp:1017-1018
+- **Severity:** Low
+- **Analysis:** reset() called outside file.open() success block but inside exists() block. File exists but unreadable → reset() fires all format NOTIFY signals with property values from unchanged document. UI churns for nothing.
+- **Impact:** Spurious formatting toolbar re-bind, animation restarts, visual flash on permission errors.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-37.*
