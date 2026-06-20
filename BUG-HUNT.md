@@ -2658,4 +2658,62 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** true (int 1) = NoLessSafeRedirectPolicy. Only allows http→https redirects. Same-origin redirects (cdn, www, trailing-slash) silently dropped.
 - **Impact:** Most real-world redirects silently fail; network loads break on common URL patterns.
 
-*Report generated over 10+ initial waves, synthesis analysis, re-run deep audits, and wave 27.*
+---
+
+## Wave 28 — Threading, Drawer Dismiss, Android Build
+
+### [THR-01] IosSaveDialog::create() — unsynchronized singleton race
+- **File:** iossavedialog.cpp:37-42
+- **Severity:** Medium
+- **Analysis:** Classic check-then-act: `if (!s_instance) s_instance = new ...` with no mutex. Constructor writes s_instance=this before construction done. Two QML engine threads → dual instance or partially-constructed object.
+- **Impact:** Use-after-free or double-delete under concurrent engine access.
+
+### [THR-02] ShakeDetector::create() — identical unsynchronized singleton race
+- **File:** shakedetector.cpp:38-43
+- **Severity:** Medium
+- **Analysis:** Same if(!s_instance) pattern as THR-01. Constructor also sets s_instance=this.
+- **Impact:** Same race condition.
+
+### [THR-03] search() — mutable static QRegularExpression shared across all callers
+- **File:** documenthandler.cpp:1543-1544
+- **Severity:** Low
+- **Analysis:** `static QRegularExpression searchRegEx; searchRegEx.setPattern(subString);` mutates shared static state. If search() ever called from worker thread, setPattern() races with find().
+- **Impact:** Data race crash if cross-thread access added.
+
+### [THR-04] SpellChecker zero thread safety — explicit finding
+- **File:** spellchecker.h:76-77, spellchecker.cpp
+- **Severity:** Medium
+- **Analysis:** m_dicts (vector) and m_customWords (QStringList) with no mutex. spell()/suggest() read while addCustomWord/removeCustomWord/setLanguages mutate. Hunspell not thread-safe. QSyntaxHighlighter default main thread, but Qt 6.7+ async highlighting → immediate crash.
+- **Impact:** Iterator invalidation / segfault on concurrent access.
+
+### [DRW-01] interalFocusElsewhere() misses 3 OverlaySheets + 2 Drawers — hotkeys pass through
+- **File:** Prompter.qml:283-296
+- **Severity:** Medium
+- **Analysis:** Function blocks hotkeys when overlays open, but omits obsConfiguration, dictionariesSheet, customWordsSheet, contextDrawer, globalMenu. Hotkeys (play/pause/stop) execute through while configuring OBS/dictionaries/words or with drawer open.
+- **Impact:** Unexpected prompter state changes while interacting with overlays/drawers.
+
+### [DRW-02] globalDrawer and contextDrawer missing from ESC dismiss chain
+- **File:** main.qml:481-504, +windows:452-487, +android:391-426
+- **Severity:** Medium
+- **Analysis:** ESC handler checks markersDrawer + 8 sheets but never checks contextDrawer.drawerOpen or globalMenu.drawerOpen. ESC falls through, drawer stays open.
+- **Impact:** ESC does not close global/context drawer; user must manually tap outside.
+
+### [AND-BLD-01] Missing version.gradle — Gradle build fails
+- **File:** android/build.gradle:19
+- **Severity:** Critical
+- **Analysis:** `apply from: '../version.gradle'` — file does not exist. projectVersionFull/projectVersionCode undefined.
+- **Impact:** Android build cannot sync or compile.
+
+### [AND-RES-01] Invalid android:scaleType on bitmap element
+- **File:** android/res/drawable/splash.xml:7
+- **Severity:** Medium
+- **Analysis:** scaleType is ImageView attribute, not valid on bitmap drawable. AAPT2 error.
+- **Impact:** Build failure or silently ignored attribute.
+
+### [AND-MFT-01] FileProvider resource @xml/qtprovider_paths — file named filepaths.xml
+- **File:** AndroidManifest.xml:43 vs res/xml/filepaths.xml
+- **Severity:** Medium (latent)
+- **Analysis:** Commented-out FileProvider references qtprovider_paths but actual file is filepaths.xml. Resource-not-found if uncommented.
+- **Impact:** Build error if FileProvider block ever activated.
+
+*Report includes waves 1-10, synthesis, re-run deep audits, waves 27-28.*
