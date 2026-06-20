@@ -2624,4 +2624,38 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 
 ---
 
-*Report generated over 10+ initial waves, synthesis analysis, and re-run deep audits.*
+---
+
+## Wave 27 — String Ops, Easing, Network
+
+### [ENC-01] truncate(-1) when font preview text has no spaces
+- **File:** documenthandler.cpp:736-738
+- **Severity:** Medium
+- **Analysis:** text truncated to 64 chars, then lastIndexOf(" ") → -1 if no space found. truncate(-1) empties string or UB. Preview shows just "…" with no text.
+- **Impact:** Font preview dialog blank for long unbroken strings (URLs, long words).
+
+### [ENC-02] getMarkerKey() mid(4) without length/startsWith guard
+- **File:** documenthandler.cpp:756
+- **Severity:** Low
+- **Analysis:** Unlike parse() which guards mid(4) with startsWith("key_"), getMarkerKey() blindly takes mid(4) from first anchor name. Anchor names <4 chars or without "key_" prefix produce garbage key codes.
+- **Impact:** Malformed anchor names silently produce wrong marker key display.
+
+### [ANM-N01] Easing.EaseOut is not a valid Qt Quick easing type (2 instances)
+- **File:** PrompterView.qml:88,140
+- **Severity:** Medium
+- **Analysis:** `Easing.EaseOut` is CSS convention, not valid QML. Valid: Easing.OutQuad, Easing.OutCubic, etc. Falls back to Easing.Linear silently.
+- **Impact:** Margin animations run abruptly instead of smoothly easing.
+
+### [NET-01] loadFromNetworkFinihed never checks m_reply->error()
+- **File:** documenthandler.cpp:889-890
+- **Severity:** High
+- **Analysis:** readAll() called without error() check. HTTP 4xx/5xx error pages loaded as document content. Network failures silent.
+- **Impact:** 404 pages become document content. No error feedback for broken connections.
+
+### [NET-02] RedirectPolicyAttribute set to boolean true → NoLessSafeRedirectPolicy
+- **File:** documenthandler.cpp:883,1739
+- **Severity:** Medium
+- **Analysis:** true (int 1) = NoLessSafeRedirectPolicy. Only allows http→https redirects. Same-origin redirects (cdn, www, trailing-slash) silently dropped.
+- **Impact:** Most real-world redirects silently fail; network loads break on common URL patterns.
+
+*Report generated over 10+ initial waves, synthesis analysis, re-run deep audits, and wave 27.*
