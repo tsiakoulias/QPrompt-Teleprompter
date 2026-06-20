@@ -2791,4 +2791,45 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** while-loop calls contains() on growing unsorted list. Total cost O(n²). QSet dedup then sort would be O(n log n).
 - **Impact:** Quadratic startup time with large custom dictionaries.
 
-*Report: waves 1-10, synthesis, re-run deep audits, waves 27-29.*
+---
+
+## Wave 30 — PropertyChanges, QTextDocument, Metadata, Opacity
+
+### [PC-01] countdown.state not set in Prompting state — countdown visible during teleprompting
+- **File:** Prompter.qml:3027-3086
+- **Severity:** Medium
+- **Analysis:** Editing/Standby/Countdown states all set countdown.state via PropertyChanges. Prompting state has no countdown PropertyChanges at all. After countdown completes or user skips, countdown reverts to Ready state (visible, opacity:1).
+- **Impact:** Countdown numeral overlays prompter text for entire prompting session.
+
+### [QTD-01] m_spellHighlighter not detached when setDocument(nullptr)
+- **File:** documenthandler.cpp:183-199
+- **Severity:** Medium
+- **Analysis:** m_spellHighlighter.reset() inside if(m_document) block. When new doc is nullptr, old highlighter remains attached to orphaned QTextDocument. Document destroyed → highlighter holds dangling pointer → use-after-free at DocumentHandler destructor.
+- **Impact:** Use-after-free on QTextDocument/SpellHighlighter cleanup.
+
+### [QTD-02] QQuickTextDocument destroyed without destroyed signal connection
+- **File:** documenthandler.h:334, documenthandler.cpp:175-202
+- **Severity:** Low-Medium
+- **Analysis:** m_document is raw QQuickTextDocument* from QML. No destroyed signal to null it. If TextEdit destroyed before DocumentHandler, m_document dangles. Composes with QTD-01.
+- **Impact:** Dangling m_document during destructor if QML cleanup order unfavorable.
+
+### [META-01–12] Desktop/AppData metadata bugs (12 total)
+- Invalid category `Qt` in desktop file (not a registered freedesktop.org category)
+- MimeType mismatch: desktop has `text/html` only, AppData has `text/plain`, `text/markdown`, `text/html`
+- Spam keyword `imaginary` in desktop file
+- Typo `fixedd` (double-d) in v2.0.2 release notes
+- 11 releases use non-ISO-8601 dates (YYYY-M-D instead of YYYY-MM-DD)
+- XML indentation inconsistency at v1.1.5 release tag
+- Missing checksum on v2.0.2 source artifact
+- v1.0 missing checksums on 4/5 artifacts
+- Version `1.1` vs GitHub tag `v1.1.0` mismatch
+- Version `1.0` vs GitHub tag `v1.0.0` mismatch
+- Artifact URLs use `QPrompt` repo name, everything else uses `QPrompt-Teleprompter` → 404
+
+### [OPC-01] Right-click toggle desynchronizes velocityIndicator visible/opacity
+- **File:** PrompterPage.qml:906,979-980
+- **Severity:** Medium
+- **Analysis:** Right-click toggles only opacity (0 ↔ 1), leaving visible=true. When opacity=0 but visible=true: middle-click reactivation blocked, full-screen MouseArea consumes input, auto-dismiss Connection fires inconsistently.
+- **Impact:** Velocity indicator stuck in invisible-but-interactive state; requires second right-click to recover.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-30.*
