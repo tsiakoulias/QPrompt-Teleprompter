@@ -3941,4 +3941,50 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **File:** qmlutil.hpp (184 lines)
 - **Analysis:** Key validation, QProcess exec (sys:// RCE), app restart, cursor management, font listing, factory reset, OBS crypto, file existence, projection buffer. No coherent responsibility.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-39.*
+---
+
+## Wave 40 — Key Modifiers, CLI, DPR, Transforms, Bindings
+
+### [KEY-N01] Named marker key binding silently discards all modifier information
+- **Files:** PrompterPage.qml:1187, documenthandler.h:213, documenthandler.cpp:707-715, markersmodel.cpp:117-120
+- **Severity:** Medium
+- **Analysis:** KeyInputButton emits `setKey(keyCode, modifiers)` but PrompterPage only passes `keyCode` to `document.setKeyMarker(keyCode)` — modifiers discarded. Stored anchor is `key_<bare_code>` with zero modifier encoding. KeySearch matches by bare KeyRole. UI shows "Ctrl+A" but behavior is identical to plain "A".
+- **Impact:** Cannot create distinct markers using same physical key with different modifiers. Collisions produce unpredictable navigation. UI misleading.
+
+### [CLI-N01] --version flag non-functional — version string empty when parser processes
+- **File:** main.cpp:159,214
+- **Severity:** Medium
+- **Analysis:** `parser.process(app)` handles --version by reading `QCoreApplication::applicationVersion()`, but version is only set later at line 214 via `KAboutData::setApplicationData()`. applicationVersion() is empty at parse time.
+- **Impact:** `qprompt --version` displays empty version. Users cannot determine installed version from CLI.
+
+### [DPR-N01] Prompter.qml uses Screen.devicePixelRatio (global) instead of screen.devicePixelRatio (window)
+- **File:** Prompter.qml:994
+- **Severity:** Medium
+- **Analysis:** `Screen.devicePixelRatio` (capital S) is application-global singleton returning primary screen's DPR. On multi-monitor with different DPIs (laptop + 4K external), text renderer selection uses wrong monitor's DPR. Countdown.qml:196 correctly uses lowercase `screen`.
+- **Impact:** Wrong text rendering path on multi-DPI multi-monitor systems.
+
+### [SCALE-N01] Right pointer xScale: -1 mirrors text pointers — backwards/unreadable text
+- **File:** ReadRegionOverlay.qml:391-398
+- **Severity:** Medium
+- **Analysis:** `Scale { xScale: -1 }` applied when sameAsLeftPointer or pointerKind is Arrow. For pointer_0 (arrow Shape), mirroring correct — arrow points inward. For pointer_1 (text pointer), text rendered backwards/unreadable.
+- **Impact:** Right-side text pointers display mirrored, unreadable text (masked by broken pointerSettings refs).
+
+### [ORIENT-N01] TimerClock binary width>height orientation creates sharp 2x font jump at 1:1
+- **File:** TimerClock.qml:127
+- **Severity:** Low
+- **Analysis:** `root.width/root.height>1 ? 2 : 1` divides font by 2 when width > height. At near-square window (800x798→800x802), timer font size abruptly doubles/halves at the 1:1 boundary. Smooth ratio-based formula would avoid discontinuity.
+- **Impact:** Timer text doubles/halves in size when window crosses near-square aspect ratio.
+
+### [BIND-N01] contentWidth undefined for Shape/Image pointer types — transform origin silently wrong
+- **File:** ReadRegionOverlay.qml:396
+- **Severity:** Low
+- **Analysis:** `(rightPointer.item.width | rightPointer.item.contentWidth) / 2` — contentWidth is Text-only property. For pointer_0 (Shape) and pointer_2 (Image), contentWidth is undefined. `number | undefined` → `ToInt32(undefined)` → 0. Origin depends on low-bit coincidence rather than intended center.
+- **Impact:** Right-pointer transform origin silently wrong for Arrow and Image pointer kinds.
+
+### [STR-CNV] 5 defensive validation gaps: toInt() without ok flag in getMarkerKey, parse(×2), setFontSize, and 32 hotkey reads
+- **Files:** documenthandler.cpp:757,1667,1675,829, globalhotkeys.cpp:569-698
+- **Severity:** Low
+- **Analysis:** All rely on `toInt()`/`QVariant::toInt()` returning 0 on failure, which matches desired default (0 = unknown/unset) in every case. No functional behavior incorrect — omission of explicit ok validation and defensive coding.
+- **Impact:** None currently. Latent fragility if Qt changes implicit-from-invalid behavior.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-40.*
