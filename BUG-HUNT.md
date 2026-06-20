@@ -3577,4 +3577,104 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** Every checkable Labs.MenuItem (Bold/Italic/Underline, Full Screen, Indicators, Position items, scroll/dial) has `checked: binding` + `onTriggered: property = checked`. On first click, native checkmark toggles imperatively → QML binding breaks. Currently masked because Qt 6 drops Qt.labs.platform Menu/MenuBar.
 - **Impact:** If ever migrated to working native menu API, ALL checkable items decay after first use.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-35.*
+---
+
+## Wave 36 — Render, Text, Platform, Decls, Colors
+
+### [RENDER-01] ShaderEffectSource prompterShadowSource runs unconditionally — wastes GPU capture when shadows disabled
+- **File:** PrompterView.qml:230-233
+- **Severity:** Medium
+- **Analysis:** `live` defaults to true. Captures entire prompter Flickable to texture every frame. Downstream shadow chain gated by `layer.enabled: root.shadows` in Prompter.qml:744, but shadowSource has no `live: root.shadows` guard. When shadows off (default), every frame incurs full off-screen render + GPU texture copy.
+- **Impact:** Unnecessary GPU bandwidth and frame-time increase on every frame during prompting.
+
+### [RENDER-02] ShaderEffectSource pointerShadowSource runs unconditionally — same pattern
+- **File:** ReadRegionOverlay.qml:123-126
+- **Severity:** Medium
+- **Analysis:** Identical to RENDER-01. Always captures readRegion to texture. Downstream shadow on readRegion gated by `layer.enabled`, but source never stops when shadows off.
+- **Impact:** Wasted texture capture every frame when shadows disabled.
+
+### [TXT-N01] Find/replace fields missing persistentSelection: true
+- **File:** Find.qml:182,230
+- **Severity:** Low
+- **Analysis:** Both SearchField and replaceField set `selectByMouse: true` but omit `persistentSelection: true`. Selected text disappears on focus loss. Main editor (Prompter.qml:972) correctly enables it.
+- **Impact:** User-selected find/replace text vanishes on focus loss.
+
+### [TXT-N02] TimerClock default text color #AAA on #131619 — fails WCAG AA contrast
+- **File:** TimerClock.qml:93,138,151,163
+- **Severity:** Low
+- **Analysis:** Default `timerSettings.color = "#AAA"` on background `#131619` — contrast ratio ~3.16:1, below WCAG AA minimum 4.5:1. Timer text is small (viewport-scaled), compounding legibility issues.
+- **Impact:** Stopwatch/ETA text hard to read for visually impaired users under default settings.
+
+### [PLAT-N01] qmlutil.hpp incorrectly excludes QNX from QProcess — run()/restartApplication() silently no-op
+- **File:** qmlutil.hpp:35,86,99
+- **Severity:** Medium
+- **Analysis:** Three guards omit Q_OS_QNX despite QNX being a POSIX RTOS with full QProcess support in Qt. main.cpp:23,42,106 correctly include QNX in similar guards. run() becomes Q_UNUSED, restartApplication() only calls quit() without spawning replacement.
+- **Impact:** sys:// URL handler, app restart on language/layout change, factory reset all broken on QNX.
+
+### [PLAT-N02] documenthandler.cpp incorrectly excludes QNX from import() — LibreOffice broken on QNX
+- **File:** documenthandler.h:330, documenthandler.cpp:964,1012,1043
+- **Severity:** Medium
+- **Analysis:** import() calls LibreOffice via QProcess for ODT/DOCX/DOC/RTF/ABW/PAGES. QNX guard incorrectly excludes it. Since QNX has QProcess, this is inconsistent with PLAT-N01. Falls through to raw-binary auto-detection.
+- **Impact:** Opening rich document formats renders binary garbage on QNX.
+
+### [PLAT-N03] Zero Q_OS_TVOS preprocessor guards in C++ despite 19 QML references — build failure
+- **Files:** All .cpp/.h/.mm (zero Q_OS_TVOS); 19 QML references to "tvos"
+- **Severity:** High
+- **Analysis:** Qt 6: Q_OS_TVOS is exclusive of Q_OS_IOS. Every C++ guard checks Q_OS_IOS but never Q_OS_TVOS. On tvOS: includes QApplication/QtWidgets (build error), skips Kirigami static registration (blank window), uses wrong QSettings path, includes SystemFontChooserDialog (QDialog — build error on tvOS).
+- **Impact:** tvOS build fails at multiple points. QML references suggest tvOS was considered but C++ backend never implemented.
+
+### [DECL-N01] MarkersModel::keySearch — default params in definition but not declaration
+- **File:** markersmodel.h:64 vs markersmodel.cpp:117
+- **Severity:** Low
+- **Analysis:** Same DCL pattern as DCL-N01/DCL-N02. Defaults `currentPosition = 0, reverse = false, wrap = true` in definition invisible to MOC and QML. Currently always called with all 4 args, masked.
+- **Impact:** Latent — any direct QML invocation with fewer args fails.
+
+### [DECL-N02] SessionModel::resetInternalData() missing override keyword and Qt 6 version guard
+- **File:** promptsession.h:74-75
+- **Severity:** Low
+- **Analysis:** MarkersModel correctly guards with `#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)` and `override`. SessionModel omits both — no compiler-checked override. Stray function in Qt 5. Note: file is dead code (HDR-N01).
+- **Impact:** No compiler diagnostic if QAbstractItemModel::resetInternalData() signature changes.
+
+### [COLOR-01] ProjectionsManager.qml uses invalid "initial" color — repro of R4-ROOT-02
+- **File:** ProjectionsManager.qml:195
+- **Severity:** Medium
+- **Analysis:** `color: root.__translucidBackground ? "transparent" : "initial"` — "initial" is CSS keyword, not valid QML color. Falls to default (black) with runtime warning.
+- **Impact:** Projection windows render with black instead of system-theme color.
+
+### [COLOR-02] Hardcoded #EED text invisible on light themes — WheelSettingsOverlay
+- **File:** WheelSettingsOverlay.qml:105
+- **Severity:** Medium
+- **Analysis:** `color: "#EED"` (~#EEEDDD, extremely light cream) on Kirigami OverlaySheet (light theme = white background). Help text: "Enable throttling for use with touchpads..."
+- **Impact:** Help text unreadable on light themes — accessibility failure.
+
+### [COLOR-03] velocityText ColorAnimation flash: #BBB → #FFF → #CCC jump
+- **File:** PrompterPage.qml:842-860
+- **Severity:** Low
+- **Analysis:** Setting `color = "#BBB"` then restarting animation with `from: "#FFF"` causes white flash mid-transition. Should omit from so animation picks up current value.
+- **Impact:** Visual jitter/flash in velocity indicator on each velocity change.
+
+### [COLOR-04] ReadRegionOverlay ColorAnimation tracks __fillColor that never changes
+- **File:** ReadRegionOverlay.qml:204,616
+- **Severity:** Low
+- **Analysis:** __fillColor initialized to `"#00000000"`, never reassigned. ColorAnimation interpolates on every state transition with zero visual effect.
+- **Impact:** Wasted frame budget evaluating no-op color interpolation.
+
+### [COLOR-05] Prompter scrollbar gradient hardcodes #CCC/#998/#665 — low contrast on light backgrounds
+- **File:** Prompter.qml:1008-1009
+- **Severity:** Low
+- **Analysis:** Hardcoded warm-grey values. On light prompter backgrounds (#FAFAFA), scrollbar handle nearly invisible. No Kirigami theme color consulted.
+- **Impact:** Scrollbar handle low-contrast/invisible on light prompter backgrounds.
+
+### [COLOR-06] Countdown #FFF digits on #333-at-0.48-overlay — insufficient contrast on light backgrounds
+- **File:** Countdown.qml:71,192,212
+- **Severity:** Low
+- **Analysis:** All countdown colors hardcoded. #333 at 0.48 opacity on #FAFAFA = ~#C8C8C8 effective background. White digits on that = poor contrast. Shape stroke colors equally unresponsive to theme.
+- **Impact:** Countdown digits hard to read on light prompter backgrounds.
+
+### [COLOR-07] CSS default stylesheet hardcodes #FFFFFF body text — ignores user text color
+- **File:** documenthandler.cpp:185-189
+- **Severity:** Low
+- **Analysis:** `setDefaultStyleSheet("body{...color:\"#FFFFFF\";...}")` — white text on light prompter background before user applies formatting. Q_PROPERTY textColor overrides at QTextCursor level only for newly typed/selected text.
+- **Impact:** White text invisible on light backgrounds until user manually changes text color.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-36.*
