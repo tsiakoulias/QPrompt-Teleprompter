@@ -3104,4 +3104,241 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** `settings.value("editor/spellCheckLanguages").toStringList()` — no default argument. Relies on implicit empty-QStringList-from-invalid-QVariant behavior.
 - **Impact:** Code quality — inconsistent with all other settings.value() calls.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-32.*
+---
+
+## Wave 33 — Invokable, CMake, Dialogs, Imports, Mouse, Comments, Regex, Hotkeys
+
+### [INV-N01] QmlUtil::r() stores QML-owned QQuickItemGrabResult raw pointer — use-after-free
+- **File:** qmlutil.hpp:175-180, main.qml:1045
+- **Severity:** Medium
+- **Analysis:** `grabToImage()` returns JavaScriptOwnership result. `r()` stores raw pointer in C++ buffer. After JS callback, GC may delete object → `deleteLater()` on freed memory → crash. Or `deleteLater()` runs first → GC double-frees.
+- **Impact:** Intermittent crash during projection sessions.
+
+### [CMAKE-NEW-01] Remote.qml exists on disk but never listed in QML_FILES
+- **File:** src/CMakeLists.txt, src/prompter/Remote.qml
+- **Severity:** Low
+- **Analysis:** Remote.qml not in any CMake source list. Orphaned dead code.
+- **Impact:** Runtime "not installed" error if Remote component ever referenced.
+
+### [CMAKE-NEW-02] Duplicate install() of appdata.xml/desktop in root and src/CMakeLists.txt
+- **File:** CMakeLists.txt:408-409, src/CMakeLists.txt:524-525
+- **Severity:** Medium
+- **Analysis:** Both root and src CMakeLists install same files to same destinations. CMake 3.27+ CMP0177 hard-errors on duplicate install.
+- **Impact:** Build configure failure on CMake 3.27+.
+
+### [CMAKE-NEW-03] find_package(KF6Crash ... COMPONENTS) — COMPONENTS keyword with zero names
+- **File:** CMakeLists.txt:316
+- **Severity:** Medium
+- **Analysis:** `find_package(KF6Crash ${REQUIRED_KF6_VERSION} COMPONENTS)` — after expansion, COMPONENTS keyword has no arguments. Syntax error. No QUIET – hard-errors if not found despite TYPE OPTIONAL next line.
+- **Impact:** CMake warning/error on configure.
+
+### [CMAKE-NEW-04] execute_process uses CMAKE_PREFIX_PATH (list) as scalar — broken command
+- **File:** src/CMakeLists.txt:512
+- **Severity:** Medium
+- **Analysis:** `${CMAKE_PREFIX_PATH}/bin/lconvert` — semicolon-separated list produces broken multi-path string. No RESULT_VARIABLE (silent failure). Redundant with qt_add_translations on line 345. Runs on all platforms including WASM where host binaries don't exist.
+- **Impact:** Non-functional command, wasted configure time.
+
+### [DLG-N01] document.modified=false set BEFORE saveAs() — failed save loses unsaved flag
+- **File:** Prompter.qml:2291
+- **Severity:** High
+- **Analysis:** Modified flag cleared BEFORE save. If save fails (disk full, permissions), error fires but `modified` already false. User sees no "unsaved changes" — may close app and lose data.
+- **Impact:** Data loss risk on save failure.
+
+### [DLG-N02] onError handler clears document.modified on save failure
+- **File:** Prompter.qml:2348-2352
+- **Severity:** High
+- **Analysis:** `onError` handler sets `document.modified = false` — but save failed, doc IS still modified. Doubly broken when combined with DLG-N01.
+- **Impact:** Data loss risk — user not prompted to retry save.
+
+### [DLG-N03] errorDialog MessageDialog has no title
+- **File:** Prompter.qml:2510-2513
+- **Severity:** Low
+- **Analysis:** Error dialog displayed with blank title bar. closeDialog, restartDialog, factoryResetDialog all set descriptive titles.
+- **Impact:** Blank title bar in error dialogs.
+
+### [DLG-N04] load() silently fails with no notification when file missing or unreadable
+- **File:** documenthandler.cpp:944-947
+- **Severity:** Medium
+- **Analysis:** No else-branch — file nonexistent or unreadable → no error signal, no dialog. Nothing visibly happens to user.
+- **Impact:** Silent failure; user doesn't know why file didn't open.
+
+### [DLG-N05] loadFromNetworkFinihed() silently ignores empty response
+- **File:** documenthandler.cpp:888-902
+- **Severity:** Medium
+- **Analysis:** Empty reply (dropped connection, empty 200) silently does nothing. No error signal, no notification.
+- **Impact:** Silent failure on network errors returning empty body.
+
+### [DLG-N06] import() error strings passed as document content via updateContents()
+- **File:** documenthandler.cpp:1000,1087
+- **Severity:** High
+- **Analysis:** ALL import formats depending on external tools (ODT, DOCX, DOC, RTF, ABW, PAGESX, PAGES) — if LibreOffice unavailable/crashes/times out, the error description becomes document content. No notification distinguishes error-text-as-content from successful import.
+- **Impact:** User's document silently replaced with error message text.
+
+### [DLG-N07] 5 showPassiveNotification() calls ignore passiveNotifications preference
+- **File:** Find.qml:133,135,160, EditorToolbar.qml:627, PrompterPage.qml:890
+- **Severity:** Low
+- **Analysis:** Search wrap, replace-count, "No glyphs selected", velocity indicator notifications fire regardless of `root.passiveNotifications: false`.
+- **Impact:** Notification spam when user disabled notifications.
+
+### [DLG-N08] 3 save-completion passive notifications lack passiveNotifications guard
+- **File:** Prompter.qml:2294,2296,2474,2499
+- **Severity:** Low
+- **Analysis:** Save completion notifications fire even when user disabled notifications. Six other call sites in same file correctly guard with `if(root.passiveNotifications)`.
+- **Impact:** Inconsistent notification behavior.
+
+### [IMP-NEW-01] #include \<qnativeinterface.h\> doesn't exist — breaks Android build
+- **File:** documenthandler.cpp:83
+- **Severity:** High
+- **Analysis:** No such header in any Qt 5 or Qt 6. Correct access via `<QCoreApplication>` (already included). Fatal: `'qnativeinterface.h': No such file or directory`.
+- **Impact:** Android builds cannot compile.
+
+### [IMP-NEW-02] main.cpp:22 #include "qglobal.h" uses quotes + Qt5-era name
+- **File:** main.cpp:22
+- **Severity:** Low
+- **Analysis:** Double-quotes search local dir first; `qglobal.h` is pre-Qt6 header name. Qt 6 canonical: `<QtGlobal>`. Local file named `qglobal.h` would shadow system header.
+- **Impact:** Fragile include — harmless currently.
+
+### [IMP-NEW-03] main.cpp:38-39 redundant #include \<QtQml/qqml.h\> + #include \<QtQml\>
+- **File:** main.cpp:38-39
+- **Severity:** Low
+- **Analysis:** `<QtQml>` umbrella already pulls in `qqml.h`. Sub-include is redundant.
+- **Impact:** Code clarity only.
+
+### [IMP-NEW-04] AboutPage.qml imports Kirigami 2.9 vs 2.11 in all other files
+- **File:** AboutPage.qml:22
+- **Severity:** Low
+- **Analysis:** CMake requires KF6 6.9.0 = Kirigami 2.11+. All 12 other QML files import 2.11. AboutPage alone uses 2.9.
+- **Impact:** Future AboutPage edit using 2.10+ API silently fails.
+
+### [IMP-NEW-05] pointers.qrc RESOURCE_PREFIX conflicts with qt_add_qml_module
+- **File:** pointers.qrc:2, src/CMakeLists.txt:253
+- **Severity:** Low (orphaned QRC, never compiled)
+- **Analysis:** Orphaned QRC has `/qt/qml/com/cuperino/qprompt/pointers/` prefix overlapping QML module prefix. Would create duplicate resource registrations if activated.
+- **Impact:** None currently. Would break if QRC ever activated.
+
+### [MA-N01] overlayMouseArea permanently disabled — dead MouseArea
+- **File:** ReadRegionOverlay.qml:116-122
+- **Severity:** Low
+- **Analysis:** `enabled: false` hardcoded. Never set to true by any state/binding/code. Id never referenced. Intended overlay cursor behavior non-functional.
+- **Impact:** Dead code; whatever this was for doesn't work.
+
+### [MA-N02] textDragArea missing cursorShape — ArrowCursor over IBeamCursor on editor
+- **File:** Prompter.qml:1429-1431
+- **Severity:** Low
+- **Analysis:** Topmost MouseArea over editor TextArea defaults to ArrowCursor. MouseArea below it correctly sets IBeamCursor but is concealed.
+- **Impact:** Arrow cursor over all editor text instead of I-beam.
+
+### [CMT-N01] Justify ToolButton comment says it's commented out — but it's active
+- **File:** EditorToolbar.qml:761-773
+- **Severity:** Medium
+- **Analysis:** Comment claims justify is commented out. Code is fully active, controlled by `toolbar.showJustify`. Contradicts reality.
+
+### [CMT-N02] Truncated comment in markersmodel.cpp:107-108
+- **File:** markersmodel.cpp:107-108
+- **Severity:** Low
+- **Analysis:** Second sentence truncated: "Joins the text of the next fragment..." — never says what it joins or why.
+- **Impact:** Workaround purpose obscured.
+
+### [CMT-N03] Misleading OpenGL workaround comment — scope of impact understated
+- **File:** main.cpp:79
+- **Severity:** Medium
+- **Analysis:** Comment only mentions "opacity bug in DirectX RHIs." Doesn't mention side effect: forces deprecated OpenGL backend on ALL Windows systems. Typo "Workarround."
+- **Impact:** Developer may not realize full scope of this environment variable.
+
+### [CMT-N04] Comment masks invalid enum bug — 2 - value produces out-of-range LayoutDirection
+- **File:** main.cpp:165
+- **Severity:** Medium
+- **Analysis:** Comment "Substract from 2 because order inverted" explains intent, masks that `2 - 0 = 2` is invalid enum value (valid range 0-1). Bug: TYP-02. Comment itself actively misleading. Typo "Substract."
+- **Impact:** Masks real bug behind innocent explanation.
+
+### [CMT-N05] Missing security warning on QProcess RCE sink (sys://)
+- **File:** qmlutil.hpp:84-95
+- **Severity:** High
+- **Analysis:** `run()` executes arbitrary commands via QProcess::startDetached. No comment warns of security implications or unsanitized input. Bug: SEC-01.
+- **Impact:** Dangerous code sink with no annotation for future maintainers.
+
+### [CMT-N06] Missing warning: re-entrant toggle() inside Behavior.onRunningChanged
+- **File:** Prompter.qml:855-856
+- **Severity:** Medium
+- **Analysis:** `toggle()` called inside animation signal handler — re-entrant state machine manipulation. Bug: FINAL-22. No warning comment.
+- **Impact:** Future maintainers unaware of re-entrancy risk.
+
+### [CMT-N07] Missing warning: joinPreviousEditBlock() without beginEditBlock()
+- **File:** documenthandler.cpp:1596,1610
+- **Severity:** Medium
+- **Analysis:** Both setLineHeight/setParagraphHeight call joinPreviousEditBlock() with no matching beginEditBlock(). Debug assertion failure, release undo corruption. Bug: R3-DOC-02. Unannotated.
+- **Impact:** Dangerous QTextDocument manipulation without documentation.
+
+### [CMT-N08] Entire Telemetry class is dead commented-out shell across 4 files
+- **File:** telemetry.h, telemetry.cpp, promptsession.h, promptsession.cpp
+- **Severity:** Medium
+- **Analysis:** All methods commented out. Class compiles to nothing. Should be removed or clearly marked as planned.
+- **Impact:** Dead files create false expectation of telemetry functionality.
+
+### [CMT-N09] Commented-out PropertyActions in active loop animation — stale state risk
+- **File:** Prompter.qml:866-871
+- **Severity:** Medium
+- **Analysis:** Two PropertyActions resetting `__i` and `position` are commented out in the main scroll loop. Without them, loop depends on stale state from previous run.
+- **Impact:** Loop behavior silently changed; no explanation for why reset was removed.
+
+### [CMT-N10] Obsolete Qt 5 qmlRegisterType calls as commented-out cruft
+- **File:** main.cpp:68-69,215-223
+- **Severity:** Low
+- **Analysis:** Multiple `// qmlRegisterType<...>(...)` and `// #include` from Qt 5 era. Malformed comment nesting at line 219 (`/**/` inside `//`).
+- **Impact:** Misleads about current C++ registration mechanism (QML_ELEMENT).
+
+### [REGEX-N01] All 13 QRegularExpression objects lack isValid() checks
+- **File:** documenthandler.cpp, spellhighlighter.cpp (13 regex objects)
+- **Severity:** Medium
+- **Analysis:** Every regex constructed without validating. Pattern typo → silent no-match instead of error. searchRegEx (line 1543) receives user input — invalid user regex like `[` silently matches nothing.
+- **Impact:** Regex bugs silently break filtering/search/highlighting.
+
+### [REGEX-N02] regex_5 accidentally excludes 15+ HTML5 tags from background-color filtering
+- **File:** documenthandler.cpp:1300
+- **Severity:** Medium
+- **Analysis:** `[^sS][^pP][^aA][^nN]` excludes all tags starting with s/p/a/n. Also excludes `<strong>`, `<script>`, `<style>`, `<svg>`, `<section>`, `<source>` etc. These retain unwanted background colors after filtering.
+- **Impact:** Pasted HTML from rich editors may retain background colors on these elements.
+
+### [REGEX-N03] Unescaped dot in font-size regex — matches any char instead of decimal
+- **File:** documenthandler.cpp:894,954,1274
+- **Severity:** Low
+- **Analysis:** `(?:.[\\d]+)` uses `.` (any char) instead of `\\.` (literal dot). Works only by coincidence on well-formed HTML.
+- **Impact:** Theoretical. No practical impact with well-formed inputs.
+
+### [HK-N01] Missing event.isAutoRepeat guard on main Keys.onPressed
+- **File:** Prompter.qml:2672
+- **Severity:** High
+- **Analysis:** No auto-repeat suppression. Holding Pause rapidly flips play/pause. Reverse rapidly flips state. Toggle/Stop/Skip/Marker all repeat-fire.
+- **Impact:** Keys behave erratically when held.
+
+### [HK-N02] Typo Qt.Key_VolumeDowm — "Dowm" instead of "Down" — volume-down hardware key dead
+- **File:** Prompter.qml:2674
+- **Severity:** Medium
+- **Analysis:** 'm' instead of 'n'. Resolves to `undefined`. Volume-down key never works. Volume-up (Key_VolumeUp) correct.
+- **Impact:** Volume-down hardware button non-functional.
+
+### [HK-N03] platformName() != "wayland" fails on "wayland-egl" — global hotkeys dead
+- **File:** globalhotkeys.cpp:16 sites
+- **Severity:** High
+- **Analysis:** Qt reports "wayland-egl" on Wayland with EGL backend. `!= "wayland"` passes → QHotkey shortcuts zeroed AND KGlobalAccel defaults zeroed. Zero global hotkeys on Wayland-EGL.
+- **Impact:** All global hotkeys non-functional on Wayland-EGL compositors.
+
+### [HK-N04] No auto-repeat guard in key-binding configuration Keys.onPressed
+- **File:** KeyInputButton.qml:103
+- **Severity:** Medium
+- **Analysis:** Auto-repeat races with toggleButtonsOff() mitigation. Signal-chain latency can allow second event before checked clears.
+- **Impact:** Double-assignment during key re-binding.
+
+### [HK-N05] Strict === equality on modifiers breaks user keybinds with NumLock
+- **File:** Prompter.qml:2674-2794
+- **Severity:** Medium
+- **Analysis:** All 31 `event.modifiers === keys.xxxModifiers` use strict equality. NumLock/KeypadModifier/GroupSwitchModifier bits cause mismatch. Hardcoded Ctrl+F/V/D correctly use `&`.
+- **Impact:** User-configured keybinds silently fail with NumLock on.
+
+### [HK-N06] isValidInput checks local keybindings only — silent conflict with global hotkeys
+- **File:** KeyInputButton.qml:62-85
+- **Severity:** Low
+- **Analysis:** Conflict check only covers `prompter.keys.*`. User can assign same key+modifier to local AND global. Both fire — undefined behavior.
+- **Impact:** Double-execution on keypress if conflict created.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-33.*
