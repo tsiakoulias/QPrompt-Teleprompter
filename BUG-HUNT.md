@@ -3807,4 +3807,56 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** reset() called outside file.open() success block but inside exists() block. File exists but unreadable → reset() fires all format NOTIFY signals with property values from unchanged document. UI churns for nothing.
 - **Impact:** Spurious formatting toolbar re-bind, animation restarts, visual flash on permission errors.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-37.*
+---
+
+## Wave 38 — Shader, RAII, Z-Order, Leaks
+
+### [SHDR-N01] Math.cos/Math.sin used with degrees value — shadow offset diagonal instead of horizontal
+- **File:** Prompter.qml:749, ReadRegionOverlay.qml:151-155
+- **Severity:** Medium
+- **Analysis:** `readonly property real angle: 180` then `offset = Qt.point(Math.cos(angle), Math.sin(angle))`. QML Math.cos/sin operate in radians. 180 rad ≈ 28.65 rotations; cos≈-0.598, sin≈-0.801 — diagonal up-left offset instead of intended horizontal-left (−1, 0) for 180°. Math.PI never used.
+- **Impact:** Text/read-region drop shadows are offset diagonally. Should multiply by Math.PI/180 for degree conversion.
+
+### [RAII-N01] QDrag object never deleteLater'd after exec() — leaks on rejected drags
+- **File:** documenthandler.cpp:1486-1489
+- **Severity:** Medium
+- **Analysis:** `new QDrag(this)` followed by `exec()`. Qt docs: "QDrag object needs to be deleted after exec() returns." Code never calls `deleteLater()`. Rejected/cancelled drags accumulate as zombie children of DocumentHandler. Paired QMimeData also leaked.
+- **Impact:** Memory leak on every drag-and-drop operation that is cancelled or rejected.
+
+### [RAII-N02] IosSaveDialog::m_tempDir created unconditionally on all platforms — wasted I/O
+- **File:** iossavedialog.h:49
+- **Severity:** Low
+- **Analysis:** `QTemporaryDir m_tempDir` is a by-value member — default constructor creates real temp directory on disk at every app start, on ALL platforms. On non-iOS, saveDocument() is a no-op but temp directory still created and leaked until process exit.
+- **Impact:** Unnecessary filesystem I/O at every app launch on non-iOS platforms.
+
+### [RAII-N03] QProcess orphan — child process detached on waitForFinished() timeout
+- **File:** documenthandler.cpp:1083-1089
+- **Severity:** Medium
+- **Analysis:** Stack QProcess started (LibreOffice child). If waitForFinished times out (30s default), function returns early, QProcess dtor runs. Qt docs: "child process may continue running after QProcess destroyed." No kill()/terminate() before return. Orphan child process leaks.
+- **Impact:** Zombie LibreOffice process left running indefinitely after import timeout.
+
+### [Z-N01] CursorAutoHide has no explicit z — hover detection fragile against Kirigami internals
+- **File:** main.qml:954, +windows/main.qml:618, +android/main.qml:562
+- **Severity:** Medium
+- **Analysis:** MouseArea with anchors.fill:parent has z:0 (default). If any Kirigami internal component assigns z>0 to page content, hover events are intercepted — cursor auto-show is dead. Only declaration order keeps it working.
+- **Impact:** On Kirigami versions where internal content uses explicit z, cursor auto-hide is silently broken.
+
+### [Z-N02] Two OverlaySheets have z:1 while nine others have none — inconsistent stacking
+- **File:** LanguageSettingsOverlay.qml:36, LayoutDirectionSettingsOverlay.qml:36
+- **Severity:** Low
+- **Analysis:** Only 2 of 11 OverlaySheets set explicit z. Remaining 9 have implicit z. If two sheets ever coincide (ESC chain race), stacking is unpredictable.
+- **Impact:** Fragile overlay layering contract.
+
+### [Z-N03] ComboBox Popup z:103 inside OverlaySheets with z:1 — disconnected layering
+- **File:** LanguageSettingsOverlay.qml:67, LayoutDirectionSettingsOverlay.qml:70
+- **Severity:** Low
+- **Analysis:** Popup z:103 vs parent OverlaySheet z:1. Gap of 102 suggests developer intended popup far above, but OverlaySheet renders in dedicated overlay layer — raw z on children may not propagate correctly.
+- **Impact:** ComboBox dropdown may render behind OverlaySheet or at incorrect layer.
+
+### [Z-N04] PrompterBackground (z:0) renders above viewport.mouse (z:0) — latent input intercept
+- **File:** PrompterView.qml:249,320
+- **Severity:** Low
+- **Analysis:** Both same-z. prompterBackground declared after → stacks on top of wheel-scroll MouseArea. Currently benign (no input children at that level), but adding MouseArea to background would unexpectedly intercept wheel events.
+- **Impact:** Latent hazard for future changes. No current bug.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-38.*
