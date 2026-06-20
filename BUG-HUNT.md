@@ -3859,4 +3859,86 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** Both same-z. prompterBackground declared after → stacks on top of wheel-scroll MouseArea. Currently benign (no input children at that level), but adding MouseArea to background would unexpectedly intercept wheel events.
 - **Impact:** Latent hazard for future changes. No current bug.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-38.*
+---
+
+## Wave 39 — DateTime, Transforms, API Contracts, Architecture
+
+### [TIME-N01] copyrightYear computed then discarded — stale "2020-2026" in About after 2026
+- **File:** main.cpp:176-179
+- **Severity:** Low
+- **Analysis:** `QDate::currentDate().year()` computed into `copyrightYear` but never interpolated into `copyrightStatement2` which hardcodes "2026". The `(currentYear <= 2020)` branch is dead code. Missing `#include <QDate>` (works only via transitive includes).
+- **Impact:** About dialog shows stale copyright range starting 2027.
+
+### [XFRM-N01] PrompterView.qml Rotation permanently overridden by PrompterPage.qml
+- **File:** PrompterView.qml:53-58 vs PrompterPage.qml:750-765
+- **Severity:** Low
+- **Analysis:** PrompterView declares `transform: Rotation { angle: 77; axis { x: root.theforce?1:0 } }` for 3D perspective tilt debug feature. PrompterPage unconditionally sets `transform: Rotation {...}` on the PrompterView instance — overriding the internal Rotation. "theforce" 3D perspective tilt is dead code, never renders.
+- **Impact:** Debug feature never shows intended visual effect. Dead code in release.
+
+### [API-N01] setAlignment() missing null-cursor guard — crash risk with no document
+- **File:** documenthandler.cpp:557-558
+- **Severity:** Medium
+- **Analysis:** Unlike all other format setters, setAlignment() creates a QTextCursor and calls mergeBlockFormat() without checking cursor.isNull(). Dereferences null QTextDocument if no document loaded.
+- **Impact:** Crash if alignment changed before document loaded.
+
+### [API-N02] selectionIsLowerCase NOTIFY signal is wrong — fontCapitalizationChanged, never emitted for case changes
+- **File:** documenthandler.h:119
+- **Severity:** Medium
+- **Analysis:** `Q_PROPERTY(bool selectionIsLowerCase READ selectionIsLowerCase NOTIFY fontCapitalizationChanged)` — fontCapitalizationChanged only emits when capitalization format changes, never when user types that changes case. If selection was previously uppercase and user types lowercase, property silently becomes true with no notification.
+- **Impact:** Stale selectionIsLowerCase binding — QML never knows selection turned lowercase.
+
+### [API-N03] CursorAutoHide.qml unconditionally dereferences pageStack.currentItem.prompter
+- **File:** CursorAutoHide.qml:31
+- **Severity:** Medium
+- **Analysis:** `parseInt(root.pageStack.currentItem.prompter.state)` — assumes currentItem always has prompter child. If user navigates to Settings/About where PrompterPage is not current, throws TypeError.
+- **Impact:** Crash when navigating away from main page while cursor auto-hide is active.
+
+### [API-N04] setMarker(bool) misleadingly named — sets regular marker, not any marker
+- **File:** documenthandler.h:123,212
+- **Severity:** Low
+- **Analysis:** Q_PROPERTY `regularMarker` has WRITE `setMarker`. But `setMarker()` exclusively creates regular markers with `href="#"` — name implies it could set any marker type.
+- **Impact:** API confusion — caller expecting to set named marker via `setMarker(true)` gets wrong behavior.
+
+### [API-N05] fileName()/fileType() return fabricated defaults — can't distinguish "no file" from "untitled.html"
+- **File:** documenthandler.cpp:838-850
+- **Severity:** Low
+- **Analysis:** When m_fileUrl empty, fileName() returns "untitled.html" and fileType() returns "html". No way to distinguish from an actual file named "untitled.html". fileUrlChanged fires when fileName() changes even though fileUrl may not.
+- **Impact:** QML can't distinguish "no file loaded" from a real file. Misleading signals.
+
+### [API-N06] SystemFontChooserDialog::show() calls setText() on same label twice — dead code
+- **File:** systemfontchooserdialog.cpp:55-56
+- **Severity:** Low
+- **Analysis:** `ui->textPreviewLabel->setText(text);` called twice with same argument. Copy-paste artifact — dead duplicate.
+- **Impact:** None. Code quality only.
+
+### [API-N07] SpellChecker::encode() fallback says "Latin-1" but calls toLocal8Bit()
+- **File:** spellchecker.cpp:400-406
+- **Severity:** Low
+- **Analysis:** Comment says "Fallback to Latin-1" but code calls `word.toLocal8Bit()`, using system locale encoding (e.g., Windows-1252, ISO-8859-2 depending on locale). Comment and code conflict.
+- **Impact:** Wrong encoding for dictionaries on systems with locale ≠ Latin-1.
+
+### [ARC-01] Velocity physics engine entirely in QML (~20 readonly property bindings)
+- **File:** Prompter.qml:113-129
+- **Analysis:** Core teleprompter behavior — `__speed`, `__velocity`, `__relativeSpeed`, `__timeToEnd`, `__destination`, `__jitterMargin`, `__speedLimit` — all in QML bindings with Math.pow, division, branching. Cannot be unit-tested; fragile to QML engine behavioral changes.
+
+### [ARC-02] Arc-03 Search/replace state machine fully in QML (50+ lines)
+- **File:** Find.qml:112-161
+- **Analysis:** Mode dispatch, replace-next/replace-previous/replace-all orchestration, wrap detection, cursor math all in QML. Should be in C++ for testability.
+
+### [ARC-03] OBS WebSocket v5 protocol in QML — opcode dispatch, auth, subscription
+- **File:** Prompter.qml:366-388
+- **Analysis:** Complete WebSocket handshake JSON parsed and opcode-dispatched in QML. C++ provides only raw authStr(). Protocol changes require QML edits.
+
+### [ARC-04] DocumentHandler is 2295-line god class spanning file I/O, network, HTML filtering, markers, spellcheck, drag-drop, images, search, undo, clipboard, sleep prevention, font dialog
+- **File:** documenthandler.cpp (2295 lines)
+- **Analysis:** At least 6 separable concerns in a single class. Any change risks all subsystems. Test isolation impossible.
+
+### [ARC-05] Prompter.qml is 3139-line god component spanning velocity, state machine, keyboard, WebSocket, markers, spellcheck UI, file dialogs, WYSIWYG toggle, shadows
+- **File:** Prompter.qml (3139 lines)
+- **Analysis:** Single QML file with 7+ responsibilities. State machine, physics engine, and keyboard handler alone justify separate components.
+
+### [ARC-06] qmlutil.hpp is utility grab-bag with 10+ unrelated functions
+- **File:** qmlutil.hpp (184 lines)
+- **Analysis:** Key validation, QProcess exec (sys:// RCE), app restart, cursor management, font listing, factory reset, OBS crypto, file existence, projection buffer. No coherent responsibility.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-39.*
