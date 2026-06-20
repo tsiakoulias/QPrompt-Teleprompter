@@ -2045,4 +2045,120 @@
 
 ---
 
-*Report generated over multiple waves of parallel subagent auditing, followed by synthesis analysis.*
+---
+
+## Round 6+ — Wave 8-10: Surgical Deep Audits
+
+### [CUR-N01] replaceAll() infinite loop when replacement contains search pattern
+- **File:** src/documenthandler.cpp:1503-1516
+- **Severity:** Critical
+- **Category:** Logic
+- **Analysis:** selectionStart never updated after insertText; stale value causes re-find of same text. If replacement contains searchedText (e.g., replace "a" with "aa"), loop never terminates.
+- **Impact:** 100% CPU hang. UI freeze requiring force-quit.
+
+### [CUR-N02] search() regex path ignores loop parameter — unconditional wrap
+- **File:** src/documenthandler.cpp:1552-1557
+- **Severity:** High
+- **Category:** Logic
+- **Analysis:** Regex branch wraps unconditionally; non-regex branch correctly checks loop parameter. replaceAll passes loop=false but regex ignores it.
+- **Impact:** Incorrect search results; compounds with CUR-N01 for guaranteed infinite loop on regex replaceAll.
+
+### [CUR-N03] alignment() reads blockFormat on multi-block selection — returns wrong alignment
+- **File:** src/documenthandler.cpp:547-550
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** textCursor() on multi-block selection: mergeBlockFormat/blockFormat returns neutral (Qt::AlignLeft) instead of actual alignment. Formatting toolbar shows wrong alignment state.
+- **Impact:** Alignment toolbar button checked state incorrect when multiple blocks selected.
+
+### [DCL-N01] filterHtml default parameter in .cpp but not in header — QML can't call with 1 arg
+- **File:** src/documenthandler.h:235 vs .cpp:1246
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Analysis:** Header declares `filterHtml(QString, bool)` with no default. .cpp implements `= true` default. Moc generates requiring both args. Default dead code.
+- **Impact:** QML cannot call `filterHtml(html)` with one argument as intended.
+
+### [DCL-N02] setKeyMarker default parameter mismatch — same pattern
+- **File:** src/documenthandler.h:213 vs .cpp:707
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Analysis:** Empty-string default in .cpp invisible to QML callers. Intended single-arg shortcut unreachable.
+- **Impact:** setKeyMarker("") no-op from C++ but QML can't invoke without explicit empty string.
+
+### [IMP-N01] import Qt.labs.platform 1.1 — Menu/MenuBar/MenuItem dropped in Qt 6
+- **File:** src/kirigami_ui/main.qml:29,617-922
+- **Severity:** Critical
+- **Category:** QML/UI
+- **Analysis:** Qt 6's Qt.labs.platform no longer exports MenuBar, Menu, MenuItem. Base main.qml instantiates these for native menu bar — all undefined types.
+- **Impact:** Native File/Format/View/Help menu bar silently dead on Linux/macOS (the targets for base main.qml).
+
+### [IMP-N02] import QtWebSockets 1.10 — wrong version for Qt 6.5
+- **File:** src/prompter/Prompter.qml:80
+- **Severity:** Critical
+- **Category:** QML/UI
+- **Analysis:** In Qt 6.x, QML WebSocket module uses Qt version number (6.5) not 1.x. Version 1.10 doesn't exist.
+- **Impact:** OBS WebSocket remote control integration completely non-functional.
+
+### [MATH-N01] Division by zero in __timeToArival/__timeToEnd when speed=0
+- **File:** src/prompter/Prompter.qml:121-123
+- **Severity:** High
+- **Category:** Logic
+- **Analysis:** __relativeSpeed=0 when __speed=0 or fontSize=0 → division by zero → Infinity assigned to NumberAnimation duration. No isFinite guard.
+- **Impact:** Teleprompter scrolling freezes permanently when speed slider hits 0.
+
+### [MATH-N02] Bitwise << on floating-point in TimerClock — precision loss
+- **File:** src/prompter/TimerClock.qml:127
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Analysis:** `... * prompter.__vw << 3` coerces float to 32-bit int before shift. e.g., 9.6 → 9 → 72 instead of 76.8. Should use `* 8`.
+- **Impact:** Stopwatch font size loses fractional precision at certain viewport widths.
+
+### [LYR-N01] InputsOverlay calls cursorAutoHide.restart() on open instead of reset()
+- **File:** src/kirigami_ui/InputsOverlay.qml:41
+- **Severity:** High
+- **Category:** Logic
+- **Analysis:** All other overlays call reset() on open (stop timer, show cursor). InputsOverlay calls restart() (re-enables auto-hide). Cursor hides after 1 second while user configuring key bindings.
+- **Impact:** Cursor vanishes during key binding configuration. User locked out of overlay.
+
+### [LYR-N02] Three OverlaySheets missing from ESC dismiss chain
+- **File:** src/kirigami_ui/main.qml:489-504
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** obsConfiguration, dictionariesSheet, customWordsSheet added to PrompterPage after ESC handler. Not in the if-else chain. ESC falls through without closing them.
+- **Impact:** ESC doesn't close OBS/dictionary/custom-words sheets. User must click close button.
+
+### [LYR-N03] ContextDrawer exposes prompter actions while viewing layer pages
+- **File:** src/kirigami_ui/main.qml:929
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** Guard `depth <= 1` always true since clear() before push(). Should be `depth < 1`. Prompter actions (start prompting, screen projections) shown on About/Paths/Remote pages.
+- **Impact:** ContextDrawer shows wrong actions on secondary pages; clicking affects hidden prompter.
+
+### [LYR-N04] ESC handler uses activeFocus in base but focus in platform variants — inconsistent
+- **File:** src/kirigami_ui/main.qml:512 vs +windows:483 vs +android:422
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** Base checks `prompter.activeFocus`, platform variants check `prompter.focus`. If prompter is FocusScope delegating to child, activeFocus=false while focus=true. Platform divergence.
+- **Impact:** Linux/macOS ESC may fail to cancel prompting; Windows/Android work correctly.
+
+### [TRL-N01] qsTr() uses %0 placeholder — should be %1 (font name never displayed)
+- **File:** src/kirigami_ui/EditorToolbar.qml:588
+- **Severity:** High
+- **Category:** I18N
+- **Analysis:** `qsTr("Active font: %0").arg(fontFamily)` — Qt arg() uses 1-based placeholders. %0 treated as literal text.
+- **Impact:** Font selector shows literal "Active font: %0" instead of actual font name in all languages.
+
+### [TRL-N02] Application --help description not translatable
+- **File:** src/main.cpp:154-155
+- **Severity:** Medium
+- **Category:** I18N
+- **Analysis:** setApplicationDescription uses QLatin1String instead of tr(). User-visible in --help output.
+- **Impact:** App description never translated. Non-English users see English in --help.
+
+### [TRL-N03] About-dialog credit roles not translatable
+- **File:** src/main.cpp:194,202,205-206
+- **Severity:** Medium
+- **Category:** I18N
+- **Analysis:** "Author", "Software Tester", credit descriptions use QLatin1String instead of tr().
+- **Impact:** Credit roles always English in About dialog.
+
+*Report generated over 8+ waves of parallel subagent auditing, followed by synthesis analysis.*
