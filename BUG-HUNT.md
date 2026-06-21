@@ -5218,4 +5218,38 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Android block forces isHtml=true unconditionally, skipping extension-based format detection. toHtml() always used. .txt files get HTML markup embedded.
 - **Impact:** Silent data corruption on Android — plain-text files round-tripped through app contain HTML tags.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-64.*
+---
+
+## Wave 65 — Timers, Font Metrics
+
+### [TMR-N05] markerCompare() only fires on forward scroll — backward scroll + re-forward misses marker
+- **File:** Prompter.qml:391-420
+- **Severity:** High
+- **Analysis:** `if (prompter.q < p)` only triggers when cursor moves forward. After scrolling past marker, then backward, q stays stale. Re-forward stops at same position but q==p → guard fails. Markers fire-once-per-forward-pass.
+- **Impact:** OBS scene switches and sys:// commands silently skipped after overshoot-and-return.
+
+### [TMR-N06] Auto-reload Timer persists after network dialog close — background refetches
+- **File:** PrompterPage.qml:1246-1253,1415-1420
+- **Severity:** Medium
+- **Analysis:** onClosed doesn't set autoReloadRunning=false. Timer fires openFromRemote() in background with no visible UI.
+- **Impact:** Unprompted network reloads continue indefinitely after dialog dismissed.
+
+### [FONT-METRIC-01] pixelSize used as line-height proxy — core scroll timing off by ~57%
+- **File:** Prompter.qml:119-122,125,128
+- **Severity:** High
+- **Analysis:** font.pixelSize is em-size, not rendered line height. For DejaVu Sans at 14px, actual height is ~22px (1.57×). Every scroll calculation using fontSize as line-height proxy is wrong: __relativeSpeed ~57% slower, __destination stops ~1 line short, __atEnd detection fires wrong.
+- **Impact:** Core teleprompter scroll speed, ETA display, and end-of-document detection all miscalibrated. Primary feature accuracy compromised.
+
+### [FONT-METRIC-02] FontLoader status never checked — font substitution silently fails
+- **File:** Prompter.qml:995-998
+- **Severity:** Medium
+- **Analysis:** If bundled DejaVuSans.ttf missing/corrupt, .name is empty → font.family feeds empty string → Qt falls back to system default. No status check, no fallback, no error.
+- **Impact:** Wrong font silently used; layout scroll timing and visual appearance shift unpredictably.
+
+### [FONT-METRIC-03] fontFamily() returns resolved-family not requested-family — substitution invisible
+- **File:** documenthandler.cpp:493-501
+- **Severity:** Low
+- **Analysis:** QFont::families() returns post-substitution resolved list. If user selects unavailable font, getter returns substitution name, not original selection.
+- **Impact:** Silent font substitution; user sees different font name than selected.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-65.*
