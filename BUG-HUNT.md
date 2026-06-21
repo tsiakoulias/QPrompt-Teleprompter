@@ -4451,4 +4451,74 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** `source: "../fonts/LibertinusSans-Regular.otf"` but files nested one level deeper than base main.qml. Path resolves to non-existent qrc location. Base main.qml:560 at correct depth.
 - **Impact:** Timer/stopwatch number font fails to load on Android and Windows. Falls back to system default.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-45.*
+---
+
+## Wave 46 — Signals, QObject, Tabs, Regex, Defaults, Visual
+
+### [SIG-N03] MessageDialog.onButtonClicked declares unused second parameter role
+- **Files:** main.qml:1088, +windows:757,777,797, +android:681,701
+- **Severity:** Low
+- **Analysis:** buttonClicked signal has signature `buttonClicked(StandardButton button)` — 1 param. Handler declares `(button, role)` with 2 params. role always undefined. Copy-paste error.
+- **Impact:** None functionally (role never accessed). Misleading for maintainers.
+
+### [QOBJ-N01] QmlUtil missing constructor with parent parameter
+- **File:** qmlutil.hpp:47
+- **Severity:** Low
+- **Analysis:** QML_ELEMENT type with all methods inline. No parent constructor. `new QmlUtil` from C++ leaks without parent.
+- **Impact:** Potential leak if instantiated from C++ (currently only QML instantiated via singleton).
+
+### [TAB-N01] PointerSettings TabButton onClicked skips currentIndex assignment
+- **File:** PointerSettings.qml:268-289
+- **Severity:** Medium
+- **Analysis:** All 4 TabButtons call `positionViewAtIndex(...)` but never set `listView.currentIndex`. currentIndex may not update until animation completes. TabBar highlight and PropertyChanges stale during animation. InputsOverlay.qml correctly uses direct `currentIndex = N`.
+- **Impact:** TabBar highlight desync during tab switch animation. Wrong pointer settings displayed momentarily.
+
+### [REGEX-CRIT-01] regex_4 destroys <body> tag — removes opening tag instead of color attributes
+- **File:** documenthandler.cpp:1287
+- **Severity:** High
+- **Analysis:** Pattern matches from `<body` through last color attribute quote but doesn't consume `>`. replace() deletes everything from `<body` to last `"`, leaving orphaned `>content</body>`. Intended approach (commented-out loop) surgically removes one color at a time.
+- **Impact:** HTML body tag destroyed; content after replacement is corrupted HTML.
+
+### [REGEX-CRIT-02] searchRegEx.setPattern() from user input — isValid() never called
+- **File:** documenthandler.cpp:1543-1544
+- **Severity:** High
+- **Analysis:** User input from QML search box passed directly to setPattern(). No isValid() check. Invalid pattern (unbalanced parentheses, malformed quantifiers) → undefined behavior in QTextDocument::find().
+- **Impact:** Search/replace crashes or silently misfires on invalid user regex.
+
+### [REGEX-N04] ReDoS — user-supplied regex has no length limit, timeout, or backtracking guard
+- **File:** documenthandler.cpp:1543-1557
+- **Severity:** Medium
+- **Analysis:** subString from QML user input. No QRegularExpression::optimize(), MatchTimeout, or pattern-length cap. Evil regex like `(a+)+b` causes exponential backtracking in replaceAll() loop. Combined with LOG-05/LOG-06 infinite loop risk.
+- **Impact:** Application hang with 100% CPU during Search/Replace All with malicious regex.
+
+### [REGEX-N05] regex_0 and regex_3 use . (any-char) instead of \. (literal dot) in decimal matching
+- **File:** documenthandler.cpp:893-894,1274-1275
+- **Severity:** Low
+- **Analysis:** `(?:.[\d]+)*` intended as `(?:\.[\d]+)*` for decimal points. Unescaped `.` matches any character, potentially over-matching on malformed CSS.
+- **Impact:** Minor. Works by coincidence on well-formed inputs.
+
+### [REGEX-N06] imgSrcRegex captures wrong src when data-src follows real src
+- **File:** documenthandler.cpp:1432-1434
+- **Severity:** Medium
+- **Analysis:** Pattern `[^>]+` is greedy. For `<img src="real.jpg" data-src="lazy.jpg">`, backtracks to last `src=` occurrence (inside data-src), capturing lazy.jpg. Should use `[^>]+?` or word boundary before `src`.
+- **Impact:** Wrong (lazy/placeholder) image URL loaded for images with lazy-load attributes.
+
+### [VCI-N01] At-end action buttons use inconsistent font scaling (1/1.5 vs 1/1.75) in same group
+- **File:** Prompter.qml:1158,1185,1212 vs 1256,1269,1309
+- **Severity:** Low
+- **Analysis:** Stop/Exit/Loop buttons scale by 1/1.5; adjacent Flipable buttons and SpinBox scale by 1/1.75. Buttons visibly 16.7% larger than neighbors.
+- **Impact:** Visible size mismatch between button rows in same footer control.
+
+### [VCI-N02] upperControls and bottomControls fade to different opacity levels during Prompting
+- **File:** PrompterView.qml:70 vs 120
+- **Severity:** Low
+- **Analysis:** Top controls fade to 0.1, bottom controls to 0.2 during Prompting. Identical purpose, different opacity target.
+- **Impact:** Asymmetric fade — top controls nearly invisible while bottom controls remain twice as visible.
+
+### [VCI-N03] Hardcoded divider/separator/border colors (#292929, #606060, #808080) break theme adaptation
+- **Files:** PointerSettings.qml, InputsOverlay.qml, Find.qml, PrompterPage.qml, ProgressIndicator.qml
+- **Severity:** Low
+- **Analysis:** Fixed gray values never adapt to theme. Dark themes render dividers near-invisible; light themes produce harsh dark borders.
+- **Impact:** Divider lines invisible on dark themes, jarring on light themes.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-46.*
