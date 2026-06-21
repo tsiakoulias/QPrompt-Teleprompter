@@ -5043,4 +5043,50 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Severity:** Low
 - **Impact:** Pointer icons collide with text at large prompter font sizes.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-58.*
+---
+
+## Wave 59 — StackView, JSON, QWindow, JS, Theme
+
+### [STK-N01] Android projectionManager undefined — crash on "Performance tweaks" submenu
+- **File:** +android/main.qml:304-305
+- **Severity:** Critical
+- **Analysis:** "Disable screen projections" menu references projectionManager.isEnabled and .toggle(). projectionManager stub entirely commented out on Android. No fallback.
+- **Impact:** Opening "Performance tweaks" submenu on Android crashes app (ReferenceError).
+
+### [JSON-N01] OBS WebSocket Hello auth fields accessed without null guard — crash on auth-disabled
+- **File:** Prompter.qml:373-374
+- **Severity:** High
+- **Analysis:** `i.d.authentication.challenge` and `.salt` — 3-level property chain with zero null guards. If OBS has auth disabled, `i.d.authentication` is undefined → TypeError crash.
+- **Impact:** Crash connecting to OBS WebSocket with authentication disabled.
+
+### [QW-N01] Projection Window onClosing references cleared model — spurious runtime errors
+- **File:** ProjectionsManager.qml:130-133,196-201
+- **Severity:** Medium
+- **Analysis:** closeAll() calls projectionModel.clear() which triggers async Instantiator to destroy Windows. Each onClosing calls projectionModel.remove(model.index) on already-cleared model.
+- **Impact:** Runtime errors on every close-all.
+
+### [QW-N02] Stale QScreen reference in projection model — dangling after monitor hot-unplug
+- **File:** ProjectionsManager.qml:119,177
+- **Severity:** Medium
+- **Analysis:** QScreen objects captured into ListModel at project() call time. Monitor unplug → dangling pointer; windows stay on phantom screen.
+- **Impact:** Projection windows at wrong coordinates after display reconfiguration.
+
+### [JS-N01] TIMERCLOCK getTimeString() — redundant .toString() on already-string — 54 allocs/sec
+- **File:** TimerClock.qml:46-50
+- **Severity:** Low
+- **Analysis:** toFixed(2) already returns String. .toString() creates redundant copy × 3 components × 2 calls per tick = ~54 useless JS string allocs/sec during prompting.
+- **Impact:** GC pressure proportional to prompting duration.
+
+### [JS-N02] markerCompare() per-frame JSON.stringify() over OBS marker — 60 allocs/sec
+- **File:** Prompter.qml:401-413
+- **Severity:** Medium
+- **Analysis:** Creates new object literal + JSON.stringify() EVERY FRAME (60fps) over OBS marker in read region. Same scene name stringified repeatedly. No guard to fire only on marker entry.
+- **Impact:** Severe GC pressure — 180+ heap allocs/sec during OBS-connected prompting.
+
+### [THM-SYS] Complete theme deadlock — 50+ Material.theme: Dark hardcoded, theme toggle commented out
+- **Files:** 14 QML files
+- **Severity:** High
+- **Analysis:** ~50 `Material.theme: Material.Dark` hardcoded across all controls. Theme toggle button commented out in all main.qml variants ("This is correct, but it isn't working, likely because of Kirigami"). No theme change handler. Single `Material.theme: Material.Light` inconsistency on one Button (Prompter.qml:1272). Countdown, TimerClock, scrollbar all hardcoded dark. Separators, borders, selection colors all hardcoded. PrompterPage `Kirigami.Theme.inherit: false` blocks theme propagation.
+- **Impact:** App permanently in dark mode regardless of system preference. Light-theme users see broken visuals.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-59.*
