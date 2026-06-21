@@ -5089,4 +5089,32 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** ~50 `Material.theme: Material.Dark` hardcoded across all controls. Theme toggle button commented out in all main.qml variants ("This is correct, but it isn't working, likely because of Kirigami"). No theme change handler. Single `Material.theme: Material.Light` inconsistency on one Button (Prompter.qml:1272). Countdown, TimerClock, scrollbar all hardcoded dark. Separators, borders, selection colors all hardcoded. PrompterPage `Kirigami.Theme.inherit: false` blocks theme propagation.
 - **Impact:** App permanently in dark mode regardless of system preference. Light-theme users see broken visuals.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-59.*
+---
+
+## Wave 60 — Scrolling, Color, Context
+
+### [HSCROLL-N01] InputsOverlay Flickables use contentWidth: width instead of implicitWidth — horizontal overflow clipped
+- **File:** InputsOverlay.qml:95,552
+- **Severity:** Medium
+- **Analysis:** Both Keyboard Inputs and Global Hotkeys Flickables set `contentWidth: buttonGrid.width` which equals Flickable's own width. contentHeight correctly uses implicitHeight. Long key labels silently clipped horizontally with no scroll.
+- **Impact:** Content clipped unreachable on narrow windows or with long translation strings.
+
+### [HSCROLL-N02] Inner Flickables missing flickableDirection: VerticalFlick — conflict with parent horizontal ListView
+- **File:** InputsOverlay.qml:92,549
+- **Severity:** Medium
+- **Analysis:** Both Flickables are delegates in horizontal ListView for tab switching. Neither sets flickableDirection, defaulting to AutoFlickDirection which may intercept horizontal swipes, blocking tab switching on touch.
+- **Impact:** Tab switching stutters/fails on touch when swiping from within Flickable area.
+
+### [COLOR-N08] textBackground() returns invalid QColor for body/paragraph text
+- **File:** documenthandler.cpp:528-534
+- **Severity:** Medium
+- **Analysis:** Default stylesheet has no background-color on body/p. QBrush::color() returns invalid QColor (isValid()=false) for NoBrush. QML color swatch indicator receives invalid color → renders as transparent black.
+- **Impact:** Text-background color swatch invisible for body/paragraph text.
+
+### [COLOR-N09] acceptedColor binds transparent QColor on startup — initial text invisible
+- **File:** PrompterPage.qml:1010,1025, PrompterView.qml:240-241
+- **Severity:** Medium
+- **Analysis:** acceptedColor never assigned, defaults to Qt.rgba(0,0,0,0). Bound through prompter.textColor → setTextColor(transparent). Word under cursor gets invisible formatting on startup.
+- **Impact:** Initial text formatting starts transparent until first color dialog use.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-60.*
