@@ -4619,4 +4619,44 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** In editing mode, onMovementEnded leaves __iBackup non-zero. Second drag: guard prevents backup, restore uses stale first-drag value instead of current velocity.
 - **Impact:** Wrong scroll velocity restored after consecutive drags in editing mode.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-48.*
+---
+
+## Wave 49 — ListView, Meta, Logging
+
+### [LVW-N01] InputsOverlay.qml ListView currentIndex: PointerSettings.States.Arrow — copy-paste error
+- **File:** InputsOverlay.qml:77
+- **Severity:** Low
+- **Analysis:** `currentIndex: PointerSettings.States.Arrow` — copy-paste from PointerSettings.qml. InputsOverlay has 2 tabs, not 4 pointer types. Works accidentally (resolves to 0). Binding breaks on first TabBar click.
+- **Impact:** TabBar highlight desyncs after first user interaction.
+
+### [META-N01] QMetaObject::invokeMethod return value unchecked — silent failure on WASM
+- **File:** wasmintegration.cpp:71
+- **Severity:** Low
+- **Analysis:** `QMetaObject::invokeMethod(background.data(), "setBackgroundImage", ...)` returns bool — discarded. If QML function renamed/removed, background image upload silently breaks on WASM with zero diagnostic.
+- **Impact:** Silent WASM background image failure on QML refactoring.
+
+### [LOG-N04] qWarning("reloading") fires unconditionally — misleading when URL mismatches
+- **File:** documenthandler.cpp:862
+- **Severity:** Low
+- **Analysis:** `qWarning("reloading")` at top of reload() — fires even when `load(url)` is not called due to URL mismatch. Incorrectly claims reload occurred.
+- **Impact:** Misleading diagnostic during file-watcher-triggered URL mismatch.
+
+### [LOG-N05] Q_UNREACHABLE() in m_setGlobalShortcut() — UB in release on new enum value
+- **File:** globalhotkeys.cpp:1109
+- **Severity:** Medium
+- **Analysis:** 33-case switch with no default + Q_UNREACHABLE(). Same pattern as EDGE-10 (globalShortcutKey). New Action enum value → UB in release.
+- **Impact:** Crash/undefined behavior if GlobalHotkeys::Action enum extended.
+
+### [LOG-N06] No error log when saveAs() write/flush fail — silent data loss
+- **File:** documenthandler.cpp:1164-1165
+- **Severity:** Medium
+- **Analysis:** file.write() return (-1) and file.flush() return (false) unchecked and unlogged. Combined with R3-DOC-04: silent data loss with zero diagnostics.
+- **Impact:** File I/O failures produce no log entry — impossible to diagnose in the field.
+
+### [LOG-N07] No error log in loadFromNetworkFinihed() — silent bad-data load
+- **File:** documenthandler.cpp:888-901
+- **Severity:** Medium
+- **Analysis:** m_reply->readAll() without checking m_reply->error(). HTTP errors silently become document content with no warning log. Combined with NET-01.
+- **Impact:** Silent network-error content ingestion with zero diagnostics.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-49.*
