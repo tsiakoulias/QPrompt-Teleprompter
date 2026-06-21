@@ -6040,4 +6040,97 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - amd64_arg produces x64 binaries even on ARM64. Mismatch with Qt ARM64 libraries.
 - **Impact:** Windows ARM64 builds produce wrong-architecture executables.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-3.*
+---
+
+## Focus Wave 4 — Cursor/Selection, Fonts, Network, Overlays, QTextDoc, Kirigami, Async, Niche OS
+
+### Cursor/Selection
+
+**[CUR-N01] selectedTextColor equals selectionColor — selected text invisible**
+- Prompter.qml:974
+- **Severity:** High
+- `selectedTextColor: find.isOpen ? "#163a58" : selectionColor` — when find closed, foreground bound to same value as background. Text rendered invisible regardless of alpha.
+- **Impact:** Text selection in editor completely unreadable when find not open.
+
+**[CUR-N02] editMarker() uses length as end position instead of position+length — selects wrong range**
+- Prompter.qml:617
+- **Severity:** Medium
+- `editor.select(cursorPosition, fragmentLength)` — TextEdit.select takes end position, not length. For marker at position=200 with length=10, selects 10→200 instead of 200→210.
+- **Impact:** Opening marker editor selects large unrelated text range.
+
+### Font System
+
+**[FONT-N01] OpenDyslexic ships Bold-only — all text permanently bold, no regular weight**
+- EditorToolbar.qml:562-564
+- **Severity:** Medium
+- Only OpenDyslexic-Bold.otf bundled; Regular weight not in CMake. setFontFamily applies Bold-only font — setBold(false) has no visual effect. Dyslexic users lose ability to distinguish bold/non-bold.
+- **Impact:** Bold formatting toggle inoperative for dyslexic font users.
+
+**[FONT-N02] 5 independent FontLoaders load same 2MB LibertinusSans.otf — duplicated in memory**
+- 5 files (Countdown, PrompterPage, main.qml, +windows, +android)
+- **Severity:** Low
+- Same font asset loaded by 5 separate FontLoader instances across 5 QML files. No font-database deduplication guarantee.
+- **Impact:** 10+ MB wasted RAM if font data not shared.
+
+### Network Error/Recovery
+
+**[NET-N01] loadFromNetworkFinihed() has ZERO error awareness — no error check, no HTTP status, no SSL, no partial download detection**
+- documenthandler.cpp:888-901
+- **Severity:** High
+- Slot reads m_reply->readAll() without checking error(), HTTP status, SSL errors, Content-Length vs received. DNS failure, 404, SSL cert errors, truncated downloads — all silently ingested as document content. error() signal never emitted for network failures.
+- **Impact:** Complete absence of network error handling. User cannot distinguish success from failure.
+
+**[NET-N02] No timeout on any QNetworkRequest — hung connections stall forever**
+- documenthandler.cpp:882-884,1738-1740
+- **Severity:** Medium
+- Neither loadFromNetwork() nor insertImageAt() calls setTransferTimeout(). Qt default = 0 (infinite). No cancel mechanism, no progress indicator.
+- **Impact:** Application silently stuck on unreachable servers.
+
+### Overlay Stacking
+
+**[OL-N01] OverlaySheet.onClosed unconditionally re-enables editor — breaks Prompting state**
+- 11 OverlaySheets across PrompterPage.qml + 3 overlay files
+- **Severity:** Medium
+- Every onClosed does `viewport.editor.enabled = true`. If prompter transitions Editing→Prompting while overlay open, closing overlay re-enables editor in Prompting — UI state inconsistency.
+- **Impact:** Editable text field during active teleprompting if overlay was closed after state change.
+
+**[OL-N02] Double-ESC on MarkersDrawer reopens it — drawerOpen true during close animation**
+- main.qml:486-487, MarkersDrawer.qml:47-56
+- **Severity:** Low
+- ESC cascade uses drawerOpen check + toggle(). During close animation, drawerOpen still true. Second ESC inverts: reopens drawer.
+
+### QTextDocument Corner Cases
+
+**[QTD-N01] QTextDocument image resource cache grows unbounded — no eviction, no setCacheLimit**
+- documenthandler.cpp:1454,1754,1766
+- **Severity:** Medium
+- addResource() called on every image insert, never removeResource(). Memory grows without bound on long sessions with many pasted images.
+- **Impact:** OOM on memory-constrained platforms during extended editing.
+
+**[QTD-N02] Undo stack unlimited — setMaximumBlockCount() never called**
+- Entire documenthandler.cpp
+- **Severity:** Medium
+- Default 0 = unlimited undo. Multi-hour sessions accumulate hundreds of MB; eventual OOM on WASM/mobile.
+
+**[QTD-N03] parse() populates lines vector with full layout extraction — dead work in release**
+- documenthandler.cpp:1627-1644
+- **Severity:** Low
+- Vector of LINE structs populated with naturalTextRect() + QString::mid() for every line, then only read inside #ifdef QT_DEBUG. O(n) wasted CPU per parse() call in release builds.
+
+### Kirigami Integration
+
+**[KIR-N01] KirigamiPlugin::registerTypes() never called on watchOS/QNX — crash on startup**
+- main.cpp:42-44,225-227
+- **Severity:** High
+- KIRIGAMI_BUILD_TYPE_STATIC set on watchOS/QNX but registerTypes() guard omits them. All Kirigami QML types unresolvable.
+- **Impact:** Application crashes on startup on watchOS/QNX.
+
+### Async Operations
+
+**[ASNC-N01] TimerClock.qml: duplicate id: clock — two elements share same ID**
+- TimerClock.qml:32,73
+- **Severity:** Critical
+- Root Item and inner Shape both declare `id: clock`. Undefined behavior — one silently shadows the other. Methods on root (getTimeString, startTimer, stopTimer) become unresolvable.
+- **Impact:** Entire timer/stopwatch/ETA system broken at QML loading level.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-4.*
