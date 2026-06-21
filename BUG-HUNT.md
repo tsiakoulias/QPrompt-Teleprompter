@@ -5804,4 +5804,116 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - Finnish: 6 wrong translations including "No pointers"→"Both pointers". French: 10 wrong including all velocity-set entries as "starting speed". Korean: 6 wrong including empty plural forms. Dutch: 6 wrong including "Alt"→"Alles". Portuguese: 5 wrong. Czech: placeholder broken `%1`→`%1`. Russian/Ukrainian: truncated LibreOffice text, untranslated credit placeholders.
 - **Impact:** Users see completely wrong functionality labels in 6 languages.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, gut-feel wave.*
+---
+
+## Focus Wave 2 — Keys, Doc Manipulation, Cross-Platform, OBS, File Dialogs, Settings, Init
+
+### Keys.onPressed Handler
+
+**[KEY-N02] setVelocity() receives event parameter but never sets event.accepted**
+- Prompter.qml:605-613
+- **Severity:** Medium
+- All 20 velocity preset calls pass event, but function body ignores it. Events bubble to parent Flickable, potentially triggering secondary scroll.
+
+**[KEY-N03] Ctrl+Home / Ctrl+End — event.accepted never set, Flickable default scroll overrides custom position**
+- Prompter.qml:2818-2828,2830-2840
+- **Severity:** High
+- Custom go-to-start/end handler runs but Flickable also processes Home/End → overrides position. Functionally broken.
+- **Impact:** Ctrl+Home/Ctrl+End jumps then immediately scrolls back.
+
+**[KEY-N04] Media keys never handled — Qt.Key_MediaTogglePlayPause, MediaPlay, MediaStop, MediaPause ignored**
+- Prompter.qml:2672-2870
+- **Severity:** Medium
+- Only Qt.Key_Play (legacy) and Qt.Key_Pause (Pause/Break) handled. Modern media keys silently ignored.
+- **Impact:** Hardware play/pause/stop buttons on keyboards do nothing.
+
+### Document Content Manipulation
+
+**[DOC-CRIT-01] insertImageAt async path — UAF, stale position, no undo block**
+- documenthandler.cpp:1737-1762
+- **Severity:** Critical
+- Lambda captures raw `this` — if DocumentHandler destroyed before reply completes, use-after-free. Captured position stale after intervening edits. No beginEditBlock/endEditBlock — orphan undo entry.
+- **Impact:** Crash on teardown during image load. Wrong insertion position. Undo corruption.
+
+**[DOC-N01] load() unconditionally clears undo stacks even when file doesn't exist**
+- documenthandler.cpp:1032-1037
+- **Severity:** Medium
+- clearUndoRedoStacks() and m_fileUrl set OUTSIDE the exists() block. On missing/unreadable file, current undo history wiped for content that was never replaced.
+- **Impact:** Silent undo history loss on failed file open.
+
+### Cross-Platform main.qml
+
+**[PLAT-CRIT-01] Android: projectionManager referenced in active menu but object commented out — ReferenceError at startup**
+- +android/main.qml:304-305,578-586
+- **Severity:** Critical
+- "Disable screen projections" action references `projectionManager.isEnabled` and `.toggle()` — but ProjectionsManager stub entirely commented out. No `id: projectionManager` in Android variant.
+- **Impact:** Android app crashes on startup when global menu bindings resolve.
+
+**[PLAT-N01] Base main.qml "Report Bug" passes qsTr disambiguation string as URL**
+- main.qml:898
+- **Severity:** Medium
+- `Qt.openUrlExternally("Global menu actions", "https://feedback.qprompt.app")` — two args, first consumed as URL. Opens literal string "Global menu actions" instead of feedback URL.
+- **Impact:** "Report Bug" in Help menu completely non-functional.
+
+### WebSocket/OBS Protocol
+
+**[OBS-N01] Hardcoded requestId reused for every scene switch — OBS v5 protocol violation**
+- Prompter.qml:407
+- **Severity:** High
+- Every SetCurrentProgramScene reuses same UUID. OBS v5 requires unique requestIds. Server may reject duplicates; client can't correlate responses.
+- **Impact:** No confirmation of scene switch success/failure.
+
+**[OBS-N02] Identified (op 2) server response never handled — auth success/failure silently ignored**
+- Prompter.qml:370-387
+- **Severity:** High
+- After sending Identify (op1), server responds with Identified (op2) containing negotiatedRpcVersion. Falls to `default: console.info(m)`. Client never knows if authenticated.
+- **Impact:** Scene switches may be sent after failed auth — OBS silently drops them.
+
+**[OBS-N03] markerCompare sends scene switch on EVERY forward-scroll frame — OBS flooded**
+- Prompter.qml:401
+- **Severity:** Medium
+- q<p true every frame during forward scroll past marker. 60 identical requests/sec flood OBS.
+- **Impact:** OBS-side CPU waste from redundant requests during scroll.
+
+### File Dialog Orchestration
+
+**[FILE-CRIT-01] Stale in-flight network reply overwrites locally opened document**
+- documenthandler.cpp:888-901,932-1041
+- **Severity:** Critical
+- load() never aborts in-flight network requests. When stale QNetworkReply completes after local file open, loadFromNetworkFinihed() overwrites document content.
+- **Impact:** User opens local .html file; moments later prior network request completes and silently replaces content.
+
+**[FILE-CRIT-02] iOS: IosSaveDialog.onAccepted discards picked fileUrl — m_fileUrl never updated**
+- Prompter.qml:2490-2507
+- **Severity:** Critical
+- accepted(fileUrl) received but never calls document.saveAs(). m_fileUrl stays at old value. Title shows wrong filename; subsequent saves go to wrong location.
+- **Impact:** iOS Save As permanently breaks file identity.
+
+**[FILE-CRIT-03] Android saveAs() opens QFile on content:// URI — always fails on modern Android**
+- documenthandler.cpp:1144-1148
+- **Severity:** Critical
+- QFile cannot open content:// schemes. Requires Android ContentResolver API. Save As completely non-functional on Android API 30+.
+- **Impact:** Users cannot save documents on modern Android.
+
+### Settings Persistence
+
+**[SET-CRIT-01] backgroundImage id shadowed by property var null — all background operations crash**
+- PrompterBackground.qml:35,68,80
+- **Severity:** Critical
+- `property var backgroundImage: null` shadows `id: backgroundImage` (Image item). Settings alias writes to null.source → TypeError crash. All background operations (set/clear/load) reference null.
+- **Impact:** Loading saved background image from QSettings crashes. Background image feature completely broken.
+
+### First-Launch / Reset
+
+**[INIT-N01] No single-instance enforcement — two instances race on QSettings, file watcher, OBS, hotkeys**
+- No QLockFile/QSharedMemory/QLocalServer anywhere
+- **Severity:** High
+- Two instances corrupt QSettings, double-watch same file, both claim KGlobalAccel, both open projection windows, WASM tabs enter independent reload loops.
+- **Impact:** Data corruption, shortcut conflicts, undefined behavior with multiple instances.
+
+**[INIT-N02] Read-only filesystem: pervasive silent failures with zero user feedback**
+- **Severity:** High
+- QSettings writes fail silently, spellchecker cache unusable, custom dictionary write fails, factoryReset does nothing but still kills app. No diagnostics anywhere.
+- **Impact:** App breaks silently on read-only media. User loses work from fake factory reset.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-2.*
