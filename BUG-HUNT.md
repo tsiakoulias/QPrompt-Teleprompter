@@ -6220,4 +6220,63 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Severity:** Critical
 - **Impact:** WASM memory corruption on large file pick (>60MB). Immediate crash or silent data corruption.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-5.*
+---
+
+## Focus Wave 6 — Drag, Spellcheck, Migration, States, Threading, Panic
+
+### Drag & Drop
+
+**[DRAG-N01] DropArea.onDropped never calls drop.accept() on external path — drops rejected**
+- Prompter.qml:1370-1378 — processes data but never accepts. Drag snaps back.
+- **Impact:** External drag-and-drop shows snap-back; file managers see rejection.
+
+**[DRAG-N02] rightWidthAdjustmentBar drag.maximumX formula canceled — bar frozen**
+- Prompter.qml:2022-2023 — parent.width==prompter.width cancels, maxX always equals minX
+- **Impact:** Right editor-width bar cannot be dragged. Users cannot adjust right content edge.
+
+### Spellcheck
+
+**[SPL-N01] No try/catch around new Hunspell() — crash on corrupt dictionaries**
+- spellchecker.cpp:152 — Hunspell constructor can throw on corrupt/malformed files
+- **Impact:** App hard-crashes on any corrupt Hunspell dictionary file.
+
+**[SPL-N02] .aff and .dic may load from different source directories — cross-version mismatch**
+- spellchecker.cpp:144-145 — two independent scans may return files from different versions
+- **Impact:** Wrong spell-checking results when dictionaries exist in multiple locations.
+
+### Qt6 Migration
+
+**[MIG-CRIT-01] Qt.platform.os returns "macos" in Qt 6.5, not "osx" — 17 macOS code paths dead**
+- 17 occurrences in 9 files — all `"osx"` comparisons silently evaluate to false
+- **Files:** main.qml (fullScreenPlatform, hideDecorators), +windows, Prompter.qml (velocity modifiers, renderType, wheel), PathsPage (LibreOffice paths), PointerSettings (ColorDialog, emoji), ProjectionsManager
+- **Impact:** macOS fullscreen behavior, velocity hotkeys, text rendering, spellcheck paths all broken on Qt 6.5. Every macOS code path protected by `=== "osx"` is dead.
+
+### Threading/Concurrency
+
+**[THR-N01] import() blocks main thread for 30s — UI frozen during LibreOffice conversion**
+- documenthandler.cpp:1086 — waitForFinished with default 30s timeout on main thread
+- **Impact:** Application "Not Responding" for duration of ODT/DOCX/DOC/RTF import.
+
+**[THR-N02] rehighlight() synchronous — UI freeze on spellcheck language change**
+- documenthandler.cpp:341 — full-document Hunspell re-scan on main thread
+- **Impact:** Multi-second UI freeze when changing spellcheck language on large documents.
+
+**[THR-N03] load() and saveAs() block main thread — large file I/O + HTML serialization**
+- documenthandler.cpp:948-956,1164 — synchronous read/write + toHtml() on main thread
+- **Impact:** Application frozen during file open/save on large documents.
+
+### Panic/Crash Scan
+
+**[PANIC-N01] setFontCapitalization(int) — unvalidated static_cast to enum, QML-reachable UB**
+- documenthandler.cpp:674-679 — Q_INVOKABLE, QML passes arbitrary int, no range check
+- **Impact:** Undefined behavior when QML passes out-of-range values (5+, negative).
+
+**[PANIC-N02] Division by zero in setContentWidth() — Infinity→NaN propagates to layout**
+- Prompter.qml:666,668 — prompter.width=0 before first layout, Infinity stored
+- **Impact:** NaN geometry corruption before first layout pass. Potential render crash.
+
+**[PANIC-N03] 22 static_cast from untrusted QSettings int to enum — UB on corrupt settings**
+- globalhotkeys.cpp:570-698 — no range validation on 22 hotkey modifier reads
+- **Impact:** UB if registry/.conf corrupted or manually edited with invalid modifier values.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-6.*
