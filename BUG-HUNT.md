@@ -5117,4 +5117,14 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** acceptedColor never assigned, defaults to Qt.rgba(0,0,0,0). Bound through prompter.textColor → setTextColor(transparent). Word under cursor gets invisible formatting on startup.
 - **Impact:** Initial text formatting starts transparent until first color dialog use.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-60.*
+---
+
+## Wave 61 — Preprocessor
+
+### [PP-N01] Q_OS_APPLE is not a Qt macro — KGlobalAccel block compiles on all Unix including macOS
+- **File:** globalhotkeys.cpp:26
+- **Severity:** Medium
+- **Analysis:** `!defined(Q_OS_APPLE)` — Qt does not define Q_OS_APPLE. Correct macro is Q_OS_DARWIN. Since never defined, `!defined(Q_OS_APPLE)` always true. KGlobalAccel include and macro compiled on all Unix platforms — macOS, FreeBSD, etc. — contrary to "KDE Plasma only" intent.
+- **Impact:** On macOS with KF6 via Homebrew, enables KDE global shortcut infrastructure on non-KDE platform. Hard compile error if KF6 unavailable.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-61.*
