@@ -6363,4 +6363,106 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - Two incompatible licenses in same files
 - **Impact:** Legal ambiguity; downstream users can't determine applicable license.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-7.*
+---
+
+## Focus Wave 8 — Windows Platform Deep Audit
+
+### Windows C++ / System
+
+**[WIN-N01] distribute.sh platform check broken — Windows deploy runs on ALL platforms**
+- dist/distribute.sh:95,99 — `[[ "$PLATFORM"=="windows" ]]` no spaces around ==, always true
+- **Impact:** macOS/Linux builds try to run windeployqt.exe; macOS macdeployqt never reached.
+
+**[WIN-N02] No Windows sleep prevention — SetThreadExecutionState never called**
+- documenthandler.cpp:1907-1933 — only Android/iOS stubs; `#else` returns false
+- **Impact:** Windows sleeps/hibernates during active teleprompting. Recording ruined.
+
+**[WIN-N03] Forced QSG_RHI_BACKEND=opengl on ALL Windows — broken on ARM64, RDP, no-OpenGL systems**
+- main.cpp:78-81 — unconditional; no D3D11 fallback; crashes or single-digit FPS on ARM64/RDP
+- **Impact:** App crashes or is unusable on Windows ARM64 Copilot+ PCs, RDP, VMs without GL drivers.
+
+**[WIN-N04] Forced OpenGL disables DXGI flip-model, HDR, VRR — all Windows users have higher latency**
+- main.cpp:78-81 — Qt 6 D3D11/D3D12 backends enable lower latency, G-Sync, HDR10
+- **Impact:** Permanent 1-2 frame extra latency, no adaptive sync, no HDR for all Windows users.
+
+**[WIN-N05] No TDR recovery — GPU driver crash causes permanent visual corruption**
+- Zero handlers for sceneGraphInvalidated/sceneGraphError signals
+- **Impact:** Any GPU driver crash ⇒ blank/garbled window until app restart.
+
+**[WIN-N06] QSettings failure silently swallowed — zero status() checks anywhere**
+- main.cpp:99, documenthandler.cpp, globalhotkeys.cpp — if registry corrupt/locked, all settings silently lost
+- **Impact:** Silent permanent loss of all user configuration. No diagnostic.
+
+**[WIN-N07] LibreOffice path only checks C:\Program Files\ — missing 32-bit path**
+- documenthandler.cpp:1063-1065, PathsPage.qml:81 — 32-bit LibreOffice on 64-bit Windows not found
+- **Impact:** Office document import silently fails; users must manually configure path.
+
+### Windows File I/O
+
+**[WIN-IO-N01] save() constructs malformed QUrl losing Windows drive letter**
+- documenthandler.cpp:1182-1184 — setUrl() parses C: as URL scheme; toLocalFile() returns wrong path
+- **Impact:** File written to wrong drive. Save-in-place broken on Windows.
+
+**[WIN-IO-N02] reload() constructs two-slash file:// URL — auto-reload dead on Windows**
+- documenthandler.cpp:860 — file://C:/... (two slashes) parsed with C: as host; never equals m_fileUrl
+- **Impact:** Auto-reload completely non-functional on Windows.
+
+**[WIN-IO-N03] QDir::mkpath() return unchecked — dictionary cache silently fails on full/restricted disk**
+- spellchecker.cpp:196,351 — no error surfaced to user
+- **Impact:** Spellcheck silently disabled; no indication why.
+
+**[WIN-IO-N04] QFileSystemWatcher::addPath() return unchecked — auto-reload silently non-functional**
+- documenthandler.cpp:1026 — fails on UNC, FAT32, Defender-locked files, handle limit
+- **Impact:** User believes auto-reload is active when it isn't.
+
+**[WIN-IO-N05] Main-thread I/O blocks UI during Defender scan — multi-second freezes**
+- documenthandler.cpp:946-951 — Defender synchronous scanning + readAll() freeze event loop
+- **Impact:** App appears hung when opening files. TOCTOU between exists()/open().
+
+### Windows QPA / Window Management
+
+**[WIN-WM-N01] Maximized geometry saved, restored as oversized normal window**
+- +windows/main.qml:80-87 — no separation of normal vs maximized geometry
+- **Impact:** Reopening app after closing while maximized ⇒ window too large or off-screen.
+
+**[WIN-WM-N02] Window position off-screen after monitor disconnect — invisible window**
+- +windows/main.qml:80-87 — no bounds validation against available screens
+- **Impact:** Window launches off-screen; user must edit registry or use Win+Arrow to recover.
+
+**[WIN-WM-N03] CursorAutoHide Timer fires during editing — hides cursor while typing**
+- CursorAutoHide.qml:49-58 — Timer doesn't re-check editor focus before hiding
+- **Impact:** Cursor vanishes mid-edit; user must move mouse to restore.
+
+**[WIN-WM-N04] Global overrideCursor stack unbalanced across projection windows**
+- qmlutil.hpp:107-110, ProjectionsManager.qml:202-206 — N projection windows push N overrides, close without pop
+- **Impact:** Cursor permanently invisible after projection windows close under timing edge case.
+
+### Windows Build/Deploy
+
+**[WIN-BLD-N01] setup.sh cmake --install missing --config on MSVC — installs wrong configuration**
+- setup.sh:229 — MSVC multi-config generator needs explicit --config
+- **Impact:** Debug DLLs installed instead of Release; missing files; windeployqt finds nothing.
+
+**[WIN-BLD-N02] setup.sh windeployqt targets path with nonexistent config subdirectory**
+- setup.sh:235 — `./install/bin/Release/QPrompt.exe` but KDE installs to `./install/bin/QPrompt.exe`
+- **Impact:** windeployqt "file not found"; no DLL deployment.
+
+**[WIN-BLD-N03] setup.sh vcvarsall.bat hardcoded to VS 2022 Community on C:**
+- setup.sh:175 — Professional/Enterprise/BuildTools editions silently fail; ARM64 gets wrong toolchain
+- **Impact:** Builds fail for most VS configurations; ARM64 builds produce x64 binaries.
+
+**[WIN-BLD-N04] No QSettings/registry cleanup on uninstall — stale data left permanently**
+- NSIS uninstaller has no EXTRA_UNINSTALL_COMMANDS; HKCU keys and %LOCALAPPDATA% data persist
+- **Impact:** Stale registry entries and user data survive uninstall forever.
+
+### Windows Projections
+
+**[WIN-PRJ-N01] Projection windows never auto-close on Windows — accumulate across sessions**
+- ProjectionsManager.qml:95-101 — Windows uses `totalProjectedDisplays<count` (add-only, never remove)
+- **Impact:** Stale projection windows accumulate GPU memory across multiple prompt sessions.
+
+**[WIN-PRJ-N02] Primary-monitor projection silently hidden on Windows**
+- ProjectionsManager.qml:188 — if model.name===root.screen.name && windows, return Hidden
+- **Impact:** User configures projection for primary display; it silently disappears.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-8.*
