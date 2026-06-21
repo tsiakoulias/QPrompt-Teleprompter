@@ -5010,4 +5010,37 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Ready state simultaneously sets opacity:1 (PropertyChanges) AND starts dissolveIn (from:0 to:1). QML applies PropertyChanges first (opacity→1), then animation starts (opacity→0→1). Visible 1→0→1 flash.
 - **Impact:** Visible flash when entering countdown-ready screen.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-57.*
+---
+
+## Wave 58 — Resolution Independence
+
+### [RESO-N01] Editing font size not viewport-scaled — text nearly unreadable on 4K
+- **File:** PrompterView.qml:242
+- **Severity:** Medium
+- **Analysis:** Editing-mode branch lacks `*prompter.__vw/10` multiplier present in WYSIWYG branch. Font size purely slider-derived with zero viewport awareness. On 4K at default slider, text disproportionately small.
+- **Impact:** Editing text nearly unreadable on 4K from defaults. Font size inconsistent with prompting state.
+
+### [RESO-N02] Scrollbar width 6dp-13dp — below minimum 44dp touch target
+- **File:** ProgressIndicator.qml:39
+- **Severity:** Low
+- **Impact:** Scrollbar very difficult to grab on touch devices.
+
+### [RESO-N03] Control spacing hardcoded 8dp — cramped on large displays
+- **Files:** PrompterView.qml:63,64,113, Prompter.qml:1047
+- **Severity:** Low
+- **Impact:** Negligible spacing relative to screen on 4K displays.
+
+### [RESO-N04] Projection-window margins fixed 10dp/5dp — near-flush on large screens
+- **File:** ProjectionsManager.qml:324-325
+- **Severity:** Low
+
+### [RESO-N05] PointerSettings ListView height hardcoded 180dp — doesn't fill available space
+- **File:** PointerSettings.qml:254
+- **Severity:** Low
+
+### [RESO-N06] ReadRegionOverlay pointer margin 3dp — overlap with text at large fonts
+- **File:** ReadRegionOverlay.qml:260,267
+- **Severity:** Low
+- **Impact:** Pointer icons collide with text at large prompter font sizes.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-58.*
