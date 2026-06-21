@@ -4119,4 +4119,86 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - R3-CTX-01 + Qt 5 registration comments + 36 QML call sites: Three pieces in three different files needed to see full picture
 - HDR-N01 + LOG-01/02: 3 bugs documented in a file never compiled — need build system + code analysis together
 
-*Report: waves 1-10, synthesis, re-run, waves 27-41.*
+---
+
+## Wave 42 — Layout, Dialogs, Q_PROPERTY, Paths, Mobile
+
+### [LAY-N01] 10 Labels with Layout.margins but inside MouseArea, not direct layout child — dead
+- **File:** EditorToolbar.qml (10 Labels)
+- **Severity:** Low
+- **Analysis:** opacityLabel, fontSizeLabel, lineHeightLabel, paragraphSpacingLabel, wordSpacingLabel, overlayOpacityLabel, overlayBrightnessLabel, letterSpacingLabel, baseSpeedLabel, baseAccelerationLabel declare Layout.topMargin/bottomMargin/rightMargin/leftMargin but are children of MouseArea, not the surrounding RowLayout. Layout attached properties only apply to direct layout children. Negative bottomMargins (-14) meant to tighten vertical spacing are silently ignored.
+- **Impact:** Labels appear at default positions without intended spacing adjustments.
+
+### [LAY-N02] WheelSettingsOverlay explanation text constrained to single column in 2-column GridLayout
+- **File:** WheelSettingsOverlay.qml:100-109
+- **Severity:** Low
+- **Analysis:** GridLayout columns:2. Explanation text RowLayout occupies column 0 only. Missing Layout.columnSpan:2 means text constrained to half width, causing excessive vertical wrapping.
+- **Impact:** Dense text wrapping; wasted space in right column.
+
+### [DLG-N10] TimerClock ColorDialog selectedColor never initialized from persisted settings
+- **File:** TimerClock.qml:198-210
+- **Severity:** Medium
+- **Analysis:** onVisibleChanged syncs custom `color` but never `selectedColor` — the property the dialog actually displays. On app restart, dialog shows Qt's runtime default instead of persisted QSettings color.
+- **Impact:** Timer color picker shows wrong starting color on first open after restart.
+
+### [DLG-N11] PrompterPage ColorDialogs — dead acceptedColor property binding
+- **File:** PrompterPage.qml:1010,1025, PrompterView.qml:240-241
+- **Severity:** Low
+- **Analysis:** Both colorDialog and highlightDialog declare `property color acceptedColor` but never assign it. PrompterView binds prompter.textColor/textBackground to acceptedColor — binding receives default/uninitialized value. Currently masked by direct setTextColor() call in onAccepted.
+- **Impact:** Dead binding. Would silently break color changes if refactored to rely on binding.
+
+### [QPROP-N02] comesFromNetwork Q_PROPERTY missing WRITE clause
+- **File:** documenthandler.h:121
+- **Severity:** Medium
+- **Analysis:** `setDocumentComesFromNetwork()` exists (public, emits NOTIFY, called from C++), but WRITE absent from Q_PROPERTY declaration. Read-only to QML property system.
+- **Impact:** Any QML attempting to set comesFromNetwork silently fails.
+
+### [PATH-N01] save() fragile percent-encoding round-trip — broken for UNC paths
+- **File:** documenthandler.cpp:1183
+- **Severity:** Medium
+- **Analysis:** `QUrl::toPercentEncoding()`→`toStdString()`→`fromStdString()`→`setUrl()` chain is unnecessary. UNC paths (`//server/share/file.html`) mangled because setUrl() interprets leading `//` as authority delimiter. Should be `QUrl::fromLocalFile(fileName)`.
+- **Impact:** save() produces broken URLs for Windows UNC paths.
+
+### [PATH-N02] reload() constructs file:// URL via raw string concat — #/? in filenames break URL
+- **File:** documenthandler.cpp:860
+- **Severity:** Medium
+- **Analysis:** `QUrl("file://" + fileUrl)` — no URL-encoding. `#` parsed as fragment delimiter, `?` as query delimiter. Spaces produce invalid URL. Root cause of R3-DOC-06 m_reloading permanently stuck. Should be `QUrl::fromLocalFile(fileUrl)`.
+- **Impact:** File-watcher reload silently fails for files with #, ?, or space in path.
+
+### [MOB-01] Android: projectionManager undefined — 3 unguarded reference sites
+- **File:** +android/main.qml:303-306, PrompterPage.qml:746
+- **Severity:** Medium
+- **Analysis:** projectionManager stub entirely commented out. "Disable projections" menu action's checked binding and onTriggered reference undefined id. PrompterPage layer.enabled binding silently fails.
+- **Impact:** Menu action non-functional. Prompter viewport layer.enabled always undefined.
+
+### [MOB-02] No +ios/ QML selector — iOS inherits base main.qml with desktop-only components
+- **File:** Missing +ios/main.qml
+- **Severity:** Medium
+- **Analysis:** iOS loads base main.qml which instantiates ProjectionsManager (desktop QWindow objects), Labs.MenuBar (native menubar), onFrameSwapped (grabToImage every frame). iOS has no multi-window or menu bar support.
+- **Impact:** Unnecessary component init, spurious QWindow creation, per-frame grabToImage on iOS.
+
+### [MOB-03] iOS: IosSaveDialog silently hangs QML caller when temp dir invalid
+- **File:** iossavedialog.mm:79-81
+- **Severity:** Medium
+- **Analysis:** `if (!m_tempDir.isValid()) return;` — early return without emitting rejected(). QML waits forever for accepted() or rejected() signal.
+- **Impact:** Save-as flow hangs indefinitely with no feedback on temp dir failure.
+
+### [MOB-04] Android: restartApplication() quits without restart
+- **File:** qmlutil.hpp:97-103
+- **Severity:** Low
+- **Analysis:** On Android/iOS/WASM/WatchOS, QProcess guard skips startDetached, leaving only quit(). Factory reset just closes app without relaunching.
+- **Impact:** User must manually reopen app after factory reset.
+
+### [MOB-05] Android: Missing INTERNET permission in manifest
+- **File:** android/AndroidManifest.xml:48-53
+- **Severity:** Low
+- **Analysis:** App uses Qt::Network (remote files, OBS WebSocket). android.permission.INTERNET not declared. Qt may auto-inject via library merge but explicit needed for API < 31.
+- **Impact:** Network failure on older Android devices; remote file/OBS silently fail.
+
+### [MOB-06] Android: PrompterPage display delegate Component.onCompleted references projectionManager — startup TypeError
+- **File:** PrompterPage.qml:675-677
+- **Severity:** Low
+- **Analysis:** `visible = projectionManager.isEnabled` in onCompleted runs even when parent action hidden. Spurious TypeError on Android startup.
+- **Impact:** Console error on startup; no user-facing effect (parent action hidden).
+
+*Report: waves 1-10, synthesis, re-run, waves 27-42.*
