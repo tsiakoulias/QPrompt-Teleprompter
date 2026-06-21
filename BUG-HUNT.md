@@ -5488,4 +5488,50 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Only m_data.last().text updated, length field stays at default 1. After extension, text.length() exceeds length. Currently masked because LengthRole already returns position instead of length (LOG-03).
 - **Impact:** Latent correctness risk; would manifest if LOG-03 is fixed.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-71.*
+---
+
+## Wave 72 — FINAL: MIME, QTextFormat, QScreen
+
+### [MIME-N01] Temporary QMimeDatabase — QMimeType dangling on Qt 5 (undefined behavior)
+- **File:** documenthandler.cpp:945
+- **Severity:** High
+- **Analysis:** `QMimeDatabase().mimeTypeForFile(fileName)` — temporary QMimeDatabase destroyed at semicolon. Qt 5: QMimeType tied to creating database — using after destruction is UB. Qt 6 made QMimeType independent but codebase supports Qt 5.15.
+- **Impact:** Undefined behavior on Qt 5.15 builds when checking MIME type of loaded file.
+
+### [MIME-N02] loadFromNetworkFinihed() ignores Content-Type header — all network content treated as HTML
+- **File:** documenthandler.cpp:888-901
+- **Severity:** Medium
+- **Analysis:** Never inspects m_reply->header(ContentTypeHeader). JSON, plain text, binary all processed as HTML with regex stripping. No MIME sniffing.
+- **Impact:** Non-HTML network content silently corrupted through HTML parsing.
+
+### [MIME-N03] PDF/EPUB/MOBI/AZW MIME-detected but import is no-op — error text becomes content
+- **File:** documenthandler.cpp:966-967,983-988,1044-1100
+- **Severity:** Medium
+- **Analysis:** MIME correctly detected, routes to import() which has empty/no-op branches. QProcess starts with empty program, fails silently, error text replaces document.
+- **Impact:** Opening PDF/EPUB/MOBI/AZW produces error message as teleprompter content.
+
+### [TXT-FMT-N01] setMarkerHref("") fails to clear QTextFormat::AnchorHref — stale href persists
+- **File:** documenthandler.cpp:769-774
+- **Severity:** Medium
+- **Analysis:** When href is empty, format.setAnchor(false) only; clearProperty(AnchorHref) skipped. After clearing, getMarkerHref() still returns old href. setMarker(false) correctly clears both.
+- **Impact:** Orphaned href data attached to deactivated anchors.
+
+### [SCR-N01] Per-screen projection flip settings lost on restart — never serialized
+- **File:** ProjectionsManager.qml:39,168-173
+- **Severity:** High
+- **Analysis:** displayModel stores per-screen flip config in memory only. Settings alias commented out. Only isEnabled and reScale persisted. Every restart resets all screens to flipSetting:0.
+- **Impact:** Users must reconfigure per-screen projection settings every session.
+
+### [SCR-N02] Duplicate entries in displayModel on first toggle — no clear() before setScreensModel()
+- **File:** ProjectionsManager.qml:49-50,157-166
+- **Severity:** Medium
+- **Analysis:** setScreensModel() appends without clear(). Called from both onCompleted and toggle(). After first enable-toggle, model has 2N entries. Stale duplicates in any iteration.
+- **Impact:** First-match logic masks most impact; fragile to future code changes.
+
+### [SCR-N03] No runtime screen plug/unplug handling — stale projection windows on disconnected screens
+- **File:** ProjectionsManager.qml:157-166
+- **Severity:** Medium
+- **Analysis:** No connection to QGuiApplication::screenAdded/screenRemoved. No polling or timer refresh. Monitor hotplug requires manual toggle cycle.
+- **Impact:** Stale windows on disconnected screens; new screens invisible until manual toggle.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72.*
