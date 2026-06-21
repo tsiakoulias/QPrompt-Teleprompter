@@ -4521,4 +4521,68 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Fixed gray values never adapt to theme. Dark themes render dividers near-invisible; light themes produce harsh dark borders.
 - **Impact:** Divider lines invisible on dark themes, jarring on light themes.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-46.*
+---
+
+## Wave 47 — Unicode, Android, Clipboard, Switch
+
+### [UTF-N01] text.truncate(64) can split UTF-16 surrogate pairs — corrupted display
+- **File:** documenthandler.cpp:736
+- **Severity:** Medium
+- **Analysis:** `text.truncate(64)` cuts at UTF-16 code unit 64. Supplementary-plane character (emoji, rare CJK) straddling position 64 → orphaned high surrogate. Also `text.truncate(-1)` when no space found in first 64 chars (lastIndexOf returns -1) → undefined behavior.
+- **Impact:** Corrupted preview text in font dialog for texts with emoji or rare CJK.
+
+### [AND-CRIT-01] Missing android.permission.INTERNET — all network silently fails
+- **File:** AndroidManifest.xml:47-53
+- **Severity:** Critical
+- **Analysis:** Manifest requests READ_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE, ACCESS_WIFI_STATE, but omits INTERNET. App uses QNetworkAccessManager for loadFromNetwork() and WebSocket for OBS.
+- **Impact:** Remote file loading and OBS scene switching silently fail on all Android versions.
+
+### [AND-HIGH-01] Android back button doesn't dismiss overlays/drawers before close
+- **File:** +android/main.qml:144-150, PrompterPage.qml:64
+- **Severity:** High
+- **Analysis:** PrompterPage.onBackRequested triggers close() directly. ESC key cascade (dismiss layers→drawers→overlays→find→exit prompting) absent from back button. Any open overlay/drawer triggers save-before-close instead of dismiss.
+- **Impact:** Broken Android UX — cannot dismiss overlays with back button.
+
+### [AND-HIGH-02] Android screen never sleeps after prompter use
+- **File:** Prompter.qml:465
+- **Severity:** High
+- **Analysis:** `document.preventSleep(false)` on entering Editing is commented out. `preventSleep(true)` active for Prompting/Standby/Countdown. Combined with `keepScreenOn="true"`, screen stays on permanently after first session.
+- **Impact:** Severe battery drain — screen never times out after using prompter once.
+
+### [AND-HIGH-03] factoryReset() quits Android app without restarting
+- **File:** qmlutil.hpp:97-103
+- **Severity:** High
+- **Analysis:** restartApplication() skip QProcess on Android → only quit(). Factory reset silently kills app; user must manually reopen.
+- **Impact:** Factory reset exits app with no restart or feedback on Android.
+
+### [AND-MED-01] Missing intent-filter for opening files from other apps
+- **File:** AndroidManifest.xml:29-32
+- **Severity:** Medium
+- **Analysis:** Only LAUNCHER intent-filter. No VIEW filter for text/html or text/plain. Cannot open .html scripts from file managers, email, or Downloads.
+- **Impact:** No "Open with QPrompt" or "Share to QPrompt" on Android.
+
+### [CLP-N01] Copy/Cut exports unfiltered HTML to system clipboard
+- **File:** Prompter.qml, EditorToolbar.qml, main.qml
+- **Severity:** Medium
+- **Analysis:** All copy/cut paths use editor.copy()/cut() — places raw QTextDocument HTML on system clipboard. filterHtml() doesn't strip scripts/event handlers (R4-EXP-01). Malicious HTML propagates to other apps via clipboard.
+- **Impact:** Security boundary leak — dangerous HTML reaches browser/email via clipboard paste.
+
+### [CLP-N02] DropArea external drop never calls drop.accept()
+- **File:** Prompter.qml:1369-1379
+- **Severity:** Medium
+- **Analysis:** External drop branch processes content but never accepts drop action. Internal drag branches correctly call accept(). Drag source may signal rejection → rollback/undo on source side.
+- **Impact:** Cross-application drag behavior undefined; source app may undo cut operations.
+
+### [CLP-N03] DropArea external drop: URLs consumed preferentially — text silently lost
+- **File:** Prompter.qml:1370-1378
+- **Severity:** Medium
+- **Analysis:** hasUrls branch handles ONLY images via insertImageAt() and never falls through to hasHtml/hasText. Browser drags with both URLs and HTML lose all text content.
+- **Impact:** Drag-and-drop from web browsers inserts only images; all text silently lost.
+
+### [SWT-N01] OBS WebSocket Switch checked binding broken on first toggle
+- **File:** PrompterPage.qml:1468-1474
+- **Severity:** Medium
+- **Analysis:** `checked: viewport.prompter.ws.active` + `onToggled: viewport.prompter.ws.active = checked`. User toggle severs declarative binding. If WebSocket disconnects, ws.active=false but Switch still shows ON. Same class as R2-EDT-03.
+- **Impact:** UI state mismatch — OBS Switch shows connected when actually disconnected.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-47.*
