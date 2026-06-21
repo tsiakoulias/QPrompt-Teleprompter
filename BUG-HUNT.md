@@ -5534,4 +5534,151 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** No connection to QGuiApplication::screenAdded/screenRemoved. No polling or timer refresh. Monitor hotplug requires manual toggle cycle.
 - **Impact:** Stale windows on disconnected screens; new screens invisible until manual toggle.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72.*
+---
+
+## Deep Dive — File-Focused Audits
+
+### documenthandler.cpp
+
+**[DOC-EDGE-01] File suffix check uses contains() — false positives for HTML detection**
+- Line 1154-1156
+- **Severity:** Medium
+- `fileInfo.suffix().contains("html")` — file named `test.nothtml` has suffix `nothtml` which matches substring. Should use case-insensitive equality.
+- **Impact:** Non-HTML files with "html" anywhere in suffix detected as HTML. Could save with wrong format.
+
+**[DOC-EDGE-02] insertImageAt creates new QNetworkAccessManager per image instead of reusing m_network**
+- Line 1737
+- **Severity:** Low
+- `new QNetworkAccessManager(this)` creates a second network manager. Each allocates its own thread pool. Repeated image insertions accumulate resources unnecessarily.
+
+**[DOC-EDGE-03] loadFromNetworkFinihed uses != "" to compare QByteArray to const char***
+- Line 892
+- **Severity:** Low
+- `document != ""` — unidiomatic implicit conversion. Should be `!document.isEmpty()`.
+
+**[DOC-EDGE-04] replaceAll passes cursor.position()-1 as selectionStart — when empty document, passes -1**
+- Line 1497-1498
+- **Severity:** Low
+- On empty document, cursor.position() = 0 → position()-1 = -1. Passed to search() which interprets -1 as "current cursor" — fragile reliance on undocumented fallback.
+
+**[DOC-EDGE-05] m_spellHighlighter->setEnabled() missing in rehighlight branch of setSpellCheckLanguages**
+- Lines 340-341
+- **Severity:** Low
+- When highlighter already exists, only rehighlight() called. setEnabled() only in creation branch. If m_spellCheckEnabled toggled while highlighter existed, stale enable-state after language change.
+
+**[DOC-EDGE-06] import() double-conversion: QString::fromStdString(bytes.toStdString())**
+- Line 1096
+- **Severity:** Low
+- QByteArray → std::string → QString round-trip. Should be `QString::fromUtf8(bytes)`.
+
+### Prompter.qml
+
+**[PRM-EDGE-01] nextItemInFocusChain() null dereference on Tab**
+- Line 2172
+- **Severity:** High
+- `editor.nextItemInFocusChain().forceActiveFocus()` — no null guard. If no next item in chain, TypeError crash.
+- **Impact:** Pressing Tab when at last focusable item crashes.
+
+**[PRM-EDGE-02] id: saveDialog (FileDialog) shadows function saveDialog(quit)**
+- Lines 2283-2312, 2449
+- **Severity:** Medium
+- FileDialog id shadows function of same name. Function unreachable via bare `saveDialog()`. Only accessible as `document.saveDialog()`.
+- **Impact:** If any code calls bare `saveDialog()` from scope, resolves to FileDialog not function.
+
+### EditorToolbar.qml
+
+**[ETB-EDGE-01] Bare prompter instead of viewport.prompter at line 1051 — ReferenceError in WYSIWYG mode**
+- Line 1051
+- **Severity:** High
+- `percentageFromFontSize()` uses bare `prompter.__vw` — prompter not declared in this file. File uses `viewport.prompter` ~100+ times and bare `prompter` exactly once.
+- **Impact:** Font-size direct-input crashes in WYSIWYG mode. Cannot type font size.
+
+**[ETB-EDGE-02] showOpacityOptions not persisted — resets every restart**
+- Line 84
+- **Severity:** Medium
+- Unlike showFontSpacingOptions, showAnimationConfigOptions, showJustify — all persisted via Settings — showOpacityOptions has no alias.
+- **Impact:** Overlay opacity/brightness controls must be re-enabled after every restart.
+
+**[ETB-EDGE-03] Settings-restored slider values never propagate to prompter until user nudges**
+- Lines 2002-2012, 2121-2131
+- **Severity:** Medium
+- onMoved fires only on user interaction, not programmatic value restore. baseSpeed/baseAcceleration sliders show saved values but prompter scrolls at default until slider is touched.
+- **Impact:** Confusing one-time jump on first slider interaction after restart.
+
+### PrompterPage.qml
+
+**[PRP-EDGE-01] enableTimersButton sets wrong property — checked bound to timersEnabled but onTriggered writes enabled**
+- Line 327
+- **Severity:** Medium
+- `checked: viewport.timer.timersEnabled` but `onTriggered: viewport.timer.enabled = checked`. Different properties. Binding breaks on first click.
+- **Impact:** Button state desyncs from actual timer toggle state.
+
+**[PRP-EDGE-02] Enter on empty URL field triggers network load**
+- Line 1308
+- **Severity:** Low
+- openUrl.onAccepted calls networkDialog.openFromRemote() with no empty check. Load button correctly disables when empty but keyboard handler has no equivalent guard.
+- **Impact:** Pressing Enter in empty URL field constructs `http://` and attempts network load.
+
+### spellchecker.cpp / spellhighlighter.cpp
+
+**[SPL-EDGE-01] setFontUnderline(true) conflicts with setUnderlineStyle(SingleUnderline) — may render double underline**
+- spellhighlighter.cpp:34-36
+- **Severity:** Medium
+- FontUnderline and UnderlineStyle are independent. Correct pattern: only UnderlineStyle + UnderlineColor.
+- **Impact:** Misspelled words visually indistinguishable from intentionally underlined text; possible double-underline.
+
+**[SPL-EDGE-02] Raw pointer m_checker with no lifetime management — use-after-free**
+- spellhighlighter.h:42
+- **Severity:** High
+- SpellChecker is plain C++ class (no QObject, no destroyed signal). m_checker never nulled. If SpellChecker destroyed first, highlightBlock() accesses dangling pointer.
+- **Impact:** Use-after-free crash if teardown order destroys SpellChecker before SpellHighlighter.
+
+**[SPL-EDGE-03] QCollator::compare() as std::sort comparator — locale-aware collation may violate strict weak ordering**
+- spellchecker.cpp:316-319
+- **Severity:** Medium
+- std::sort requires strict weak ordering. Turkish dotted/dotless I and digraph locales may violate transitivity in case-insensitive collation → UB.
+- **Impact:** Non-deterministic or incorrect sort order; potential crash in certain locales.
+
+### main.cpp
+
+**[MAIN-EDGE-01] System locale ignored — non-English users forced to English on first launch**
+- Lines 135-139
+- **Severity:** Medium
+- When language pref empty (fresh install), unconditionally loads qprompt_en.qm. Should use QLocale::system().
+- **Impact:** Every non-English user on first launch gets English instead of system language.
+
+### CMakeLists.txt
+
+**[CMAKE-EDGE-01] set(CMAKE_OSX_ARCHITECTURES="x86_64;arm64") — erroneous = produces garbage**
+- CMakeLists.txt:418
+- **Severity:** High
+- set() doesn't use = syntax. Entire token including = becomes value. Literal string `="x86_64;arm64"` instead of list.
+- **Impact:** macOS universal binary builds never compile for both architectures.
+
+**[CMAKE-EDGE-02] QML_IMPORT_PATH corrupted — literal "QML_IMPORT_PATH" inserted as path element**
+- CMakeLists.txt:97-100
+- **Severity:** Medium
+- Repeated QML_IMPORT_PATH in set() is not a named parameter — treated as literal semicolon-separated value element.
+- **Impact:** Qt Creator looks for QML modules in directory literally named "QML_IMPORT_PATH".
+
+**[CMAKE-EDGE-03] install(TARGETS Kirigami) uses bare target name instead of KF6Kirigami**
+- src/CMakeLists.txt:520
+- **Severity:** High
+- KF6 naming convention: KF6Kirigami not bare Kirigami.
+- **Impact:** cmake --install fails on macOS with "target Kirigami does not exist."
+
+**[CMAKE-EDGE-04] USE_GIT_DEPENDENCIES_ONLY skips GlobalAccel find_package but still links it**
+- CMakeLists.txt:155,241-247, src/CMakeLists.txt:486
+- **Severity:** High
+- FetchContent branch skips KF6::GlobalAccel find, but Linux link block always references it.
+- **Impact:** CMake configuration failure with -DUSE_GIT_DEPENDENCIES_ONLY=ON.
+
+### documenthandler.h
+
+**[HDR-EDGE-01] Missing #include \<QColor\>**
+- Line 107
+- **Severity:** Low
+- Q_PROPERTY(QColor ...) requires full type for MOC. No #include <QColor>. Works only via accidental transitive includes.
+- **Impact:** Fragile compilation — may break on Qt version upgrades.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives.*
