@@ -4357,4 +4357,98 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Another process creating outPath between exists() check and copy() causes copy to silently fail (masked by unchecked copy return = EDGE-09). Corrupt partial file passes future exists() checks.
 - **Impact:** Corrupt Hunspell dictionaries persist indefinitely; only manual cache deletion fixes.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-44.*
+---
+
+## Wave 45 — Integer Portability, Text, URLs, Performance, Error Recovery
+
+### [TXT-CRIT] Plain 'v'/'V' keypress silently consumed — letter 'v' cannot be typed
+- **File:** Prompter.qml:2163-2168
+- **Severity:** Critical
+- **Analysis:** In no-modifiers branch, `case Qt.Key_V:` catches every plain 'v', Shift+'v', Alt+'v' and forwards to prompter handler where Ctrl modifier check fails → nothing happens. Letter silently discarded. Copy-paste error from Ctrl+modifier block where `case Qt.Key_V` correctly handles Ctrl+V paste.
+- **Impact:** Letter 'v' cannot be typed anywhere in scripts — ~1% of English characters lost. Documents requiring "very", "voice", "video" etc. impossible to type.
+
+### [TXT-N03] Toolbar paste and Edit menu paste bypass HTML sanitization
+- **File:** EditorToolbar.qml:345, main.qml:686
+- **Severity:** Medium
+- **Analysis:** Both invoke TextArea.paste() directly — zero HTML filtering. Ctrl+V and context menu correctly call document.paste() which runs filterHtml(). Same "Paste" operation produces different results depending on access path.
+- **Impact:** HTML pasted via toolbar/menu retains unwanted formatting (hardcoded sizes, colors, nowrap). Inconsistent behavior vs shortcuts.
+
+### [TXT-N04] goToNextMarker() temporarily sets cursorPosition=-1 — corrupts cursor state
+- **File:** Prompter.qml:656-659
+- **Severity:** Medium
+- **Analysis:** When no markers exist, nextMarker() returns Marker(-1) with position=-1. editor.cursorPosition set to -1 fires onChange signals; cursorRectangle.y read from invalid state before guard corrects position. Qt may assert-fail in debug.
+- **Impact:** Visual jitter/flash on "next marker" with empty markers list. Debug assertion failures.
+
+### [INT-N01] quint64→int narrowing at DocumentHandler→MarkersModel boundary (4 sites)
+- **File:** documenthandler.cpp:1713,1721, markersmodel.h:62-63
+- **Severity:** Low
+- **Analysis:** DocumentHandler Q_INVOKABLE accepts quint64 position but MarkersModel takes int. 64→32 bit truncation. For very large documents (>2GB text), marker navigation produces wrong results.
+- **Impact:** Wrong marker positions in very large documents.
+
+### [INT-N02] replaceAll() returns long — 32-bit overflow on Windows x64
+- **File:** documenthandler.h:228, documenthandler.cpp:1494
+- **Severity:** Medium
+- **Analysis:** long is 32-bit on Windows x64 (LLP64). Replacement counter silently overflows at 2^31 matches. Should be qlonglong/qint64.
+- **Impact:** Replace-all count silently wrong on Windows with >2B matches.
+
+### [INT-N03] 6 qsizetype→int narrowing conversions across models and loops
+- **File:** markersmodel.cpp:101,121, promptsession.cpp:88, main.cpp:274, spellchecker.cpp:98,328
+- **Severity:** Low
+- **Analysis:** size()/length()/indexOf() return qsizetype (64-bit), narrowed to int (32-bit). Sentinels like -1 fit but values > INT_MAX corrupt.
+- **Impact:** Code quality — practical document sizes stay within int range.
+
+### [URL-N03] Network-loaded HTML lacks base URL — relative resources broken
+- **File:** documenthandler.cpp:888-901
+- **Severity:** Medium
+- **Analysis:** loadFromNetworkFinihed never calls doc->setBaseUrl(). Original network URL discarded. Relative URLs in HTML (`<img src="images/photo.jpg">`) can't resolve. May resolve against stale base URL from prior local file.
+- **Impact:** Images, stylesheets in network-loaded HTML fail to load.
+
+### [URL-N04] loadFromNetwork() validates wrong URL instance
+- **File:** documenthandler.cpp:881
+- **Severity:** Low
+- **Analysis:** `if (url.isValid())` checks original URL, not constructed resultingUrl. Valid relative URL can produce invalid resultingUrl that passes unchecked.
+- **Impact:** Invalid network requests silently initiated.
+
+### [URL-N05] openFromRemote() blindly prepends http:// to non-HTTP schemes
+- **File:** PrompterPage.qml:1279-1282
+- **Severity:** Medium
+- **Analysis:** Any URL not starting with http:// or https:// gets http:// prepended. `file:///path` becomes `http://file:///path`. Case variants like `HTTP://` not handled.
+- **Impact:** Silently broken behavior when pasting file:// or other-scheme URLs.
+
+### [PERF-N01] onFrameSwapped calls markerCompare() unconditionally — wasted JS call every frame
+- **File:** main.qml:1038
+- **Severity:** Medium
+- **Analysis:** markerCompare() fires every display frame (60-144 Hz) even when not prompting. Has internal guard that returns immediately, but JS function call/stack frame overhead wasted. State check should be hoisted.
+- **Impact:** 60+ wasted function calls/sec during editing.
+
+### [PERF-N02] RecentDocuments._load() blocks startup with N synchronous createObject() calls
+- **File:** RecentDocuments.qml:221,82-107
+- **Severity:** Medium
+- **Analysis:** Up to 30 Kirigami.Action components created synchronously during Component.onCompleted. Plus file-existence queries via C++. All on main thread during startup.
+- **Impact:** App startup delayed proportionally to recent document count. ~50-200ms extra latency with 30 entries.
+
+### [PERF-N03] velocityDragOverlay hot-loop calls velocity functions without throttling
+- **File:** PrompterPage.qml:939-976
+- **Severity:** Low
+- **Analysis:** for-loop calls increase/decreaseVelocity N times per mouse event (N=⌊deltaY/20⌋). Each triggers full Prompter binding cascade + position update + NumberAnimation rebind. Dozens of velocity changes per mouse event.
+- **Impact:** UI jank during mouse-drag velocity adjustment.
+
+### [ERR-N01] removeCustomWord() silently drops dictionary languages on partial reload failure
+- **File:** spellchecker.cpp:334-344
+- **Severity:** Medium
+- **Analysis:** If any loadOne() fails during reload, language silently skipped — lost from m_dicts with no notification. Always returns true (success).
+- **Impact:** User loses entire dictionary languages silently after removing a custom word.
+
+### [ERR-N02] insertImageAt() async callback silently discards 3 failure modes
+- **File:** documenthandler.cpp:1744-1752
+- **Severity:** Medium
+- **Analysis:** Network error, null downloaded image, null textDocument — all three silently return without emitting error(). User sees nothing happen.
+- **Impact:** Silent failure when pasting remote images; no way to know operation failed.
+
+### [PATH-N03] Wrong ../fonts/ depth in +android and +windows FontLoader paths
+- **File:** +android/main.qml:465, +windows/main.qml:531
+- **Severity:** High
+- **Analysis:** `source: "../fonts/LibertinusSans-Regular.otf"` but files nested one level deeper than base main.qml. Path resolves to non-existent qrc location. Base main.qml:560 at correct depth.
+- **Impact:** Timer/stopwatch number font fails to load on Android and Windows. Falls back to system default.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-45.*
