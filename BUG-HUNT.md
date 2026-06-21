@@ -5367,4 +5367,43 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Both select entire document and merge block format to ALL blocks. Every other formatting setter respects selection scope. These two force destructive global scope.
 - **Impact:** Any per-block line-height or paragraph-spacing customization silently destroyed. Names suggest property setters but behavior is document-level overwrite.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-67.*
+---
+
+## Wave 68 — Shortcuts, Lazy Init, Layout Loops
+
+### [SHT-N01] markerToggle/namedMarkerToggle forwarded but never handled — dead hotkeys
+- **File:** Prompter.qml:2097-2098,2118,2672-2870
+- **Severity:** Medium
+- **Analysis:** Editor Keys.onPressed forwards markerToggle and namedMarkerToggle to prompter.Keys.onPressed, which never checks for either key. Persisted via QSettings but zero effect. Hardcoded Ctrl+M/Ctrl+Shift+M still work independently.
+- **Impact:** Configurable marker toggle key bindings are dead code.
+
+### [SHT-N02] Missing StandardKey.FullScreen on Android
+- **File:** +android/main.qml (absent from base:523 and +windows:494)
+- **Severity:** Low
+- **Impact:** External keyboard users on Android have no F11/Alt+Enter fullscreen toggle.
+
+### [LAZY-N01] namedMarkerConfiguration Loader double-loads KeyInputButton — first load wasted
+- **File:** PrompterPage.qml:1172-1179
+- **Severity:** Low
+- **Analysis:** Both source: and setSource() on same Loader. Async load from source starts first, setSource cancels and reloads.
+- **Impact:** Component loaded twice; first async load wasted.
+
+### [LAZY-N02] InputsOverlay ObjectModel eagerly loads both tabs — hidden tab content loaded prematurely
+- **File:** InputsOverlay.qml:90-547
+- **Severity:** Medium
+- **Analysis:** ObjectModel eagerly instantiates both Flickable children. Both Component.onCompleted fire simultaneously on first open, triggering ~51 async Loader loads for both tabs even if user never switches.
+- **Impact:** Unnecessary QML instantiation and C++ object creation on first overlay open.
+
+### [LL-N01] 10 EditorToolbar MouseArea/TextField width-depends-on-width binding loops
+- **File:** EditorToolbar.qml (10 instances, lines 924-2053)
+- **Severity:** Medium
+- **Analysis:** MouseArea.width → TextField.width → (anchors.fill: parent) → MouseArea.width. QML detects and breaks cycle. TextField width resolves to 0 in edit mode.
+- **Impact:** Direct numeric input fields invisible/unusable when entering edit mode.
+
+### [LL-N02] ProgressIndicator stepSize divide-by-zero when prompter.height is 0
+- **File:** ProgressIndicator.qml:35
+- **Severity:** Low
+- **Analysis:** `stepSize: prompter.height/(4*(editor.height+...))` — prompter.height=0 at startup produces 0 stepSize. Can cause assertion failures or NaN in ScrollBar calculations.
+- **Impact:** Scrollbar jittery or unusable during window resize transitions.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-68.*
