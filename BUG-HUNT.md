@@ -5681,4 +5681,127 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - Q_PROPERTY(QColor ...) requires full type for MOC. No #include <QColor>. Works only via accidental transitive includes.
 - **Impact:** Fragile compilation — may break on Qt version upgrades.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives.*
+---
+
+## Gut-Feel Focus Wave — States, WASM, Error Recovery, Projections, Countdown, Spellcheck
+
+### State Machine
+
+**[SM-N01] Timer never runs during Prompting — PropertyChanges ordering bug**
+- Prompter.qml:3033-3053
+- **Severity:** High
+- timer.running block listed before prompter.__i block. Expression `timer.running: prompter.__play && prompter.__velocity>0` evaluates with __i still at 0 (Editing default). __velocity = 0 → timer.running = false permanently. Stopwatch/ETA never advances.
+- **Impact:** Timer clock frozen during entire prompting session.
+
+**[SM-N02] prompter.state++ bypasses toggle() — projectionManager.addMissingProjections, timer.reset skipped**
+- Countdown.qml:123
+- **Severity:** Low
+- Raw state assignment triggers PropertyChanges but skips toggle()'s imperative block. Timer not reset between countdown and prompting. New projections opened during countdown not picked up.
+
+**[SM-N03] Loop animation self-destructs via redundant cancel()+toggle()**
+- Prompter.qml:901-907
+- **Severity:** Medium
+- Final ScriptAction calls cancel() then toggle(). toggle() calls loop.stop() while still executing inside loop's own animation. Dual state transition (Editing→Standby/Countdown/Prompting) with double transition scripts.
+
+### WASM
+
+**[WASM-N01] Unchecked _malloc return — writes to address 0 on allocation failure**
+- wasmintegration.cpp:135-141,201
+- **Severity:** High
+- Emscripten _malloc returns 0 on heap exhaustion. Code proceeds to write via HEAPU8/stringToUTF8 to address 0 — silently corrupts global state/stack.
+- **Impact:** Memory corruption on large file picks during memory pressure.
+
+**[WASM-N02] QML eagerly clears pointer properties before async WASM callback — data loss on cancel**
+- PointerSettings.qml:489-492,529-532,593-596,633-636
+- **Severity:** High
+- All 4 pointer Browse buttons clear TextField and source property synchronously BEFORE async FileReader callback. If user cancels dialog, values stay empty permanently and get persisted to QSettings.
+- **Impact:** WASM users lose pointer configuration permanently on dialog cancel.
+
+**[WASM-N03] requestFullscreen() Promise rejection unhandled — silent failure**
+- wasmintegration.cpp:107-108
+- **Severity:** Medium
+- No .catch() on Promise. Browser denial (iframe, permissions policy) produces unhandled rejection with no user feedback.
+
+### Error Recovery
+
+**[ERR-N01] saveDialog() clears document.modified BEFORE saveAs() — premature state change**
+- Prompter.qml:2291
+- **Severity:** High
+- Modified=false set before save. If saveAs fails, modified already false AND onError also sets false. User cannot retry save.
+- **Impact:** Data loss — user believes save succeeded when it didn't.
+
+**[ERR-N02] After save failure, closeDialog workflow proceeds — discards document while error dialog shown**
+- Prompter.qml:2298-2310
+- **Severity:** High
+- SaveDialog switch executes immediately after saveAs() returns, even on failure. Calls newDocument/loadGuide/open — discards unsaved document. Error dialog sits on top of now-blank editor.
+- **Impact:** User sees error notification over already-destroyed document.
+
+**[ERR-N03] Empty network response silently ignored — no error, no state change**
+- documenthandler.cpp:892
+- **Severity:** Medium
+- `if (document != "")` — empty body silently returns. No error emitted. Editor stays with stale content.
+
+### Projections
+
+**[PROJ-N01] closeAll() destroys displayModel — per-screen flip configs lost on toggle-off**
+- ProjectionsManager.qml:130-132
+- **Severity:** High
+- displayModel cleared alongside projectionModel. Only isEnabled/reScale persisted. All per-screen flip configs reset to Off on next toggle-on.
+- **Impact:** Users must reconfigure every screen each session.
+
+**[PROJ-N02] visibility binding checks root.visible from Item not ApplicationWindow — never hides**
+- Line 188
+- **Severity:** Medium
+- root.visible resolves to projectionManager.visible (always true), not ApplicationWindow. Projection windows remain visible when main window minimized.
+
+**[PROJ-N03] GridLayout buttons dimmed but still clickable during Countdown/Prompting**
+- Line 320
+- **Severity:** Medium
+- Opacity drops to 0.2 but enabled never changed. Accidental close-button click during recording destroys projection window.
+
+**[PROJ-N04] Stale QScreen references after monitor hotplug disconnect/reconnect**
+- Lines 119,181
+- **Severity:** Medium
+- QScreen captured at project() time. After disconnect+reconnect, Qt creates new QScreen. Window's screen binding holds stale QScreen with zero geometry.
+- **Impact:** Projection windows at wrong position after monitor reconnect.
+
+**[PROJ-N05] forwardTo accessed in 10 binding sites with zero null guards**
+- Lines 215-392
+- **Severity:** Medium
+- No null check on forwardTo.prompter/forwardTo.mouse/forwardTo.width. Cascade crash during page transitions.
+
+### Countdown
+
+**[CNTD-N01] No persisted-settings validation — negative values bypass all guards**
+- Countdown.qml:45-46,64-65
+- **Severity:** Medium
+- __iterations and __disappearWithin loaded from QSettings with no validation. Negative values pass through toggle() guard. Garbled animation with negative text.
+- **Impact:** Corrupted countdown display, dissolveOut never fires, undefined sweep animation.
+
+**[CNTD-N02] __disappearWithin not validated on cold start — invariant breach**
+- Countdown.qml:45-46
+- **Severity:** Medium
+- Invariant `__disappearWithin ≤ __iterations` only enforced in SpinBox onValueModified. On cold start from persisted settings, clamping never executes. Countdown runs at full opacity, prompter text never visible through overlay.
+
+### Spellchecker
+
+**[SPL-N01] removeCustomWords() causes explosive N×M dictionary reload**
+- documenthandler.cpp:434-436
+- **Severity:** Medium
+- Each removeCustomWord() internally calls unload()+loadOne() per language+saveCustomWordsToDisk(). Removing 10 words with 2 languages = 20 filesystem-scan cycles + 10 file overwrites. Should batch-remove then single reload.
+- **Impact:** Quadratic performance — multi-second freezes removing multiple words.
+
+**[SPL-N02] Raw pointer m_checker with no lifetime management — use-after-free**
+- spellhighlighter.h:42
+- **Severity:** High
+- SpellChecker is plain C++, no destroyed() signal. m_checker never nulled. If SpellChecker destroyed first, highlightBlock() uses dangling pointer.
+- **Impact:** Use-after-free crash on QML teardown.
+
+### Translations
+
+**[TS-SYS] 37 semantically wrong translations across fi/fr/ko/nl/pt_BR, 7 broken HTML/placeholders, 3 languages with truncated content**
+- **Severity:** Medium
+- Finnish: 6 wrong translations including "No pointers"→"Both pointers". French: 10 wrong including all velocity-set entries as "starting speed". Korean: 6 wrong including empty plural forms. Dutch: 6 wrong including "Alt"→"Alles". Portuguese: 5 wrong. Czech: placeholder broken `%1`→`%1`. Russian/Ukrainian: truncated LibreOffice text, untranslated credit placeholders.
+- **Impact:** Users see completely wrong functionality labels in 6 languages.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, gut-feel wave.*
