@@ -5252,4 +5252,85 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** QFont::families() returns post-substitution resolved list. If user selects unavailable font, getter returns substitution name, not original selection.
 - **Impact:** Silent font substitution; user sees different font name than selected.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-65.*
+---
+
+## Wave 66 — State Cleanup, Toolbar, Lifecycle, Responsive
+
+### [STC-N01] closeAll() destroys user's per-screen projection flip configuration
+- **File:** ProjectionsManager.qml:130-132
+- **Severity:** Medium
+- **Analysis:** displayModel.clear() alongside projectionModel.clear(). displayModel holds user's per-screen flipSetting values. Toggling projections off/on discards all customization — setScreensModel() rebuilds with flipSetting:0.
+- **Impact:** User loses all per-display flip configuration every time projections toggled.
+
+### [STC-N02] Find.qml close() doesn't reset replace-mode or regex-mode flags
+- **File:** Find.qml:58-62
+- **Severity:** Low
+- **Analysis:** close() leaves find.replace and find.regEx persistent. Next Ctrl+F opens in stale replace+regex mode from previous session.
+- **Impact:** Unexpected find/replace state carried across sessions and document loads.
+
+### [STC-N03] velocityIndicator.firstResetDone never cleared on dismiss — second activation broken
+- **File:** PrompterPage.qml:799-872,928-937
+- **Severity:** Medium
+- **Analysis:** velocityDragOverlay.dismiss() never clears firstResetDone, originX/Y, originalVelocity. Next activation: firstResetDone still true → cursor warps to page-middle not indicator-center.
+- **Impact:** Velocity indicator mouse tracking broken on second activation.
+
+### [STC-N04] Projection window CursorAutoHide not reset on close — cursor permanently hidden
+- **File:** ProjectionsManager.qml:202-206,196-200
+- **Severity:** Medium
+- **Analysis:** onClosing never calls cursorAutoHide.reset(). If cursor was hidden by auto-hide timer, system cursor stays hidden after window destruction.
+- **Impact:** Cursor permanently invisible until user moves mouse or opens another overlay.
+
+### [STC-N05] cancel() doesn't call timer.stopTimer() — elapsed time persists across sessions
+- **File:** Prompter.qml:460-466
+- **Severity:** Low
+- **Analysis:** Entering Edit via toggle() doesn't stop timer. TimerClock elapsedMilliseconds from last run persists. Next session starts from prior elapsed value.
+- **Impact:** Timer shows cumulative time across multiple prompting sessions unless reset.
+
+### [TB-N01] toolbar toggle timers produce stale state on rapid clicks
+- **File:** EditorToolbar.qml:816-851
+- **Severity:** Medium
+- **Analysis:** 250ms delayed toggle fires openAnimationConfigTimer or showFontSpacingOptions with stale pre-click state, overriding user's deliberate click.
+- **Impact:** Rapid double-click on toolbar toggle produces unpredictable panel state.
+
+### [TB-N02] baseSpeedSlider/baseAccelerationSlider onMoved yanks focus to prompter instead of restoreFocus()
+- **File:** EditorToolbar.qml:2009-2010,2128-2129
+- **Severity:** Medium
+- **Analysis:** Uses `viewport.prompter.focus = true` instead of `restoreFocus()`. All other toolbar actions correctly restore prior focus. User typing in editor loses focus on slider adjustment.
+- **Impact:** Editor focus lost on speed slider adjustment; user must click back into editor.
+
+### [TB-N03] Collapsible toolbar rows animate height but adjacent rows snap — no y-position animation
+- **File:** EditorToolbar.qml:1175-1906 (8 collapsible rows)
+- **Severity:** Low
+- **Analysis:** Behavior on height smooth, but Flow recalculates sibling positions immediately — rows below jump to new position without animation.
+- **Impact:** Jarring visual — half animations smooth, half teleport.
+
+### [TB-N04] velocityDragArea accepts MiddleButton without propagateComposedEvents — scroll blocked
+- **File:** PrompterPage.qml:875-884
+- **Severity:** Medium
+- **Analysis:** MouseArea at z:5 accepts MiddleButton | RightButton but no propagateComposedEvents. MiddleButton press consumed before reaching viewport.mouse for scroll handling.
+- **Impact:** Middle-button scroll interaction lost in viewport.
+
+### [RESP-N01] minimumHeight: minimumWidth forces square aspect ratio — prevents landscape-strip windows
+- **File:** main.qml:83, +windows:78
+- **Severity:** Low
+- **Impact:** Cannot resize to wide-short window shapes that layout would otherwise handle.
+
+### [RESP-N02] mobileOrSmallScreen threshold at 1231px activates on default 1220px launch
+- **File:** main.qml:54,77
+- **Severity:** Medium
+- **Analysis:** Threshold 11px above default width. Every fresh launch starts in "mobile/compact" toolbar mode. Users must widen window past 1231px to see full desktop toolbar.
+- **Impact:** Default launch shows compact toolbar layout; full toolbar requires window resize.
+
+### [RESP-N03] +android/main.qml omits all size declarations — transient zero-size layout on startup
+- **File:** +android/main.qml
+- **Severity:** Low
+- **Analysis:** No width/height/minimum declarations. Child bindings dependent on root.width evaluate against 0/undefined before window sized. Toolbars flash as window resizes from zero to full screen.
+- **Impact:** Transient layout collapse on Android startup.
+
+### [QT-LC-N01] QQmlFileSelector never instantiated — platform QML file selectors dead
+- **File:** main.cpp:33
+- **Severity:** High
+- **Analysis:** `#include <QQmlFileSelector>` present but no persistent QQmlFileSelector created and attached to engine. +windows/main.qml and +android/main.qml variants are dead code — base main.qml always loaded on all platforms.
+- **Impact:** Platform-specific QML objects (QmlUtil on Windows, RestartDialog) never instantiated. Wrong QML file loaded on all platforms.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-66.*
