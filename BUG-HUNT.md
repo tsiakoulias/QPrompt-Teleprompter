@@ -5466,4 +5466,26 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** `if (!skipAutoReload || autoReload())` — for non-binary files (skipAutoReload=false), always true regardless of user preference. Should be `&&`.
 - **Impact:** When auto-reload disabled, external changes to HTML/text files still trigger reloads — user preference silently ignored.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-70.*
+---
+
+## Wave 71 — Text Boundaries
+
+### [TBND-N01] SpellHighlighter regex excludes combining diacritical marks — NFD text misspelled
+- **File:** spellhighlighter.cpp:53-54
+- **Severity:** Medium
+- **Analysis:** `\p{L}+` matches only Unicode letters, not combining marks (`\p{M}`). NFD text like "café" (c-a-f-e-U+0301) gets orphaned accent, truncated match sent to Hunspell. Incorrect spelling underline positioning.
+- **Impact:** Intermittent spell-check failures for French, Spanish, Portuguese, Vietnamese, Greek in NFD form.
+
+### [TBND-N02] All CJK text marked misspelled — ideographic characters not in Hunspell dictionaries
+- **File:** spellhighlighter.cpp:53-54
+- **Severity:** Medium
+- **Analysis:** `\p{L}` matches individual CJK characters as separate "words." Hunspell dictionaries have zero entries for ideographic characters. Every character returns false → solid wall of red underlines across entire CJK document.
+- **Impact:** Spell check completely unusable for Chinese, Japanese, Korean documents.
+
+### [TBND-N03] extendLastMarker() doesn't update Marker::length field — stale after appends
+- **File:** markersmodel.cpp:109-114
+- **Severity:** Low
+- **Analysis:** Only m_data.last().text updated, length field stays at default 1. After extension, text.length() exceeds length. Currently masked because LengthRole already returns position instead of length (LOG-03).
+- **Impact:** Latent correctness risk; would manifest if LOG-03 is fixed.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-71.*
