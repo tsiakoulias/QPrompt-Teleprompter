@@ -4936,4 +4936,62 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** +windows variant includes "wasm" (dead code there). Base variant (WASM actually loads this) does NOT include "wasm". WASM uses browser-managed fullscreen.
 - **Impact:** App's own fullscreen-toggle UI shown alongside browser native fullscreen button on WASM.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-55.*
+---
+
+## Wave 56 — WYSIWYG, QProcess, Images, Ternary, Accessibility
+
+### [WYS-N01] Internal drag-and-drop copy inserts HTML as plain text — tags become visible
+- **File:** Prompter.qml:1362-1363
+- **Severity:** Medium
+- **Analysis:** TextArea.insert() always plain text. Internal Ctrl+drag inserts HTML string verbatim — angle brackets/tags visible. External drops correctly use insertHtmlAt().
+- **Impact:** Visible HTML tag pollution on every internal copy-drag.
+
+### [WYS-N02] Default stylesheet CSS errors: valign:top (not a CSS property) and border:1pt (missing style)
+- **File:** documenthandler.cpp:188
+- **Severity:** Low
+- **Analysis:** valign is HTML attribute, should be vertical-align:top. border:1pt missing solid/dashed style keyword.
+- **Impact:** Table cells render with wrong alignment/borders in browsers.
+
+### [QP-N01] restartApplication() quits even when startDetached fails — app dies with no replacement
+- **File:** qmlutil.hpp:97-102
+- **Severity:** High
+- **Analysis:** startDetached() returns bool — discarded. quit() fires unconditionally. If binary inaccessible (macOS bundle moved, AppImage mount expired), app terminates permanently.
+- **Impact:** Factory reset or language change kills app with no restart.
+
+### [QP-N02] convert.waitForFinished() blocks GUI thread up to 30s during LibreOffice import
+- **File:** documenthandler.cpp:1086
+- **Severity:** Medium
+- **Analysis:** waitForFinished() with no timeout = 30000ms. Called synchronously on main thread from import() → file open.
+- **Impact:** App frozen unresponsive for up to 30s during ODT/DOCX/DOC/RTF import.
+
+### [QP-N03] convert.exitCode() never checked — LibreOffice error output becomes document content
+- **File:** documenthandler.cpp:1086-1091
+- **Severity:** Medium
+- **Analysis:** After waitForFinished returns true, proceeds directly to readAll() without checking exitCode(). If LibreOffice exits non-zero, stdout (error page) replaces document.
+- **Impact:** Silent data corruption — document replaced with LibreOffice error output.
+
+### [IMG-N01] insertImageAt() has no data: URI handler — silently drops data URI images
+- **File:** documenthandler.cpp:1733-1764
+- **Severity:** High
+- **Analysis:** QImage ctor doesn't parse data URIs. image.isNull() → true. Scheme check misses "data". Falls to return with zero effect. insertHtmlAt() correctly handles data: URIs.
+- **Impact:** Data URI images dropped/pasted via QML handler silently do nothing.
+
+### [IMG-N02] insertHtmlAt() silent blocking HTTP load for img src URLs — UI freeze
+- **File:** documenthandler.cpp:1451
+- **Severity:** High
+- **Analysis:** QImage::load() with HTTP URL performs synchronous download on main thread. UI frozen until complete/timed-out. insertImageAt() correctly uses async QNetworkAccessManager for HTTP.
+- **Impact:** Multi-second UI freezes when pasting HTML with remote images.
+
+### [TRN-N01] Dead ternary: both branches return Qt.OpenHandCursor
+- **File:** Prompter.qml:2024
+- **Severity:** Low
+- **Analysis:** `flicking ? Qt.OpenHandCursor : Qt.OpenHandCursor` — both branches identical. Degraded copy-paste from left-hand equivalent which has proper orientation-aware cursor logic.
+- **Impact:** Right-width-adjustment handle shows wrong cursor.
+
+### [A11Y-SYS] Systemic absence of Accessible properties — app invisible to screen readers
+- **Files:** All .qml files
+- **Severity:** Medium
+- **Analysis:** Zero Accessible.name/description/role anywhere. ~35 font-glyph ToolButtons speak unreadable codepoints. 6 icon-only buttons unnamed. 4 ComboBox/SpinBox lack accessible names despite sibling Labels. Countdown toggle MouseArea not exposed. Replace field indistinguishable from search field. Entire formatting toolbar unintelligible.
+- **Impact:** Application completely unusable for screen-reader users.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-56.*
