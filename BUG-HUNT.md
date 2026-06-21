@@ -4299,4 +4299,62 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** `if (this.__play) this.__i++` — __i modification gated on play. When paused, functions only resume at existing velocity + trigger animated jump to document end. Contrast with setVelocity() which always modifies __i.
 - **Impact:** "Increase/Decrease Velocity" buttons do nothing to velocity when paused — behavioral inconsistency.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-43.*
+---
+
+## Wave 44 — Drag, Timers, QFileInfo, Creative Scan
+
+### [DEF-N01] Flickable.flicking undefined in Qt 6 — wrong cursor during momentum scroll
+- **File:** Prompter.qml:1981,2024
+- **Severity:** Medium
+- **Analysis:** `flicking` was Qt 5 Flickable property renamed to `moving` in Qt 6. Resolves to `undefined` (falsy). Cursor falls to wrong branch — OpenHandCursor instead of OpenHandCursor-like drag visual during momentum scroll.
+- **Impact:** Wrong cursor cue during momentum scroll on Qt 6.
+
+### [DEF-N02] DropArea internalDrag always false — internal drag handler dead code
+- **File:** Prompter.qml:1331,1350
+- **Severity:** Medium
+- **Analysis:** `property bool internalDrag: false` never set to true. C++ startTextDrag()/startRangeDrag() never called from QML. Actual internal drag uses separate manual MouseArea mechanism. If startTextDrag() ever invoked, onDropped would incorrectly treat internal drag as external content, corrupting the operation.
+- **Impact:** Two parallel drag systems with no connection. Dead code hazard.
+
+### [TMR-N01] resetBackground Timer not stopped when new background loaded — race erases new image
+- **File:** PrompterBackground.qml:47-57,73-76
+- **Severity:** Medium
+- **Analysis:** clearBackground() starts 2.8s timer to clear source. setBackgroundImage() loads new image but never stops timer. If user clears background then immediately loads new image within 2.8s, timer fires and erases newly loaded image.
+- **Impact:** New background image silently disappears after ~2.8 seconds.
+
+### [TMR-N02] Windows onFrameSwapped missing qmlutil.r(p) — per-frame grab result leak
+- **File:** +windows/main.qml:706-716 vs main.qml:1036-1047
+- **Severity:** Medium
+- **Analysis:** Base main.qml calls qmlutil.r(p) for double-buffer + deleteLater. Windows variant missing this call. Each grabToImage() (60fps) leaks one QQuickItemGrabResult when projections enabled.
+- **Impact:** Steady memory leak on Windows during screen projections. Accumulates unboundedly.
+
+### [CMAKE-N05] foreach(file IN LISTS icon_files doc) — "doc" never defined
+- **File:** src/CMakeLists.txt:243
+- **Severity:** Low
+- **Analysis:** Variable `doc` never defined. CMake treats as empty. If `doc` was typo for `document_files`, all welcome HTML docs would receive wrong resource aliases.
+- **Impact:** Dead/confusing code; probable typo masked by undefined=lazy empty.
+
+### [PRE-N01] Preprocessor uses `or` instead of `||` in 6 #if directives — MSVC build break
+- **File:** documenthandler.cpp:132,347,911,1057; globalhotkeys.cpp:560,832
+- **Severity:** Low
+- **Analysis:** `#if (defined(Q_OS_MACOS) or defined(Q_OS_IOS))` — C preprocessor doesn't recognize `or` on MSVC without `/Zc:preprocessor`. 40+ other guards use `||`.
+- **Impact:** Build failure on MSVC with `/permissive-`.
+
+### [CNTD-N01] Countdown Running: dissolveIn and dissolveOut compete for same opacity when __iterations===__disappearWithin===1
+- **File:** Countdown.qml:289-291,308
+- **Severity:** Low
+- **Analysis:** Running state sets dissolveIn.running=true (fade-in 0→1) AND dissolveOut.running (fade-out 1→0) concurrently when both equal 1. Two NumberAnimations compete for countdown.opacity — winner undefined.
+- **Impact:** Erratic opacity flash/stutter with specific countdown config (1 iteration + 1 disappear step).
+
+### [QF-N02] QDir::entryList missing QDir::Readable in availableDictionaries()
+- **File:** spellchecker.cpp:254
+- **Severity:** Low
+- **Analysis:** `QDir::Files` lists unreadable .dic files as available. Hunspell fails to open them with only qWarning, no user feedback.
+- **Impact:** Broken-permission dictionaries pollute available list.
+
+### [QF-N03] TOCTOU: QFile::exists() → QFile::copy() in resource cache extraction
+- **File:** spellchecker.cpp:198-199
+- **Severity:** Low
+- **Analysis:** Another process creating outPath between exists() check and copy() causes copy to silently fail (masked by unchecked copy return = EDGE-09). Corrupt partial file passes future exists() checks.
+- **Impact:** Corrupt Hunspell dictionaries persist indefinitely; only manual cache deletion fixes.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-44.*
