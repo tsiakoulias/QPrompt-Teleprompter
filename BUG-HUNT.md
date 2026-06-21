@@ -4201,4 +4201,102 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** `visible = projectionManager.isEnabled` in onCompleted runs even when parent action hidden. Spurious TypeError on Android startup.
 - **Impact:** Console error on startup; no user-facing effect (parent action hidden).
 
-*Report: waves 1-10, synthesis, re-run, waves 27-42.*
+---
+
+## Wave 43 — Menus, Debug, Static Analysis, Data Flows
+
+### [MENU-N01] contextMenu.popup(this) missing click coordinates — menu at wrong position
+- **File:** Prompter.qml:1402
+- **Severity:** Medium
+- **Analysis:** `contextMenu.popup(this)` equivalent to popup(parent, 0, 0) — menu at top-left of editor. Right-click position available via `mouse` parameter but ignored.
+- **Impact:** On mobile/WASM, spell-check context menu at top-left instead of click position.
+
+### [MENU-N02] Mobile "Add to dictionary" missing %1 placeholder — word never shown
+- **File:** Prompter.qml:2620
+- **Severity:** Medium
+- **Analysis:** `qsTr("Add to dictionary", ...).arg(prompter.spellMisspelledWord)` — no `%1` in string. arg() silently does nothing. Desktop version has `qsTr("Add \"%1\" to dictionary", ...)`.
+- **Impact:** Users see "Add to dictionary" with no indication of which word.
+
+### [MENU-N03] Text alignment menu RTL swap: labels swap but actions don't
+- **File:** EditorToolbar.qml:362-374
+- **Severity:** Medium
+- **Analysis:** `text` and `enabled` bindings swap for RTL, but `onTriggered` unconditionally sets AlignLeft/AlignRight. In RTL, clicking "Right" sets AlignLeft. Global Format menu correctly swaps both text and action.
+- **Impact:** Alignment menu produces opposite of label in RTL mode.
+
+### [MENU-N04] Trailing empty MenuSeparator at end of mobile context menu
+- **File:** Prompter.qml:2662
+- **Severity:** Low
+- **Analysis:** Final MenuSeparator with no menu items after it creates dangling separator line.
+- **Impact:** Visual artifact — thin line at bottom of context menu.
+
+### [MENU-N05] "Redo" context menu item missing & accelerator
+- **File:** Prompter.qml:2633
+- **Severity:** Low
+- **Analysis:** All other menu items have `&` accelerator. "Redo" is the only one missing it.
+- **Impact:** Keyboard navigation skips Redo when cycling accelerators.
+
+### [MENU-N06] Paste behavior inconsistent between context menu and global Edit menu
+- **File:** Prompter.qml:2564,2651 vs main.qml:686
+- **Severity:** Low
+- **Analysis:** Context menu Paste → document.paste() (filters HTML). Global Edit menu Paste → editor.paste() (raw, unfiltered). Same operation, different results.
+- **Impact:** HTML from browser pasted via global Edit menu injects unfiltered HTML.
+
+### [DBG-N01] OBS WebSocket auth challenge+salt logged to console in release builds
+- **File:** Prompter.qml:364,372,386
+- **Severity:** Medium
+- **Analysis:** `console.log(m)` logs full WebSocket Hello message including authentication challenge and salt on every connection. `console.info(m)` at line 386 maps to qInfo() — never suppressed. No debug guard.
+- **Impact:** Security-sensitive material leaked to console/logs in production.
+
+### [DBG-N02] Velocity debug logging active in production
+- **File:** Prompter.qml:606, InputsOverlay.qml:441
+- **Severity:** Low
+- **Analysis:** `console.log("velocity: ", velocity)` and modifier logging on every keypress/ComboBox change. No debug guard.
+- **Impact:** Production console spam on every velocity change.
+
+### [DBG-N03] Latent debug state leak: pointers/debug Setting persists Guides checkbox
+- **File:** PointerSettings.qml:94, ReadRegionOverlay.qml:239
+- **Severity:** Low
+- **Analysis:** After QML-01 fixed, users who checked "Guides" will see red debug rectangles appear with no way to disable (cross-file reference still broken).
+- **Impact:** Debug rectangles appear in production after fixing QML-01.
+
+### [DBG-N04] qDebug() in namedMarker()/setMarker() active in release
+- **File:** documenthandler.cpp:760,793
+- **Severity:** Low
+- **Analysis:** `qDebug() << "Empty"` and `qDebug() << marker` trace every marker query/set. CMake doesn't define QT_NO_DEBUG_OUTPUT.
+- **Impact:** Production debug spam on every marker interaction.
+
+### [WARN-N01] SpellHighlighter::isEnabled() — dead code, never called
+- **File:** spellhighlighter.h:36
+- **Severity:** Low
+- **Analysis:** Public method defined but zero invocations in entire codebase.
+
+### [WARN-N02] SpellChecker::addWord() — dead public API, never called
+- **File:** spellchecker.h:48, spellchecker.cpp:134-140
+- **Severity:** Low
+- **Analysis:** Full implementation but never invoked. DocumentHandler uses addCustomWord() instead.
+
+### [WARN-N03] quint64→int implicit narrowing in nextMarker()/previousMarker()
+- **File:** documenthandler.cpp:1713,1721
+- **Severity:** Low
+- **Analysis:** Q_INVOKABLE accepts quint64 but calls MarkersModel methods taking int. 64→32 bit unsigned→signed truncation. Compiler warning on some toolchains.
+- **Impact:** Code quality — practical document sizes stay within int range.
+
+### [WARN-N04] QProcess::startDetached() bool return silently ignored
+- **File:** qmlutil.hpp:91
+- **Severity:** Low
+- **Analysis:** `startDetached()` returns bool. Discarded. If program not found, failure invisible — no error logged, no QML notification.
+- **Impact:** Silent failure of sys:// URL handler and app restart on missing program.
+
+### [FLOW-N01] setKeyMarker() calls setAnchor("#") — const char*→bool conversion, href never set
+- **File:** documenthandler.cpp:716
+- **Severity:** Medium
+- **Analysis:** `format.setAnchor("#")` — `setAnchor(bool)` is only overload. `"#"` decays to const char* → pointer-to-bool → true. setAnchorHref never called. Regular markers (setMarker:798) correctly use `setAnchorHref("#")`. Parse sees key markers with url="" vs regular markers with url="#".
+- **Impact:** Inconsistent marker url role; QML consuming url sees wrong classification.
+
+### [FLOW-N02] increaseVelocity()/decreaseVelocity() skip velocity change when paused
+- **File:** Prompter.qml:494-497,510-513
+- **Severity:** Medium
+- **Analysis:** `if (this.__play) this.__i++` — __i modification gated on play. When paused, functions only resume at existing velocity + trigger animated jump to document end. Contrast with setVelocity() which always modifies __i.
+- **Impact:** "Increase/Decrease Velocity" buttons do nothing to velocity when paused — behavioral inconsistency.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-43.*
