@@ -4994,4 +4994,20 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Zero Accessible.name/description/role anywhere. ~35 font-glyph ToolButtons speak unreadable codepoints. 6 icon-only buttons unnamed. 4 ComboBox/SpinBox lack accessible names despite sibling Labels. Countdown toggle MouseArea not exposed. Replace field indistinguishable from search field. Entire formatting toolbar unintelligible.
 - **Impact:** Application completely unusable for screen-reader users.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-56.*
+---
+
+## Wave 57 — Events, Animation Timing
+
+### [EVT-N13] rewind()/fastForward() event undefined — winding state permanently locked after first use
+- **File:** Prompter.qml:547-571
+- **Severity:** High
+- **Analysis:** Functions take no event parameter. `keyBeingPressed = event.key` accesses `.key` on undefined → TypeError. keyBeingPressed stays at default 0. In Keys.onReleased, `event.key===keyBeingPressed` always fails (0 ≠ any real key). winding never cleared back to false.
+- **Impact:** After pressing rewind or fast-forward once, hold-to-continue functionality permanently broken. Release-detection dead.
+
+### [ANM-N02] Standby→Ready countdown opacity flash — PropertyChanges opacity:1 conflicts with dissolveIn
+- **File:** Countdown.qml:265-276
+- **Severity:** Medium
+- **Analysis:** Ready state simultaneously sets opacity:1 (PropertyChanges) AND starts dissolveIn (from:0 to:1). QML applies PropertyChanges first (opacity→1), then animation starts (opacity→0→1). Visible 1→0→1 flash.
+- **Impact:** Visible flash when entering countdown-ready screen.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-57.*
