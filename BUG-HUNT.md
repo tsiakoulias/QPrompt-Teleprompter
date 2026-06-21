@@ -4769,4 +4769,70 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** ReadRegionOverlay defines enum States but has no states: array. Sub-components manage own states independently. All 4 PropertyChanges setting overlay.state in Prompter.qml change no properties — dead code.
 - **Impact:** Dead enum + dead PropertyChanges. States either never implemented or should be removed.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-51.*
+---
+
+## Wave 52 — Config, Tooltips, Watcher, Models
+
+### [CFG-N01] Desktop MimeType incomplete — only text/html, missing text/plain and text/markdown
+- **File:** com.cuperino.qprompt.desktop (both copies)
+- **Severity:** Medium
+- **Analysis:** MimeType=text/html; only. appdata.xml declares text/plain and text/markdown as supported.
+- **Impact:** File managers don't offer QPrompt for plain-text or markdown files.
+
+### [CFG-N02] v1.1.3 release date "2022-1-16" breaks chronological order — should be 2023-01-16
+- **File:** appdata.xml line 202
+- **Severity:** Low
+- **Impact:** Software centers may display releases in wrong order.
+
+### [CFG-N03] "fixedd" typo in v2.0.2 release description
+- **File:** appdata.xml line 72
+- **Severity:** Low
+
+### [TP-SYS] Systemic absence of ToolTip on ~60+ controls across entire application
+- **Files:** Find.qml (8 buttons), EditorToolbar.qml (~28 buttons), PrompterView.qml (4 buttons), Prompter.qml (4 at-end buttons), MarkersDrawer (pin button), KeyInputButton (clear button), PrompterPage (~18 drawer actions)
+- **Severity:** Medium
+- **Analysis:** Dozens of buttons use unicode/cryptic icons with zero ToolTip text. Only ~12 of ~30 context drawer actions have tooltips. Zero Accessible properties anywhere — app invisible to screen readers.
+- **Impact:** Poor discoverability. Keyboard-only and assistive-technology users cannot identify controls.
+
+### [TP-N01] "Error loading file..." used as document content, not placeholderText
+- **File:** Prompter.qml:969
+- **Severity:** Medium
+- **Analysis:** `text: qsTr("Error loading file…")` set as TextArea's text property — appears as editable document body on new/empty documents.
+- **Impact:** New documents show confusing "Error loading file..." as editable content.
+
+### [WATCH-N01] addPath() return never checked — silent watch failure
+- **File:** documenthandler.cpp:1026
+- **Severity:** Medium
+- **Analysis:** QFileSystemWatcher::addPath() returns false on unsupported filesystems, network drives, or exceeded system watch limits. No diagnostic, no fallback.
+- **Impact:** Auto-reload silently non-functional for files on network/unsupported filesystems.
+
+### [WATCH-N02] removePath() return never checked — stale path causes double-watch
+- **File:** documenthandler.cpp:1024
+- **Severity:** Medium
+- **Analysis:** If removePath fails, old path stays watched alongside new path. fileChanged on old file invokes reload() with wrong URL — m_reloading stuck at true (R3-DOC-06).
+- **Impact:** Double-watch causing stale content reload on old file change.
+
+### [WATCH-N03] Watcher not refreshed after fileChanged — stale inotify on Linux atomic saves
+- **File:** documenthandler.cpp:857-864,1020-1027
+- **Severity:** Medium
+- **Analysis:** Editors using write-to-temp+rename (atomic save) replace file inode. Inotify watch stays on old inode. Qt fires fileChanged once but watcher not re-added. Standard fix: removePath+addPath after each fileChanged.
+- **Impact:** Subsequent external edits after first atomic save undetected on Linux.
+
+### [WATCH-N04] unblockFileWatcher() dereferences _fileSystemWatcher without null guard
+- **File:** documenthandler.cpp:1125-1128
+- **Severity:** Low
+- **Analysis:** No null check. Reachable via QTimer::singleShot from saveAs().
+
+### [MODEL-N01] MarkersModel::rowCount ignores parent.isValid() — returns full size for child probe
+- **File:** markersmodel.cpp:32-36
+- **Severity:** Medium
+- **Analysis:** Flat QAbstractListModel should return 0 when parent.isValid(). Unconditionally returns m_data.size(). QML views probing children get wrong count. LOG-01 covers SessionModel only.
+- **Impact:** Wrong row count reported for child indices.
+
+### [MODEL-N02] SessionModel::clearDataPoints lacks empty-model guard before beginRemoveRows
+- **File:** promptsession.cpp:79-84
+- **Severity:** Low
+- **Analysis:** beginRemoveRows(0, 0) on empty model signals removal of 1 row from empty model — contract violation. MarkersModel::clearMarkers correctly guards with isEmpty() check. LOG-02 covers off-by-one only.
+- **Impact:** Model/view consistency violation on clearing empty session model.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-52.*
