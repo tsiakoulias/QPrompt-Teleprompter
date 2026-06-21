@@ -3987,4 +3987,136 @@ All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml.
 - **Analysis:** All rely on `toInt()`/`QVariant::toInt()` returning 0 on failure, which matches desired default (0 = unknown/unset) in every case. No functional behavior incorrect — omission of explicit ok validation and defensive coding.
 - **Impact:** None currently. Latent fragility if Qt changes implicit-from-invalid behavior.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-40.*
+---
+
+## Wave 41 — Shadowing, Link, Comparison, Layout, Synthesis
+
+### [SHADOW-N03] id: stopwatch shadows property bool stopwatch — timersEnabled always true
+- **File:** TimerClock.qml:38,122,100
+- **Severity:** High
+- **Analysis:** `id: stopwatch` (Item child) shadows `property bool stopwatch: true` in same scope. Line 100 `timersEnabled: enabled && (stopwatch || eta)` — bare `stopwatch` resolves to Item (always truthy), never to bool. timersEnabled always returns `enabled && true`, permanently ignoring both stopwatch and eta toggles.
+- **Impact:** 9 consumers of viewport.timer.timersEnabled across main.qml, +windows, +android, PrompterPage ALL receive wrong values. Timer display always enabled regardless of toggles.
+
+### [SHADOW-N04] id: frame shadows property bool frame — latent hazard
+- **File:** Countdown.qml:42,152
+- **Severity:** Low
+- **Analysis:** `id: frame` (Shape) shadows `property bool frame: false`. No bare `frame` usage currently exists, but any future code referencing `frame` will resolve to Shape (truthy) instead of bool toggle.
+- **Impact:** None currently. Latent maintenance hazard.
+
+### [LINK-N01] Qt::Network not linked on iOS static build — unresolved symbols
+- **File:** src/CMakeLists.txt:418-427
+- **Severity:** High
+- **Analysis:** iOS target_link_libraries omits Qt::Network despite unconditional QNetworkAccessManager usage in documenthandler.cpp. Qt::Network not transitively linked via Qt::Quick.
+- **Impact:** iOS static build fails with unresolved symbols.
+
+### [LINK-N02] Qt::Network not linked on WASM static build — same as LINK-N01
+- **File:** src/CMakeLists.txt:436-445
+- **Severity:** High
+- **Analysis:** WASM target_link_libraries omits Qt::Network.
+- **Impact:** WASM static build fails with unresolved symbols.
+
+### [LINK-N03] Qt::WebSockets found as REQUIRED but never explicitly linked
+- **File:** CMakeLists.txt:145, all target_link_libraries blocks
+- **Severity:** Medium
+- **Analysis:** find_package REQUIRED ensures module installed but no target_link_libraries entry on any platform. Works on dynamic-link via QML plugin; breaks on static if qmlimportscanner misses it.
+- **Impact:** OBS WebSocket integration broken on static builds if auto-scan fails.
+
+### [LINK-N04] KF6::GlobalAccel find_package/link mismatch on Haiku
+- **File:** CMakeLists.txt:303-308, src/CMakeLists.txt:446-460
+- **Severity:** Medium
+- **Analysis:** Haiku uses special KF6 find_package (IconThemes only, line 306-308) but src/CMakeLists links KF6::GlobalAccel. Works only by accident via idempotent find_package.
+- **Impact:** Fragile Haiku build — may fail to configure if KF6 installed with mismatched version.
+
+### [COMP-N01] Case-sensitive duplicate detection in setLanguages()
+- **File:** spellchecker.cpp:83
+- **Severity:** Low
+- **Analysis:** `seen.contains(lang)` is case-sensitive. `{"en_US", "EN_US"}` loaded as separate dictionaries. Same root cause as SPL2-12 but different code site.
+- **Impact:** Duplicate dictionary loading on case-different language inputs.
+
+### [COMP-N02] Case-sensitive suffix check misses mixed-case extensions — silent format loss
+- **File:** documenthandler.cpp:1154
+- **Severity:** Medium
+- **Analysis:** saveAs() only checks lowercase and UPPERCASE extensions ("html", "html", "HTML", "HTM" etc). Extensions like "Html", "Htm" on case-preserving filesystems (Windows/macOS) slip through — file saved as plain text, silently destroying all formatting.
+- **Impact:** Silent formatting loss when saving files with mixed-case extensions.
+
+### [COMP-N03] regularMarker() same double-textCursor anti-pattern as LOG-07
+- **File:** documenthandler.cpp:693-696
+- **Severity:** Low
+- **Analysis:** Null-check on local QTextCursor (fetch 1), reads anchor properties from 3 independent textCursor() calls (fetches 2-4). LOG-07 documents namedMarker() only — regularMarker() has identical bug.
+- **Impact:** Rare stale formatting state on marker toolbar button.
+
+### [LBL-N01] All 12 Sliders in EditorToolbar missing Layout.fillWidth: true — cramped
+- **File:** EditorToolbar.qml (12 Slider instances)
+- **Severity:** Medium
+- **Analysis:** Every Slider child of RowLayout (velocity, opacity, fontSize, lineHeight, paragraphSpacing, wordSpacing, overlayOpacity, overlayBrightness, letterSpacing, baseSpeed, baseAcceleration, WYSIWYG fontSize) lacks Layout.fillWidth. Renders at implicit width (~100px) even when toolbar is 800+ px wide.
+- **Impact:** All sliders unnecessarily short and imprecise on wide displays. Primary velocity slider during prompting especially affected.
+
+### [LBL-N02] 11 Labels with Layout.bottomMargin: -14 — undefined behavior, overlap risk
+- **File:** EditorToolbar.qml (11 Label instances)
+- **Severity:** Medium
+- **Analysis:** Negative margins on RowLayout children are undefined behavior per Qt Quick docs. Intent is vertical tightening but relies on undefined layout engine behavior. Can cause label text to bleed into adjacent rows.
+- **Impact:** Text overlap on adjacent rows; fragile to Qt version/font size changes.
+
+### [LBL-N03] PrompterView 3× height overflow in theforce debug mode
+- **File:** PrompterPage.qml:739
+- **Severity:** Low
+- **Analysis:** `height: (root.theforce ? 3 : 1) * parent.height`. At minimum window (291px), produces 873px — far exceeding window. Oversized Flickable allocates and renders off-screen content.
+- **Impact:** 3× memory/layout overhead in debug mode; visual corruption on small windows.
+
+---
+
+## Deep Synthesis Analysis (Wave 41 Synthesis Subagent)
+
+### Top 3 Root Causes Generating Most Downstream Bugs
+
+**Root Cause #1: Declarative/Imperative Binding Destruction (~30 bugs)**
+QML declarative bindings silently destroyed by imperative writes on user interaction. No recovery mechanism. Each user action permanently degrades state: ~23 ToolButton checked states, 3 drag-origin bindings, 4 telemetry toggles, animation running flags, TabBar currentIndex, named bookmark indicator.
+
+**Root Cause #2: Qt Version Confusion — Import/API Mismatch (~22 bugs)**
+Targets Qt 6.5 but uses Qt 5.0/5.14/5.15 import versions, Qt 6.6+ versions, and Qt 6.7+ APIs indiscriminately. No systematic version enforcement. Dead imports block entire components (ReadRegionOverlay, ProjectionsManager, native menus).
+
+**Root Cause #3: Unvalidated Pointer/Container Dereference (~14 bugs)**
+C++ members/containers accessed without null or bounds validation. Many reachable from QML via Q_INVOKABLE before state initialization. Null QTextDocument derefs, empty QList first()/last(), uninitialized members, missing row bounds guards.
+
+### Critical Bug Chains
+
+**Chain A — Dead Component Cascade (35+ bugs):** R4-QTV-02 → ReadRegionOverlay fails to load, masking QML-01 (26 undefined refs), QML-02, R4-ROV-01/02/03, R4-BKG-01, SCP-01/02, UNIT-07. R4-QTV-01 → ProjectionsManager fails to load, masking R4-PRJ-01/02/03/04, SCP-08. IMP-N01 → native menus dead. **35+ bugs invisible behind 3 broken imports.**
+
+**Chain B — Network Reply Double-Fault:** RES-01 (m_reply overwritten without abort) + RES-02 (slot uses wrong reply) + NET-01 (error never checked) + SAVE-N01 (phantom temp-file URL). Each alone is High; combined guarantee silent data corruption + crash + broken saves.
+
+**Chain C — Search/Replace Death Spiral (guaranteed):** LOG-05 (loop param ignored) + LOG-06 (infinite loop) + CUR-N01 (replacement matches search pattern). **100% CPU hang on any regex Replace All, even `replaceAll("a","aa")`.**
+
+**Chain D — Progressive UI Decay:** R2-EDT-03 + EVT-04/05/06 + R4-ROV-02 + QML-BND-01/02 + R2-TEL-01 + EVT-07 + ACT-N07. **30+ bugs from one root cause: declarative bindings destroyed by imperative writes.**
+
+**Chain E — Settings Split-Personality:** SET-01 (C++ and QML write to different QSettings domains on macOS/iOS) + SET-02 (factoryReset clears only one domain). Neither file alone reveals the divergence. "Reset" button is a lie.
+
+**Chain F — Hotkey Annihilation Triad:** HTK-01 (defaults erased on customize) + HTK-02 (persistence broken in non-KDE builds) + HTK-03 (defaults zeroed on Wayland-EGL). **Hotkeys broken on ALL platform/build combinations.**
+
+### Top 5 Fix Priority Order (Highest Leverage)
+
+| Priority | Bug(s) | Lines | Direct Fixes | Cascade Fixes |
+|---|---|---|---|---|
+| **1** | SEC-01 (sys:// RCE) | ~3 | 1 | 2 |
+| **2** | R4-QTV-01 + R4-QTV-02 (dead imports) | ~2 | 2 | **35+ unmasked** |
+| **3** | R3-CTX-01 (AbstractUnits QML_ELEMENT) | 1 | 1 | 5+ (all animations work) |
+| **4** | R2-EDT-03 (binding break pattern) | ~5 | 23 | 8+ |
+| **5** | HTK-01 (defaults destroyed) | ~3 | 1 | 2 |
+
+**Fixing priorities 1-5: ~27 bugs directly fixed, 50+ cascade-fixed, ~14 lines of code.**
+
+### Bugs With Compound Severity
+
+- **RES-01+RES-02:** Stale reply downloads AND its data loaded → guaranteed silent data corruption → **Critical**
+- **LOG-05+LOG-06+CUR-N01:** Infinite loop on ALL regex Replace All → **Critical (guaranteed)**
+- **DLG-N01+DLG-N02+R3-DOC-04:** Modified cleared before AND after failed save → **Critical data loss**
+- **SET-01+SET-02:** Settings split + false "factory reset" → **Critical**
+
+### Bugs Visible Only From Abstract Overview (Cross-File)
+
+- SET-01+SET-02: C++ and QML agree on wrong QSettings domain assumption
+- PLAT-01: KF6Crash CMake var never compiled into C++ macro — build file and source look correct in isolation
+- SCP-01 through SCP-20: 20 files reference `root.*` via outer-scope id resolution — works "by accident"
+- R3-CTX-01 + Qt 5 registration comments + 36 QML call sites: Three pieces in three different files needed to see full picture
+- HDR-N01 + LOG-01/02: 3 bugs documented in a file never compiled — need build system + code analysis together
+
+*Report: waves 1-10, synthesis, re-run, waves 27-41.*
