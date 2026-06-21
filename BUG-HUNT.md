@@ -5143,4 +5143,20 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** checked binding breaks on click. Setting togglable from 3 independent UI paths (overlay button, context drawer action, native menu item). Changing via other path leaves overlay button showing stale checked state.
 - **Impact:** Overlay toggle shows wrong state when changed via other UI.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-62.*
+---
+
+## Wave 63 — Visual Feedback, Material
+
+### [RPL-N01] 6 additional files missing QtQuick.Controls.Material import — ~65 controls unthemed
+- **Files:** Find.qml, PrompterView.qml, Prompter.qml, PrompterPage.qml, EditorToolbar.qml, InputsOverlay.qml
+- **Severity:** Medium
+- **Analysis:** FINAL-02 covers WheelSettingsOverlay only. 6 more files use Material.theme: Material.Dark without importing QtQuick.Controls.Material. ~65 controls get default light/indeterminate ripple, hover, press, focus styling.
+- **Impact:** Press/hover/focus visual feedback broken for most controls — no dark-themed interaction states.
+
+### [VIS-FB-N01] bookmarkListButton and searchButton missing checkable: true — no checked background
+- **File:** EditorToolbar.qml:188,202
+- **Severity:** Low
+- **Analysis:** Both declare checked binding but omit checkable: true. Material style checked background only renders when checkable && checked. Text color feedback works but background never highlights.
+- **Impact:** Checked state visually diminished — harder to tell if markers drawer or find panel is open.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-63.*
