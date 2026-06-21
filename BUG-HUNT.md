@@ -5406,4 +5406,14 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** `stepSize: prompter.height/(4*(editor.height+...))` — prompter.height=0 at startup produces 0 stepSize. Can cause assertion failures or NaN in ScrollBar calculations.
 - **Impact:** Scrollbar jittery or unusable during window resize transitions.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-68.*
+---
+
+## Wave 69 — Shadow Chain
+
+### [SHDR-N02] id: shadow collides with property ShaderEffectSource shadow — ambiguous resolution in blur chain
+- **File:** Prompter.qml:746,752,754,759,762
+- **Severity:** Medium
+- **Analysis:** ShaderEffect has both `id: shadow` AND `readonly property ShaderEffectSource shadow` — same name. Inner blur chain references `shadow.source` which is ambiguous: self-reference to property → null → broken blur dimensions. ReadRegionOverlay avoids this by using distinct id.
+- **Impact:** When shadows enabled, prompter shadow may use degenerate (0×0) blur dimensions — corrupted/missing shadows.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-69.*
