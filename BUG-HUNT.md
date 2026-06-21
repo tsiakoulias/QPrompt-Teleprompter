@@ -4717,4 +4717,56 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Qt 6 ships windeployqt6.exe. Qt 5 tool doesn't exist on Qt 6-only machines. Mixed Qt 5+6 machines deploy wrong DLLs.
 - **Impact:** Windows deployment packaging broken on Qt 6-only systems.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-50.*
+---
+
+## Wave 51 — Popups, Scene Graph, State
+
+### [POP-N01] ESC cascade missing dictionariesSheet — undismissable by keyboard
+- **File:** PrompterPage.qml:1512, all 3 main.qml ESC handlers
+- **Severity:** Medium
+- **Analysis:** dictionariesSheet has no property alias and is not in ESC handler chain. StandardKey.Cancel Shortcut intercepts Escape before OverlaySheet CloseOnEscape. ESC falls through to restoreFocus() — sheet remains open.
+- **Impact:** Keyboard-only users cannot dismiss dictionary selection overlay.
+
+### [POP-N02] ESC cascade missing customWordsSheet — undismissable by keyboard
+- **File:** PrompterPage.qml:1589, all 3 main.qml ESC handlers
+- **Severity:** Medium
+- **Analysis:** Same as POP-N01 — no alias, not in ESC chain.
+- **Impact:** Keyboard-only users cannot dismiss custom words editor overlay.
+
+### [POP-N03] ESC cascade missing obsConfiguration — undismissable by keyboard despite alias
+- **File:** All 3 main.qml ESC handlers
+- **Severity:** Medium
+- **Analysis:** obsConfiguration IS aliased in PrompterPage (line 53) but not checked in ESC cascade. All other aliased sheets ARE checked — simple omission.
+- **Impact:** ESC does nothing while OBS WebSocket configuration overlay is open.
+
+### [POP-N04] CountdownConfiguration SpinBoxes use focus: true (JS label) instead of focus = true
+- **File:** PrompterPage.qml:1092,1114
+- **Severity:** Medium
+- **Analysis:** `focus: true` (colon) creates JavaScript breakable label — SpinBox never receives focus. Same bug class as R2-WHE-01.
+- **Impact:** Countdown configuration SpinBoxes never receive keyboard focus on value change.
+
+### [RND-N01] forceQtTextRenderer dead on Apple platforms — unconditionally uses NativeRendering
+- **File:** Prompter.qml:994
+- **Severity:** Low
+- **Analysis:** `Qt.platform.os==="ios" || Qt.platform.os==="osx"` short-circuits to NativeRendering before `root.forceQtTextRenderer` is evaluated.
+- **Impact:** "Force Qt Text Renderer" toggle has no effect on macOS/iOS.
+
+### [RND-N02] Missing smooth: true on background Image — aliased upscale
+- **File:** PrompterBackground.qml:79-87
+- **Severity:** Low
+- **Analysis:** Image.PreserveAspectCrop almost always scales. Without smooth:true, nearest-neighbor interpolation produces visibly pixelated backgrounds.
+- **Impact:** Jagged background images when source resolution doesn't match window aspect.
+
+### [RND-N03] Missing smooth: true on projection Image — aliased text on external displays
+- **File:** ProjectionsManager.qml:284-304
+- **Severity:** Low
+- **Analysis:** Projection Image frequently re-scaled for different screen sizes. Nearest-neighbor filtering makes text jagged on large external monitors/projectors.
+- **Impact:** Pixelated prompter content on external projection screens.
+
+### [ST-N02] Dead overlay.state PropertyChanges — overlay has no states array
+- **File:** ReadRegionOverlay.qml:34-37, Prompter.qml:2899-3032
+- **Severity:** Medium
+- **Analysis:** ReadRegionOverlay defines enum States but has no states: array. Sub-components manage own states independently. All 4 PropertyChanges setting overlay.state in Prompter.qml change no properties — dead code.
+- **Impact:** Dead enum + dead PropertyChanges. States either never implemented or should be removed.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-51.*
