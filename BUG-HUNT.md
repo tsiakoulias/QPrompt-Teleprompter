@@ -6279,4 +6279,88 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - globalhotkeys.cpp:570-698 — no range validation on 22 hotkey modifier reads
 - **Impact:** UB if registry/.conf corrupted or manually edited with invalid modifier values.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-6.*
+---
+
+## Focus Wave 7 — Hardcoded Strings, Signals, Timers, Undo, Assets, Init
+
+### Signals
+
+**[SIG-N01] File watcher permanently blocked after saveAs() error — auto-reload dies**
+- documenthandler.cpp:1143,1160-1161,1170 — blockSignals(true) before open; on failure, unblock timer never scheduled
+- **Impact:** After a single save error, auto-reload stops working until app restart.
+
+**[SIG-N02] loaded(format) emitted before setDocumentComesFromNetwork(false) — onLoaded sees stale comesFromNetwork**
+- documenthandler.cpp:956,1039,1122 — signal fires with stale flag; local loads enter network-restore path
+- **Impact:** First load: non-deterministic cursor position; after network loads: all local files position wrong.
+
+### Timers
+
+**[TMR-N01] TimerClock internal Timer bound to clock.enabled instead of timersEnabled — fires when not needed**
+- TimerClock.qml:100,191 — runs updateTimer() every 333ms even with stopwatch+ETA disabled
+- **Impact:** ~3 wasted JS calls/sec for entire session.
+
+**[TMR-N02] loop.stop() triggers onStopped → resetCountdown() mid-animation — visual countdown jump**
+- Prompter.qml:857,876,1106 — manual stop fires onStopped handler designed for normal completion
+- **Impact:** Countdown display jumps from partial to full height during rewind.
+
+### Undo/Redo/Clipboard
+
+**[UNDO-N01] paste() never updates m_cursorPosition — stale position tracking after paste**
+- documenthandler.cpp:1336-1365
+- **Impact:** C++ format queries read wrong cursor position until QML syncs back.
+
+**[UNDO-N02] replaceAll() emits format signals inside active edit block — toolbar flickers during Replace All**
+- documenthandler.cpp:1492-1520 — reset() signals fire while document partially replaced
+- **Impact:** Formatting toolbar buttons temporarily show wrong state during large Replace All.
+
+**[UNDO-N03] moveText() does not update cursor position tracking members**
+- documenthandler.cpp:1393-1423 — QML callers capture return value but don't call setCursorPosition
+- **Impact:** After drag-moving text, format queries read wrong position.
+
+### Property Init Order
+
+**[INIT-N01] textColor/textBackground bound to acceptedColor that is never assigned**
+- PrompterView.qml:240-241, PrompterPage.qml:1010,1025
+- **Impact:** Initial editor text color stuck at black (#000000). May be invisible on dark themes.
+
+**[INIT-N02] ReadRegionOverlay Settings restores positionState before __customPlacement — persisted placement lost**
+- ReadRegionOverlay.qml:107-114,594-600 — restore order causes Fixed-state PropertyChanges to evaluate with default 0.5
+- **Impact:** Custom overlay position resets to vertical center on every app restart.
+
+### Resource/Asset Bundling
+
+**[ASST-N01] 4 .qrc files orphaned — not registered in CMake, stale alias names**
+- fonts.qrc, chinese.qrc, icons.qrc, pointers.qrc — never referenced in any CMakeLists.txt
+- **Impact:** Misleading dead code. If activated, would cause path conflicts.
+
+**[ASST-N02] icons.qrc references 66 files — 65 don't exist on disk, 1 duplicated**
+- 65 of 66 SVG files missing; icons now supplied by Breeze subset
+- **Impact:** Build failure if qrc ever activated.
+
+**[ASST-N03] Undefined CMake variable doc in foreach — welcome HTML docs lack QT_RESOURCE_ALIAS**
+- src/CMakeLists.txt:243 — `doc` never defined; 21 welcome .html files never aliased
+- **Impact:** Fragile implicit path resolution for welcome documents.
+
+### Git/Build Hygiene
+
+**[HYG-N01] 8 CMake/Gradle build artifacts committed to git**
+- src/CMakeFiles/, android/.gradle/ — generated files in repo
+- **Impact:** Repo bloat; confusing for contributors.
+
+**[HYG-N02] 30 files have incorrect executable bit (+x)**
+- Font files, licenses, PNGs — non-executable files marked 100755
+- **Impact:** Noise in file listings; potential security scanners flagging.
+
+**[HYG-N03] 6 pairs of duplicate identical files in repo**
+- .desktop, appdata.xml, .ico, .png, OpenDyslexic, Palanquin — same content, different paths
+- **Impact:** Maintenance confusion about canonical copy.
+
+**[HYG-N04] License conflict: qmlutil.hpp GPLv3 vs CC BY-SA 4.0 StackOverflow code**
+- GPLv3 and CC BY-SA 4.0 are not compatible per FSF
+- **Impact:** Legal compliance risk in distributed binaries.
+
+**[HYG-N05] documenthandler.{cpp,h} dual-licensed GPLv3 + BSD — mutually exclusive**
+- Two incompatible licenses in same files
+- **Impact:** Legal ambiguity; downstream users can't determine applicable license.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-7.*
