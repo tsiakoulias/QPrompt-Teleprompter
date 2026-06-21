@@ -4659,4 +4659,62 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** m_reply->readAll() without checking m_reply->error(). HTTP errors silently become document content with no warning log. Combined with NET-01.
 - **Impact:** Silent network-error content ingestion with zero diagnostics.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-49.*
+---
+
+## Wave 50 — Fonts, XML, CMake, setup.sh
+
+### [FONT-N01] font.family: "Monospace" never resolves — no such font on any OS
+- **File:** TimerClock.qml:149,161
+- **Severity:** Medium
+- **Analysis:** `font.family: "Monospace"` does case-insensitive exact matching. No font named "Monospace" ships on any platform. Should be `font.families: ["monospace"]` (lowercase, plural) — the only API resolving CSS generic family names.
+- **Impact:** Timer stopwatch/ETA uses proportional fallback. Digit widths vary, causing visible layout jitter as time increments.
+
+### [FONT-N02] FontLoader id typo: westernSeriousSansfFont — stray 'f' in "Sans"
+- **File:** EditorToolbar.qml:558, Prompter.qml:996
+- **Severity:** Low
+- **Analysis:** "Sansf" instead of "Sans". Only affects QML id, not font loading. Code-search for "DejaVu" or "Sans" won't find this id.
+- **Impact:** Developer confusion. Zero runtime impact.
+
+### [XML-N01] android:background="#303030" invalid on \<activity\> — silently ignored
+- **File:** AndroidManifest.xml:26
+- **Severity:** Medium
+- **Analysis:** android:background is a View/layout attribute, not valid on activity elements. Ignored by Android platform. Needs android:theme with windowBackground instead.
+- **Impact:** Activity flashes white/system-default on launch instead of intended dark #303030.
+
+### [CMAKE-N01] QML_IMPORT_PATH set twice — KIRIGAMI_DIRS lost
+- **File:** CMakeLists.txt:97-102
+- **Severity:** Medium
+- **Analysis:** Second set() overwrites first. Kirigami import paths never stored in cached variable.
+- **Impact:** Qt Creator never discovers Kirigami QML paths. No code completion for Kirigami types.
+
+### [CMAKE-N02] INTERFACE_LINK_LIBRARIES on executable target — no-op
+- **File:** src/CMakeLists.txt:285
+- **Severity:** Low
+- **Analysis:** INTERFACE_LINK_LIBRARIES is no-op on executable — nothing links against an executable's interface.
+- **Impact:** Dead code.
+
+### [CMAKE-N03] qt_wrap_ui conflicts with global AUTOUIC — double UI processing
+- **File:** src/CMakeLists.txt:43-46 vs CMakeLists.txt:45
+- **Severity:** Medium
+- **Analysis:** Both mechanisms process systemfontchooserdialog.ui. Redundant code generation, race in parallel builds.
+- **Impact:** Build failures or duplicate symbols in parallel builds.
+
+### [CMAKE-N04] Relative ../build path in install rules — out-of-tree build failure
+- **File:** src/CMakeLists.txt:521-522
+- **Severity:** Medium
+- **Analysis:** `install(DIRECTORY ../build/bin/org ...)` assumes build dir named "build" sibling to source. Out-of-tree builds resolve to nonexistent path.
+- **Impact:** macOS QML plugin installation empty for out-of-tree builds.
+
+### [CMAKE-N05] Android not excluded from KDE module includes and desktop install rules
+- **File:** CMakeLists.txt:332,407
+- **Severity:** Medium
+- **Analysis:** `UNIX` true for Android. `# AND NOT ANDROID` comments confirm exclusion intended but not implemented. KDE flags may inject incompatible linker flags into Android builds.
+- **Impact:** Potentially broken Android builds from KDE compiler/linker flags.
+
+### [SETUP-N01] setup.sh uses windeployqt.exe (Qt 5) — should be windeployqt6.exe (Qt 6)
+- **File:** setup.sh:233
+- **Severity:** Medium
+- **Analysis:** Qt 6 ships windeployqt6.exe. Qt 5 tool doesn't exist on Qt 6-only machines. Mixed Qt 5+6 machines deploy wrong DLLs.
+- **Impact:** Windows deployment packaging broken on Qt 6-only systems.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-50.*
