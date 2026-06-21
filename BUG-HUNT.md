@@ -4835,4 +4835,44 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** beginRemoveRows(0, 0) on empty model signals removal of 1 row from empty model — contract violation. MarkersModel::clearMarkers correctly guards with isEmpty() check. LOG-02 covers off-by-one only.
 - **Impact:** Model/view consistency violation on clearing empty session model.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-52.*
+---
+
+## Wave 53 — Conversions, QVariant, Loader, Detach, Colors
+
+### [COERC-N01] parseInt("") → NaN state bootstrap — first toggle() bricks state machine
+- **File:** Prompter.qml:448
+- **Severity:** High
+- **Analysis:** Flickable.state defaults to empty string "". toggle() reads `parseInt(state)` to compute next state. `parseInt("") = NaN`. `(NaN + 1) % 4 = NaN`. State set to NaN — every subsequent `parseInt(state) === Prompter.States.X` comparison fails silently (NaN ≠ integer). State machine permanently bricked from first toggle.
+- **Impact:** If Flickable.state is ever empty when toggle() is called, the app enters unrecoverable undefined state.
+
+### [COERC-N02] Unvalidated string-to-number injects NaN into root.__opacity — all opacity dead
+- **File:** EditorToolbar.qml:953-958
+- **Severity:** Medium
+- **Analysis:** Non-numeric TextField input ("abc") passes !="" guard, both numeric comparisons produce NaN→false, falls through to `"abc"/100 → NaN`. Propagates to PrompterBackground opacity, toolbar opacity, overlay calculations. No recovery — only app restart fixes it.
+- **Impact:** Typing non-numeric text in opacity field silently breaks all opacity-dependent visuals.
+
+### [COERC-N03] real→int truncation in WindowDragger position compounds drift
+- **File:** WindowDragger.qml:28-34
+- **Severity:** Low
+- **Analysis:** mouse.x (qreal/double) stored to prevX (int) — loses ~0.5px mean error per drag start. Compounds with FINAL-05 algebraic accumulation.
+- **Impact:** Window position drift larger than documented in FINAL-05 alone.
+
+### [QLOAD-N01] InputsOverlay toggleButtonsOff() null-check bypass — crash on slow async Loaders
+- **File:** InputsOverlay.qml:107,564
+- **Severity:** Medium
+- **Analysis:** All 48 Loaders are async. `typeof children[i].item !== "undefined"` passes for null (typeof null === "object"). If one Loader finishes before others, `null.checked = false` throws TypeError crash.
+- **Impact:** Crash on first-open of key-configuration overlay on slow systems.
+
+### [DETACH-N01] 4 non-const operator[] on QList in keySearch() — unnecessary implicit sharing detach
+- **File:** markersmodel.cpp:126,133,137,144
+- **Severity:** Low
+- **Analysis:** QModelIndexList is implicitly shared. Non-const operator[] returns T& forcing deep copy. All 4 sites only read — should use .at() or declare const.
+- **Impact:** Wasteful heap allocation per keySearch() call. Minor performance.
+
+### [COLOR-CRIT-01] selectionColor #333d9ef3 — alpha channel reversed (#AARRGGBB vs #RRGGBBAA), selection invisible
+- **File:** Prompter.qml:973-974
+- **Severity:** High
+- **Analysis:** Qt parses 8-char hex as #AARRGGBB. #333d9ef3 = AA=0x33 → alpha≈20%. Developer likely intended CSS-style #RRGGBBAA with alpha 0xf3=95%. Both selectionColor and selectedTextColor at ~20% opacity — practically invisible on any background.
+- **Impact:** Text selection outside find mode is effectively invisible. Users cannot see what they've highlighted during normal editing.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-53.*
