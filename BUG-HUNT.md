@@ -4875,4 +4875,37 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Qt parses 8-char hex as #AARRGGBB. #333d9ef3 = AA=0x33 → alpha≈20%. Developer likely intended CSS-style #RRGGBBAA with alpha 0xf3=95%. Both selectionColor and selectedTextColor at ~20% opacity — practically invisible on any background.
 - **Impact:** Text selection outside find mode is effectively invisible. Users cannot see what they've highlighted during normal editing.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-53.*
+---
+
+## Wave 54 — Symmetry, Clipboard, Interaction State
+
+### [SYM-N01] 6 RTL/symmetry issues across PointerSettings, Find, PrompterView, Prompter, PrompterPage
+- **Files:** PointerSettings.qml:380 (right pointer label not RTL-mirrored), Find.qml:63-66 (search bar always left-pinned), PrompterView.qml:74-76 (upper controls not RTL-aware), Prompter.qml:658-659 (goToNextMarker has end-fallback but goToPreviousMarker lacks start-fallback), PrompterPage.qml:266,278 (pointer tooltips not RTL-mirrored, contradict button labels)
+- **Severity:** Low-Medium
+- **Impact:** Inconsistent RTL experience — labels, tooltips, positioning, and navigation fallbacks not mirrored.
+
+### [CLIP-CRIT-01] Paste via toolbar button and File menu bypasses HTML sanitization
+- **File:** EditorToolbar.qml:345, main.qml:686
+- **Severity:** Critical
+- **Analysis:** Both invoke editor.paste() (raw Qt built-in) instead of document.paste() (filtered via filterHtml()). Ctrl+V and context menu correctly use document.paste(). Unsanitized HTML with scripts, event handlers, javascript: URLs injected.
+- **Impact:** Same RCE/XSS class as SEC-01 and R4-EXP-01. Keyboard shortcuts safe; toolbar and File menu are not.
+
+### [CLIP-N04] Image-only clipboard paste — button enabled but does nothing
+- **File:** documenthandler.cpp:1356-1359
+- **Severity:** Medium
+- **Analysis:** hasImage() branch entirely commented out. But Qt TextEdit.canPaste returns true for images. User clicks paste — nothing happens, no feedback.
+- **Impact:** Misleading enabled paste button that silently fails for image content.
+
+### [INT-N04] OBS URL/Password fields disabled when WebSocket enabled — inverted logic
+- **File:** PrompterPage.qml:1478,1500
+- **Severity:** Medium
+- **Analysis:** `wsUrlField.enabled: !enabledToggle.checked` — when WebSocket is ON, fields become disabled. Should be always editable or enabled when disconnected.
+- **Impact:** Cannot reconfigure OBS connection without first disabling it.
+
+### [INT-N05] PropertyChanges permanently destroys CheckBox checked bindings on PointerSettings tab switch
+- **File:** PointerSettings.qml:70-83
+- **Severity:** Medium
+- **Analysis:** Arrow state PropertyChanges sets checked/enabled values. QML state saves/restores VALUES not BINDINGS. After visiting Arrow tab, "Reuse left pointer" and "Tint" checkboxes permanently desync from actual settings.
+- **Impact:** Checkboxes show stale state after tab switch; external settings changes not reflected.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-54.*
