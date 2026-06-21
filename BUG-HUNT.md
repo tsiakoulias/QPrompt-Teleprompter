@@ -4585,4 +4585,38 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** `checked: viewport.prompter.ws.active` + `onToggled: viewport.prompter.ws.active = checked`. User toggle severs declarative binding. If WebSocket disconnects, ws.active=false but Switch still shows ON. Same class as R2-EDT-03.
 - **Impact:** UI state mismatch — OBS Switch shows connected when actually disconnected.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-47.*
+---
+
+## Wave 48 — Input Method, Window, Gesture
+
+### [IMH-SYS] Systemic absence of inputMethodHints on ALL TextFields (16 sites)
+- **Files:** EditorToolbar.qml (10 numeric TextFields), PrompterPage.qml (openUrl, wsUrlField, markerHrefField), PathsPage.qml (sofficePathField), PointerSettings.qml (3 color hex, 4 path TextFields), Find.qml (replaceField)
+- **Severity:** Medium
+- **Analysis:** Zero `inputMethodHints` set on any TextField. No `ImhFormattedNumbersOnly` on 10 numeric fields, no `ImhUrlCharactersOnly` on URL/path fields, no `ImhNoAutoUppercase` on dictionary word field, no `ImhNoPredictiveText` on replace field.
+- **Impact:** Full QWERTY with auto-correct/auto-cap on all mobile fields. Numeric fields get wrong keyboard. URLs get auto-correct corruption. Dictionary words get forced capitalization. Paths get predictive text mangling.
+
+### [EKA-SYS] Systemic absence of EnterKeyAction on ALL TextFields (7 sites)
+- **Files:** PrompterPage.qml (openUrl, wsUrlField, markerHrefField, newWordField), Find.qml (searchField, replaceField), PathsPage.qml (sofficePathField)
+- **Severity:** Low
+- **Analysis:** Fields with onAccepted/onEditingFinished/ReturnPressed handlers lack EnterKeyAction. Virtual keyboard shows default "Return" instead of contextual "Go"/"Search"/"Done".
+- **Impact:** Mobile keyboard enter-key label wrong — no visual cue for action. 10 EditorToolbar numeric fields also affected.
+
+### [WINDOW-N01] Projection windows not closed on main window close — orphaned on Linux
+- **File:** main.qml:159-165, +windows:154-160, +android:144-150
+- **Severity:** Medium
+- **Analysis:** onClosing opens save dialog if modified but never calls projectionManager.closeAll() or sets isEnabled=false. Projection Windows with transientParent:root: on Windows/macOS may auto-hide but on Linux/X11, transient children not guaranteed to close when parent closes.
+- **Impact:** Orphaned projection windows remain on-screen after app exits on Linux.
+
+### [GSW-N01] MarkersDrawer SwipeListItem navigates on swipe — gesture conflict on touch
+- **File:** MarkersDrawer.qml:70-74
+- **Severity:** Medium
+- **Analysis:** `onPressed` fires at start of every touch including swipe. Swiping to reveal edit action first triggers navigation to marker position + drawer close. Should use `onClicked` which only fires on press-release without exceeding swipe threshold.
+- **Impact:** Swipe-to-reveal-edit non-functional on touchscreens; every swipe navigates away first.
+
+### [GSW-N02] Flickable onDragStarted uses stale __iBackup after non-prompting drags
+- **File:** Prompter.qml:773-781,788-798
+- **Severity:** Low
+- **Analysis:** In editing mode, onMovementEnded leaves __iBackup non-zero. Second drag: guard prevents backup, restore uses stale first-drag value instead of current velocity.
+- **Impact:** Wrong scroll velocity restored after consecutive drags in editing mode.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-48.*
