@@ -5416,4 +5416,54 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** ShaderEffect has both `id: shadow` AND `readonly property ShaderEffectSource shadow` — same name. Inner blur chain references `shadow.source` which is ambiguous: self-reference to property → null → broken blur dimensions. ReadRegionOverlay avoids this by using distinct id.
 - **Impact:** When shadows enabled, prompter shadow may use degenerate (0×0) blur dimensions — corrupted/missing shadows.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-69.*
+---
+
+## Wave 70 — Keyboard Nav, Drag, Shapes, FD
+
+### [KB-N01] Find.qml: 9 toolbar buttons missing focusPolicy — keyboard-invisible
+- **File:** Find.qml
+- **Severity:** Medium
+- **Analysis:** All Find/Replace toolbar buttons (Close, Replace-toggle, Prev, Next, RegEx, etc.) lack focusPolicy: Qt.TabFocus. Only searchField and replaceField in tab chain. Keyboard users cannot tab to any Find toolbar button.
+- **Impact:** Find/replace toolbar completely inaccessible via keyboard Tab navigation.
+
+### [KB-N02] InputsOverlay TabBar TabButtons have no focusPolicy + keyNavigationEnabled: false — keyboard dead
+- **File:** InputsOverlay.qml:57-63,85
+- **Severity:** Medium
+- **Analysis:** TabButtons default Qt.NoFocus. keyNavigationEnabled: false disables arrow-key navigation in horizontal ListView. Keyboard-only users cannot switch between Keyboard Inputs and Global Hotkeys tabs.
+- **Impact:** "Global Hotkeys" configuration panel unreachable via keyboard.
+
+### [KB-N03] +windows and +android ESC handler uses .focus instead of .activeFocus — wrong boolean
+- **File:** +windows/main.qml:483, +android/main.qml:422
+- **Severity:** Medium
+- **Analysis:** Checks `prompter.focus` (settable property, can be true without actual focus) instead of `.activeFocus`. Base main.qml correctly uses activeFocus. ESC may fail to cancel prompting mode when focus held elsewhere.
+- **Impact:** ESC key may not exit prompting on Windows/Android.
+
+### [DRAG-N01] Image resize body drag: cursor shows OpenHandCursor until drag threshold exceeded
+- **File:** Prompter.qml:1651
+- **Severity:** Low
+- **Analysis:** `cursorShape: dragTarget.manualDrag ? ClosedHandCursor : OpenHandCursor` — manualDrag becomes true only after mouse moves >8px. From press to threshold, shows wrong cursor. leftWidthAdjustmentBar correctly checks pressed || drag.active.
+
+### [DRAG-N02] textDragArea has no cursorShape — no cursor feedback during text drag
+- **File:** Prompter.qml:1429-1431
+- **Severity:** Low
+- **Analysis:** Manual text drag shows blue drop line but cursor stays as IBeamCursor — no indication drag is in progress.
+
+### [SHAPE-N01] pointer_0.qml PathLine parent.width resolves to undefined (ShapePath has no width) — arrow collapsed
+- **File:** pointer_0.qml:60-67
+- **Severity:** Medium
+- **Analysis:** parent inside PathLine is ShapePath (non-Item QObject, no width). parent.width = undefined → 0. Both PathLines collapse to (0,0). Arrow renders as single point instead of chevron.
+- **Impact:** Arrow pointer shape never renders correctly.
+
+### [SHAPE-N02] concentricCircles Shape uses parent-space coordinates in local space — circles off-center
+- **File:** Countdown.qml:202-239
+- **Severity:** Medium
+- **Analysis:** Shape has width:diameter and centering, but ShapePath uses offsetCentre/prompter.centreY (hundreds of pixels, parent-space). Interpreted in Shape's small local space → circles render offset far from intended screen center.
+- **Impact:** Countdown concentric circles render at wrong position.
+
+### [FD-N01] || should be && in autoReload guard — user preference ignored for non-binary files
+- **File:** documenthandler.cpp:1025
+- **Severity:** Medium
+- **Analysis:** `if (!skipAutoReload || autoReload())` — for non-binary files (skipAutoReload=false), always true regardless of user preference. Should be `&&`.
+- **Impact:** When auto-reload disabled, external changes to HTML/text files still trigger reloads — user preference silently ignored.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-70.*
