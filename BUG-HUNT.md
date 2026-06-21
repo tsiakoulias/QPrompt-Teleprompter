@@ -6133,4 +6133,91 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - Root Item and inner Shape both declare `id: clock`. Undefined behavior — one silently shadows the other. Methods on root (getTimeString, startTimer, stopTimer) become unresolvable.
 - **Impact:** Entire timer/stopwatch/ETA system broken at QML loading level.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-4.*
+---
+
+## Focus Wave 5 — Layers, Hotkeys, I18N, Memory, iOS, Math, Shutdown, WASM
+
+### Visual Layering
+
+**[LAY-N01] Countdown crosshair frame ignores countdown.frame property — always visible despite toggle**
+- Countdown.qml:151-178 — no visible binding to `countdown.frame`
+- **Impact:** Users who disable frame in config still see crosshair lines.
+
+### Global Hotkeys
+
+**[GH-N01] Missing KGlobalAccel::setComponent() — all 32 hotkeys ungrouped in KDE settings**
+- globalhotkeys.cpp — no component identity set
+- **Impact:** Hotkeys appear scattered under no recognizable app name in KDE shortcut editor.
+
+### I18N
+
+**[I18N-CRIT-01] English .ts file has unfinished plural forms — proper singular/plural never loads**
+- po/qprompt_en.ts:9,20 — `type="unfinished"` on numerus translations
+- **Impact:** English users see "Replaced 1 instance(s)" instead of "Replaced 1 instance". All 19 other languages are correctly finished.
+
+### Runtime Memory Growth
+
+**[GROW-N01] m_customWords grows without bound — no cap, no eviction**
+- spellchecker.cpp — words added via context menu accumulate forever
+- **Impact:** O(n) contains() + sort on every add; thousands of entries after months of use.
+
+**[GROW-N02] Per-frame closure allocation in onFrameSwapped — 60 JS function objects/sec**
+- main.qml:1041 — new anonymous function per grabToImage callback
+- **Impact:** Sustained GC pressure during prompting sessions.
+
+### iOS/macOS Bridging
+
+**[IOS-N01] iOS preventSleep() entirely stubbed — screen dims during prompting**
+- documenthandler.cpp:1926-1928 — idleTimerDisabled never set
+- **Severity:** High
+- **Impact:** iOS screen can auto-lock during active teleprompting.
+
+**[IOS-N02] macOS QML import paths relative to CWD — broken when launched from Finder/Dock**
+- main.cpp:304-306
+- **Severity:** High
+- Paths like `"../../../"`, `"../build/"` resolve to root `"/"` when CWD is `/` (Finder/Dock launch). Kirigami QML modules silently fail to load.
+- **Impact:** macOS app launched via Finder/Dock has broken QML imports.
+
+**[IOS-N03] get-task-allow hardcoded true in entitlements — App Store rejection**
+- ios/QPrompt.entitlements:9-10
+- **Severity:** High
+- Development-only entitlement active in all build configs. No debug/release differentiation.
+- **Impact:** App Store submission rejected; TestFlight builds require false.
+
+### Math/Arithmetic
+
+**[MATH-N01] binarySearch() potential out-of-bounds at() when rowCount() changes mid-search**
+- markersmodel.cpp:192,202 — rowCount() called twice; model may mutate between calls
+- **Severity:** Medium
+- **Impact:** Debug assertion failure / crash if markers modified during navigation search.
+
+### Shutdown/Resume
+
+**[SSU-CRIT-01] No autosave or crash-recovery — force-kill = 100% data loss**
+- No periodic save, no temp backup, no recovery path
+- **Severity:** Critical
+- **Impact:** SIGKILL, power loss, OOM kill — all unsaved changes permanently lost.
+
+**[SSU-N01] No SIGTERM/SIGINT handler — kill bypasses save prompt**
+- main.cpp — no signal handlers registered
+- **Severity:** High
+- **Impact:** Terminal kill or Ctrl+C destroys unsaved document with no prompt.
+
+**[SSU-N02] No ApplicationStateChange handler — app runs full-tilt when backgrounded**
+- No connection to QGuiApplication::applicationStateChanged
+- **Severity:** High
+- **Impact:** Prompter continues scrolling, TimerClock accumulates, WebSocket stays connected while backgrounded on mobile/WASM.
+
+**[SSU-N03] No commitDataRequest/saveStateRequest — session manager kills without save**
+- main.cpp — desktop logout/shutdown signals not connected
+- **Severity:** High
+- **Impact:** System logout/restart silently loses unsaved document.
+
+### WASM Emscripten
+
+**[WASM-CRIT-01] Missing _malloc null check — OOM writes to address 0, corrupts heap**
+- wasmintegration.cpp:135-141,201-202 — HEAPU8.set with null pointer
+- **Severity:** Critical
+- **Impact:** WASM memory corruption on large file pick (>60MB). Immediate crash or silent data corruption.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-5.*
