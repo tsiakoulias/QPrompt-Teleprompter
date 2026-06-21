@@ -5333,4 +5333,38 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** `#include <QQmlFileSelector>` present but no persistent QQmlFileSelector created and attached to engine. +windows/main.qml and +android/main.qml variants are dead code — base main.qml always loaded on all platforms.
 - **Impact:** Platform-specific QML objects (QmlUtil on Windows, RestartDialog) never instantiated. Wrong QML file loaded on all platforms.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-66.*
+---
+
+## Wave 67 — Types, Block Formatting
+
+### [TC-N01] Image.source assigned boolean false instead of empty string
+- **File:** ProjectionsManager.qml:287
+- **Severity:** Low
+- **Analysis:** `source: model.flip ? model.p : false` — false (boolean) on empty, not "". QML coerces to "". Should be `model.flip ? model.p : ""`.
+- **Impact:** Type muddling. Silent coercion.
+
+### [TC-N02] property color value assigned string expression — silent coercion
+- **File:** PointerSettings.qml:146,178,209
+- **Severity:** Low
+- **Analysis:** Three TextFields declare `property color value: text ? text : placeholderText` — both strings. Silent string→color coercion.
+- **Impact:** Breaks if text holds non-color string.
+
+### [BLK-N01] alignment() returns Qt::AlignCenter (includes vertical bit 0x0080) on null cursor
+- **File:** documenthandler.cpp:549
+- **Severity:** Medium
+- **Analysis:** Qt::AlignCenter = AlignHCenter | AlignVCenter. AlignVCenter has no meaning in QTextBlockFormat context — only applies to table cells/frames. QTextDocument default is AlignLeft.
+- **Impact:** Alignment toolbar shows "centered" with bogus vertical-flag pollution when no document.
+
+### [BLK-N02] updateContents() fails to reset block formatting — stale formats contaminate new document
+- **File:** documenthandler.cpp:1104-1122
+- **Severity:** Medium
+- **Analysis:** removeSelectedText() preserves first block's format on Document deletion. insertText() inherits old block formatting. No QTextBlockFormat reset.
+- **Impact:** Loading plain text after centered HTML makes new text center-aligned. Line height and paragraph spacing carry over from previous document.
+
+### [BLK-N03] setLineHeight/setParagraphHeight apply document-wide — destroy per-block customization
+- **File:** documenthandler.cpp:1597,1611
+- **Severity:** Medium
+- **Analysis:** Both select entire document and merge block format to ALL blocks. Every other formatting setter respects selection scope. These two force destructive global scope.
+- **Impact:** Any per-block line-height or paragraph-spacing customization silently destroyed. Names suggest property setters but behavior is document-level overwrite.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-67.*
