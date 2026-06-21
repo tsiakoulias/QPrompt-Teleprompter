@@ -5916,4 +5916,128 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - QSettings writes fail silently, spellchecker cache unusable, custom dictionary write fails, factoryReset does nothing but still kills app. No diagnostics anywhere.
 - **Impact:** App breaks silently on read-only media. User loses work from fake factory reset.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-2.*
+---
+
+## Focus Wave 3 — Signals, HTML Roundtrip, Pointers, Android, Cursors, Bindings, Extremes, Build
+
+### Signal/Slot
+
+**[SIG-N01] QMetaObject::invokeMethod return value never checked — 6 silent failure sites**
+- shakedetector.mm:35,96,105, iossavedialog.mm:42,50, wasmintegration.cpp:71
+- **Severity:** Medium
+- Return bool discarded. If target deleted between schedule and execution (QueuedConnection), fails silently with zero diagnostics.
+- **Impact:** Silent iOS shake detection failure. Silent WASM background image upload failure.
+
+### HTML Import/Export Fidelity
+
+**[HTML-CRIT-01] Images lost on save/load roundtrip — QTextDocument resources not serialized**
+- documenthandler.cpp:1724-1776
+- **Severity:** Critical
+- insertImageAt adds images to resource cache via addResource(). toHtml() references resources by URL, never embeds data. On reload, resources never repopulated. Local file images become broken placeholders.
+- **Impact:** Any document with inserted images becomes imageless after save+reopen. Data loss.
+
+**[HTML-CRIT-02] filterHtml() regex_4 greedy .* destroys entire CSS block in office imports**
+- documenthandler.cpp:1279-1286
+- **Severity:** Critical
+- `p\s*{.*(\scolor:...)` — greedy `.*` matches across multiple CSS rules. Entire `<style>` block destroyed. Only `p` rules + body rules survive; all others deleted.
+- **Impact:** Multi-rule CSS in LibreOffice/MS Office HTML imports partially or completely destroyed.
+
+**[HTML-N01] load() bypasses filterHtml() for local HTML files — unfiltered attributes survive**
+- documenthandler.cpp:952-956
+- **Severity:** High
+- Only regex_0 applied, not filterHtml(). white-space, script tags, event handlers, phantom markers from `<a name="...">` all survive. paste() and import() correctly apply full filterHtml().
+- **Impact:** Local HTML from other editors opens with broken wrapping and potential XSS.
+
+**[HTML-N02] loadFromNetworkFinihed() bypasses filterHtml() — unfiltered remote HTML**
+- documenthandler.cpp:888-901
+- **Severity:** High
+- Same as HTML-N01 but for untrusted network content. Remote HTML has LESS sanitization than clipboard paste.
+- **Impact:** Security gap — remote HTML bypasses all filterHtml() protections.
+
+### Pointer / Read Region
+
+**[PNTR-N01] Operator precedence: right-side Arrow pointer xScale never flipped**
+- ReadRegionOverlay.qml:394-395
+- **Severity:** Medium
+- `xScale: pointerKind===Arrow || sameAsLeftPointer ? -1 : 1` — `||` lower precedence than `?:`. Parsed as `(kind===Arrow) || (sameAsLeftPointer ? -1 : 1)`. When Arrow, short-circuits to `true` (= 1). Right arrow always points right (away from text), never flipped to point left.
+- **Impact:** Right-side arrow points outward away from reading region.
+
+### Android Manifest
+
+**[AND-N01] resConfig "en" strips all non-English resources — multilanguage broken at APK level**
+- android/build.gradle:82
+- **Severity:** High
+- AAPT2 strips every non-English framework resource. App supports 20+ languages but system prompts, date pickers, permission dialogs always in English.
+- **Impact:** Android system UI permanently English regardless of device locale.
+
+**[AND-N02] Missing android:localeConfig — per-app language preferences non-functional on Android 13+**
+- AndroidManifest.xml:8-15
+- **Severity:** Medium
+- Android 13 requires localeConfig for per-app language. Without it, in-app language selection overridden by system.
+
+**[AND-N03] android:enableOnBackInvokedCallback="false" disables predictive back gesture**
+- AndroidManifest.xml:15
+- **Severity:** Medium
+- Explicitly opts out of Android 14+ predictive back. No modern back-to-home animation.
+
+### QTextCursor Position/Ops
+
+**[TC-N01] m_cursorPosition defaults to -1 — textCursor() creates cursor at invalid position**
+- documenthandler.cpp:126,1214
+- **Severity:** High
+- Constructor sets m_cursorPosition(-1). textCursor() calls setPosition(-1) — undocumented Qt behavior. All getters read formatting from position -1 before QML calls setCursorPosition().
+- **Impact:** Undefined formatting state on startup. Version-dependent Qt behavior.
+
+**[TC-N02] setAlignment() has zero cursor-validity guard — crash on null document**
+- documenthandler.cpp:553-560
+- **Severity:** High
+- Only formatting setter without isNull() guard. mergeBlockFormat on null cursor → segfault. setFontSize and others correctly guard.
+- **Impact:** Crash when alignment changed with no document loaded.
+
+**[TC-N03] replaceAll() backward search from penultimate position misses first-character match**
+- documenthandler.cpp:1497-1500
+- **Severity:** High
+- movePosition(End) → position-1 as start. FindBackward from position 0 searches left of position 0 (nowhere). First character of every document silently skipped by Replace All backward search.
+- **Impact:** Replace All silently misses matches at position 0 of every document.
+
+### Rapid/Extreme Scenarios
+
+**[EXT-N01] replaceAll single undo block — OOM on large documents with many matches**
+- documenthandler.cpp:1503-1516
+- **Severity:** Medium
+- All replacements in one beginEditBlock. 100K+ matches = 100K× undo data = exceeds memory, crashes. No chunking.
+- **Impact:** OOM crash on Replace All with large documents.
+
+**[EXT-N02] Ctrl+F during Prompting permanently corrupts Find overlay state**
+- Prompter.qml:2845-2846
+- **Severity:** Medium
+- find.open() in Prompting sets isOpen=true but visible=false (height bound to 0). toggle() uses !visible to compute isOpen — can never set isOpen=false. Find permanently stuck.
+- **Impact:** Find overlay permanently "open"; requires manual state reset.
+
+### Build System
+
+**[BLD-N01] distribute.sh platform condition always true — runs windeployqt on all platforms**
+- dist/distribute.sh:95
+- **Severity:** High
+- `[[ "$PLATFORM"=="windows" ]]` has no spaces around `==`. Bash treats as non-empty string test (always true). Windows deploy step runs on Linux/macOS. macOS macdeployqt never reached.
+- **Impact:** macOS DMG packaging silently broken.
+
+**[BLD-N02] USE_GIT_DEPENDENCIES_ONLY on Linux → KF6::GlobalAccel link failure**
+- CMakeLists.txt:155-247, src/CMakeLists.txt:474-487
+- **Severity:** High
+- FetchContent branch skips KGlobalAccel find. Linux link block unconditionally references KF6::GlobalAccel. Target doesn't exist.
+- **Impact:** CMake configure failure. Linux self-contained source-build path broken.
+
+**[BLD-N03] KDEClangFormat: ALL_CLANG_FORMAT_SOURCE_FILES populated 170 lines AFTER include**
+- CMakeLists.txt:349,519
+- **Severity:** Medium
+- KDEClangFormat reads variable at include-time (line 349). Variable populated at line 519. clang-format target empty.
+- **Impact:** `cmake --target clang-format` is silent no-op. CI formatting checks pass trivially.
+
+**[BLD-N04] setup.sh vcvarsall.bat hardcodes amd64 — wrong for native Windows ARM64**
+- setup.sh:175
+- **Severity:** Medium
+- amd64_arg produces x64 binaries even on ARM64. Mismatch with Qt ARM64 libraries.
+- **Impact:** Windows ARM64 builds produce wrong-architecture executables.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-3.*
