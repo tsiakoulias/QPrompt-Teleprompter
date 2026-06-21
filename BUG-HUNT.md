@@ -5127,4 +5127,20 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** `!defined(Q_OS_APPLE)` — Qt does not define Q_OS_APPLE. Correct macro is Q_OS_DARWIN. Since never defined, `!defined(Q_OS_APPLE)` always true. KGlobalAccel include and macro compiled on all Unix platforms — macOS, FreeBSD, etc. — contrary to "KDE Plasma only" intent.
 - **Impact:** On macOS with KF6 via Homebrew, enables KDE global shortcut infrastructure on non-KDE platform. Hard compile error if KF6 unavailable.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-61.*
+---
+
+## Wave 62 — Transforms, Toggles
+
+### [TRF-N01] rightWidthAdjustmentBar drag.maximumX formula broken — drag collapses to single point
+- **File:** Prompter.qml:2022
+- **Severity:** High
+- **Analysis:** maxX formula cancels prompter.width terms: `prompter.width - editor.x - prompter.width - 20 - 13 = -editor.x - 33`. drag.minimumX = -editor.x + 20, which is always greater. Result: drag.maximumX always equals drag.minimumX — single-point snap, handle cannot be dragged. Commented-out line 2021 shows intended formula using editor.width and drag.maximumX reference.
+- **Impact:** Right width adjustment bar is non-functional — editor right edge cannot be freely adjusted via drag.
+
+### [TOG-N01] WheelSettingsOverlay useScrollAsDialButton — cross-path stale checked state
+- **File:** WheelSettingsOverlay.qml:50-60
+- **Severity:** Medium
+- **Analysis:** checked binding breaks on click. Setting togglable from 3 independent UI paths (overlay button, context drawer action, native menu item). Changing via other path leaves overlay button showing stale checked state.
+- **Impact:** Overlay toggle shows wrong state when changed via other UI.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-62.*
