@@ -5159,4 +5159,63 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Both declare checked binding but omit checkable: true. Material style checked background only renders when checkable && checked. Text color feedback works but background never highlights.
 - **Impact:** Checked state visually diminished — harder to tell if markers drawer or find panel is open.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-63.*
+---
+
+## Wave 64 — Final: Build, Translations, Metadata, Android
+
+### [DEB-N01] libvulkan-dev (dev package) listed as Debian runtime dependency
+- **File:** CMakeLists.txt:446
+- **Severity:** High
+- **Analysis:** CPACK_DEBIAN requires libvulkan-dev — a build-time package (headers, .so symlinks). Runtime should be libvulkan1. Pulls unnecessary build toolchain.
+- **Impact:** Bloated install; packaging review rejection.
+
+### [DEB-N02] qml6-module-qtcore is not a real Debian package — .deb uninstallable
+- **File:** CMakeLists.txt:446
+- **Severity:** High
+- **Analysis:** QtCore has no QML module. Correct name is qml6-module-qtqml. apt cannot resolve.
+- **Impact:** DEB package uninstallable — dependency resolution fails.
+
+### [DEB-N03] qml6-module-qt-labs-platform doesn't exist for Qt 6 — .deb uninstallable
+- **File:** CMakeLists.txt:446
+- **Severity:** High
+- **Analysis:** Qt.labs.platform dropped in Qt 6. Package can never be satisfied on Qt 6 system.
+- **Impact:** Another blocking dependency. Three uninstallable DEB dependencies total.
+
+### [RPM-N01] RPM dependencies entirely commented out — zero automatic dependency resolution
+- **File:** CMakeLists.txt:450
+- **Severity:** Medium
+- **Analysis:** CPACK_RPM_PACKAGE_REQUIRES fully commented out. Generated RPMs have empty Requires. dnf/yum installs with zero dependencies.
+- **Impact:** App fails to launch after dnf install — Qt/KDE not pulled in.
+
+### [TS-N07] Wrong translations: Chinese "Undo"→"Open", "Bars"→"Toolbar"; French "Pointer Configuration"→"Prompter duration"; Korean "Line width"→"Line height"
+- **Files:** qprompt_zh.ts, qprompt_fr.ts, qprompt_ko.ts
+- **Severity:** Medium
+- **Impact:** Users see completely wrong functionality labels. Menu items and settings labels are misleading.
+
+### [META-N14] ModernToolkit removed from AppStream spec — validation error
+- **File:** appdata.xml:66
+- **Severity:** Medium
+- **Impact:** AppStream validation failure. GNOME Software / KDE Discover may reject metadata.
+
+### [META-N15] No StartupWMClass in desktop file — duplicate dock entries, missing icon
+- **File:** com.cuperino.qprompt.desktop
+- **Severity:** Medium
+- **Impact:** App appears as separate generic entry in docks/taskbars on Linux.
+
+### [META-N16] README badges and links reference wrong repo Cuperino/QPrompt (should be QPrompt-Teleprompter)
+- **File:** README.md
+- **Severity:** Low
+- **Impact:** Stale/zero project stats on badges; dead links.
+
+### [META-N17] README links to non-existent BUILD.md
+- **File:** README.md:18
+- **Severity:** Medium
+- **Impact:** New contributors cannot find build instructions.
+
+### [AND-N08] Android saveAs() hardcodes isHtml=true — plain-text files saved with HTML markup
+- **File:** documenthandler.cpp:1149,1164
+- **Severity:** Medium
+- **Analysis:** Android block forces isHtml=true unconditionally, skipping extension-based format detection. toHtml() always used. .txt files get HTML markup embedded.
+- **Impact:** Silent data corruption on Android — plain-text files round-tripped through app contain HTML tags.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-64.*
