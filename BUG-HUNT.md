@@ -4908,4 +4908,32 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - **Analysis:** Arrow state PropertyChanges sets checked/enabled values. QML state saves/restores VALUES not BINDINGS. After visiting Arrow tab, "Reuse left pointer" and "Tint" checkboxes permanently desync from actual settings.
 - **Impact:** Checkboxes show stale state after tab switch; external settings changes not reflected.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-54.*
+---
+
+## Wave 55 — Number Format, Platform Conditionals
+
+### [FMT-N01] Step Speed onAccepted displays 100x correct value
+- **File:** EditorToolbar.qml:1955
+- **Severity:** Medium
+- **Analysis:** onAccepted writes raw slider value (e.g., 100.00) instead of divided value (1.00). All other code paths (onVisibleChanged, Keys handlers) correctly divide by 100.
+- **Impact:** After accepting edit, speed field shows 100x inflated value. Subsequent interactions use wrong base.
+
+### [FMT-N02] Step Acceleration onAccepted — identical 100x display bug
+- **File:** EditorToolbar.qml:2074
+- **Severity:** Medium
+- **Analysis:** Same as FMT-N01 for acceleration Slider.
+- **Impact:** Same — acceleration field shows 100x inflated value.
+
+### [PLAT-N04] "ipados" is not valid Qt.platform.os string — 18 dead guards across 5 files
+- **Files:** main.qml (7), +windows (6), +android (3), EditorToolbar.qml, ReadRegionOverlay.qml
+- **Severity:** Medium
+- **Analysis:** Qt.platform.os returns "ios" for both iPhone and iPad. No separate "ipados" string exists. All 18 guards are dead code.
+- **Impact:** Full-screen buttons wrongly shown on iPad. Read region placement defaults wrong. System font button wrongly enabled on iPad. Since 'ios' is already in all 18 arrays alongside 'ipados', fix is to delete 'ipados' entries.
+
+### [PLAT-N05] Base main.qml fullScreenPlatform missing "wasm" (inconsistent with +windows)
+- **File:** main.qml:45
+- **Severity:** Low
+- **Analysis:** +windows variant includes "wasm" (dead code there). Base variant (WASM actually loads this) does NOT include "wasm". WASM uses browser-managed fullscreen.
+- **Impact:** App's own fullscreen-toggle UI shown alongside browser native fullscreen button on WASM.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-55.*
