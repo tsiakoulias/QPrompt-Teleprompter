@@ -6465,4 +6465,92 @@ C++ members/containers accessed without null or bounds validation. Many reachabl
 - ProjectionsManager.qml:188 — if model.name===root.screen.name && windows, return Hidden
 - **Impact:** User configures projection for primary display; it silently disappears.
 
-*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-8.*
+---
+
+## Focus Wave 9 — Windows Platform (Final)
+
+### Windows Shell / Taskbar
+
+**[WIN-SHELL-N01] Missing AppUserModelID — broken taskbar grouping, no jump lists**
+- main.cpp — SetCurrentProcessExplicitAppUserModelID/QApplication::setWinApplicationId never called
+- **Impact:** Taskbar icon may group with wrong apps; jump list (recent files) impossible. Explorer restart produces duplicate buttons.
+
+**[WIN-SHELL-N02] FramelessWindowHint breaks Windows 11 snap layouts during prompting**
+- +windows/main.qml:124-125 — removes WS_CAPTION needed for Win+Z and snap assist
+- **Impact:** During prompting, window cannot use snap layouts or Win+Arrow tiling.
+
+**[WIN-SHELL-N03] Projection windows get independent taskbar buttons — N+1 clutter**
+- ProjectionsManager.qml:176-194 — FramelessWindowHint without Qt.Tool leaves taskbar entry per window
+- **Impact:** Taskbar flooded with unlabeled projection buttons; indistinguishable from main window.
+
+**[WIN-SHELL-N04] Windows Tablet Mode not detected — desktop UI on touch devices**
+- No GetSystemMetrics(SM_CONVERTIBLESLATEMODE) or IsUserInTabletMode() anywhere
+- **Impact:** Surface Pro/Yoga get desktop-sized toolbar buttons unusable with finger input.
+
+### Windows Font/Text Rendering
+
+**[WIN-FONT-N01] QtRendering on Windows bypasses DirectWrite/ClearType for ALL text ≤ 120px**
+- Prompter.qml:991-994 — Text.QtRendering (FreeType grayscale) instead of DirectWrite subpixel
+- **Impact:** All Windows users get FreeType-rendered text with no ClearType. Text less readable.
+
+**[WIN-FONT-N02] No High Contrast mode detection — app invisible in HC themes**
+- Hardcoded colors in 20+ files; never queries QStyleHints::colorScheme()
+- **Impact:** Invisible/unreadable in Windows High Contrast mode. Accessibility compliance failure.
+
+### Windows Power/Session
+
+**[WIN-PWR-N01] No sleep prevention on Windows — display sleeps during prompting**
+- documenthandler.cpp:1929-1931 — SetThreadExecutionState never called; stub returns false
+- **Impact:** Windows display turns off mid-session per power plan. Core teleprompter function broken.
+
+**[WIN-PWR-N02] No WM_QUERYENDSESSION/commitDataRequest — data loss on shutdown**
+- main.cpp — zero native event handling; onClosing dialog races with OS termination timeout
+- **Impact:** Windows shutdown/restart kills app with unsaved changes permanently lost.
+
+**[WIN-PWR-N03] No applicationState monitoring — prompting continues during Win+L lock**
+- Zero references to Qt.application.state/applicationStateChanged
+- **Impact:** Prompter scrolls past user's place while session is locked. OBS commands fire unattended.
+
+**[WIN-PWR-N04] No WM_POWERBROADCAST — sleep/hibernate silently corrupts animation state**
+- Zero native event handling for PBT_APMSUSPEND/PBT_APMRESUMESUSPEND
+- **Impact:** After sleep resume: timers jump with accumulated missed ticks, prompter position leaps.
+
+### Windows Multi-Monitor / Projection
+
+**[WIN-SCR-N01] No screen hotplug handling — crash on monitor disconnect during projection**
+- ProjectionsManager.qml — zero handlers for screenAdded/screenRemoved; QScreen* dangling
+- **Impact:** Crash on next frame swap after monitor hot-unplug during active projections.
+
+**[WIN-SCR-N02] Screen name collision — wrong projection hidden on identically-named monitors**
+- ProjectionsManager.qml:188 — dual identical monitors share .name; second one wrongly hidden
+- **Impact:** Projection silently fails on second identical monitor in multi-monitor setup.
+
+**[WIN-SCR-N03] Screen.devicePixelRatio (capital S) reads primary DPI — wrong for projector displays**
+- Prompter.qml:994 — uses primary screen DPI instead of display screen's DPI
+- **Impact:** Wrong text rendering path when projector (primary) + laptop (secondary).
+
+### Windows Input / Hotkey
+
+**[WIN-INPUT-N01] Pen/tablet input dead — zero QTabletEvent handling**
+- All files — MouseArea responds to QMouseEvent only; Surface Pen/Wacom generate QTabletEvent
+- **Impact:** Surface Pro and Wacom pen users cannot interact with the application at all.
+
+**[WIN-INPUT-N02] StickyKeys breaks all strict-equality modifier checks**
+- Prompter.qml:2674-2794 — StickyKeys injects extra modifier flags; === fails
+- **Impact:** All 31 user-configured keybindings silently fail when StickyKeys is active.
+
+**[WIN-INPUT-N03] Dead-key capture during keybinding — ghost bindings on international keyboards**
+- KeyInputButton.qml:103-112 — dead keys (acute, grave) not excluded from capture
+- **Impact:** French/German/Spanish users create unusable dead-key bindings.
+
+**[WIN-INPUT-N04] Global hotkeys lost after Win+L lock — no re-registration**
+- globalhotkeys.cpp:1116 — RegisterHotKey cleared on lock; QHotkey may not re-register on unlock
+- **Impact:** All global hotkeys stop working after locking/unlocking Windows.
+
+### Windows Compiler / MSVC
+
+**[WIN-CC-N01] C++ or token in 6 #if directives — breaks MSVC without /Zc:preprocessor**
+- documenthandler.cpp:132,347,911,1057, globalhotkeys.cpp:560,832
+- **Impact:** Compile error on MSVC if /permissive- or /Zc:preprocessor not enabled.
+
+*Report: waves 1-10, synthesis, re-run, waves 27-72, deep dives, focus waves 1-9.*
