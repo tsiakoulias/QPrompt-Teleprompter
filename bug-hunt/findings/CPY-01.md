@@ -1,0 +1,33 @@
+# [CPY-01] 5 Q_INVOKABLE methods pass QString by value instead of const&
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `markersmodel.h:68, documenthandler.h:213,215,227, systemfontchooserdialog.h:53`
+- **Consensus:** 2/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **Files:** markersmodel.h:68, documenthandler.h:213,215,227, systemfontchooserdialog.h:53
+- **Severity:** Low
+- **Analysis:** extendLastMarker, setKeyMarker, setMarkerHref, replaceSelected, setFontFamily all take QString by value but only read (never mutate). Unnecessary heap allocation per call.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | 5 Q_INVOKABLE pass QString by value (markersmodel.h:68) |
+| gpt | ⚠️ PARTIAL | 58 | observed 5 Q_INVOKABLE methods pass QString by value instead of const& (src/markersmodel.h:68) |
+| deepseek | ✅ LEGIT | 80 | 5 Q_INVOKABLE methods pass QString by value instead of const&; unnecessary heap copies (documenthandler.h:213 215 227 markersmodel.h:68) |
+| glm | ✅ LEGIT | 75 | markersmodel.h:68 documenthandler.h:213 215 227 systemfontchooserdialog.h:53 Q_INVOKABLE methods pass QString by value instead of const& |
+| kimi | ❌ FALSE | 80 | QString passed by value is legal and functional; it is an inefficiency, not a correctness bug. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — 5 Q_INVOKABLE pass QString by value (markersmodel.h:68) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

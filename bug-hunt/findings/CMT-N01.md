@@ -1,0 +1,33 @@
+# [CMT-N01] Justify ToolButton comment says it's commented out — but it's active
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `EditorToolbar.qml:761-773`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** EditorToolbar.qml:761-773
+- **Severity:** Medium
+- **Analysis:** Comment claims justify is commented out. Code is fully active, controlled by `toolbar.showJustify`. Contradicts reality.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | comment claims Justify button commented out but it's active (EditorToolbar.qml:761) |
+| gpt | ⚠️ PARTIAL | 48 | comment problem observed, but defect impact is limited (src/kirigami_ui/EditorToolbar.qml:761) |
+| deepseek | ✅ LEGIT | 90 | Comment says justify is commented out at EditorToolbar.qml:761 but code is active via toolbar.showJustify |
+| glm | ✅ LEGIT | 80 | EditorToolbar.qml:761-773 comment says justify is commented out but button is active |
+| kimi | ✅ LEGIT | 80 | EditorToolbar.qml:761 comment states justify is commented out, but alignJustifyButton at lines 762-773 is fully active. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — comment claims Justify button commented out but it's active (EditorToolbar.qml:761) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

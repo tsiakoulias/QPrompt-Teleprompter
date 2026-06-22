@@ -1,0 +1,34 @@
+# [WSM-N01] Synchronous QImage::load() from HTTP blocks WASM main thread
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** 
+- **Location:** `documenthandler.cpp:1449-1451,1733`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1449-1451,1733
+- **Severity:** High
+- **Analysis:** `image.load(src)` with HTTP URL → synchronous XMLHttpRequest on WASM. Deprecated in Chrome/Firefox/Safari. Blocks UI thread for entire request duration.
+- **Impact:** Multi-second UI freezes on WASM during image paste with remote URLs; browser console deprecation warnings.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | synchronous QImage::load over HTTP blocks WASM main thread (documenthandler.cpp:1449) |
+| gpt | ✅ LEGIT | 84 | Synchronous QImage::load() from HTTP blocks WASM main thread (src/documenthandler.cpp:1449) |
+| deepseek | ✅ LEGIT | 85 | image.load(src) with HTTP URL at documenthandler.cpp:1451 — synchronous XHR on WASM blocks UI |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:1449-1451 1733 QImage::load() from HTTP blocks WASM main thread synchronously |
+| kimi | ✅ LEGIT | 80 | documenthandler.cpp:1451 calls image.load(src) on http/https URLs; on WASM this performs a synchronous network request on the main thread. |
+| opus-ultra | ✅ LEGIT | 60 | synchronous QImage::load over HTTP blocks WASM main thread (documenthandler.cpp:1449) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

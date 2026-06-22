@@ -1,0 +1,36 @@
+# [INT-N05] PropertyChanges permanently destroys CheckBox checked bindings on PointerSettings tab switch
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `PointerSettings.qml:70-83`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PointerSettings.qml:70-83
+- **Severity:** Medium
+- **Analysis:** Arrow state PropertyChanges sets checked/enabled values. QML state saves/restores VALUES not BINDINGS. After visiting Arrow tab, "Reuse left pointer" and "Tint" checkboxes permanently desync from actual settings.
+- **Impact:** Checkboxes show stale state after tab switch; external settings changes not reflected.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 55 | PropertyChanges destroys CheckBox checked bindings (PointerSettings.qml:70) |
+| gpt | ⚠️ PARTIAL | 58 | observed PropertyChanges permanently destroys CheckBox checked bindings on PointerSettings tab switch (src/prompter/PointerSettings.qml:70) |
+| deepseek | ✅ LEGIT | 90 | PointerSettings.qml:70-83: Arrow state PropertyChanges overwrites checked/enabled bindings; checkboxes permanently desync after tab switch |
+| glm | ✅ LEGIT | 75 | PointerSettings.qml:70-83 PropertyChanges permanently destroys CheckBox checked bindings on tab switch |
+| kimi | ✅ LEGIT | 85 | PointerSettings.qml:70-83 Arrow state PropertyChanges assigns `checked` value, breaking bindings on sameAsLeftPointer/tint checkboxes. |
+| opus-ultra | ✅ LEGIT | 55 | PropertyChanges destroys CheckBox checked bindings (PointerSettings.qml:70) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,34 @@
+# [RND-N02] Missing smooth: true on background Image — aliased upscale
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `PrompterBackground.qml:79-87`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PrompterBackground.qml:79-87
+- **Severity:** Low
+- **Analysis:** Image.PreserveAspectCrop almost always scales. Without smooth:true, nearest-neighbor interpolation produces visibly pixelated backgrounds.
+- **Impact:** Jagged background images when source resolution doesn't match window aspect.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | missing smooth:true on background Image (PrompterBackground.qml:79) |
+| gpt | ⚠️ PARTIAL | 58 | observed Missing smooth: true on background Image - aliased upscale (src/prompter/PrompterBackground.qml:79) |
+| deepseek | ✅ LEGIT | 85 | PrompterBackground.qml:79-87: Image with PreserveAspectCrop fillMode lacks smooth:true; nearest-neighbor scaling |
+| glm | ✅ LEGIT | 70 | PrompterBackground.qml:79-87 missing smooth: true on background Image; aliased upscale |
+| kimi | ✅ LEGIT | 85 | PrompterBackground.qml:79-88 Image with PreserveAspectCrop lacks `smooth: true`; nearest upscale is policy, but claim of aliasing is verified. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — missing smooth:true on background Image (PrompterBackground.qml:79) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

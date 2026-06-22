@@ -1,0 +1,36 @@
+# [LOG-N07] No error log in loadFromNetworkFinihed() — silent bad-data load
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:888-901`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** documenthandler.cpp:888-901
+- **Severity:** Medium
+- **Analysis:** m_reply->readAll() without checking m_reply->error(). HTTP errors silently become document content with no warning log. Combined with NET-01.
+- **Impact:** Silent network-error content ingestion with zero diagnostics.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 55 | no error log on bad/empty network data (documenthandler.cpp:888) |
+| gpt | ⚠️ PARTIAL | 58 | observed No error log in loadFromNetworkFinihed() - silent bad-data load (src/documenthandler.cpp:888) |
+| deepseek | ✅ LEGIT | 95 | documenthandler.cpp:888-901: m_reply->readAll() without checking m_reply->error(); HTTP errors silently become document content with no warning log |
+| glm | ✅ LEGIT | 75 | documenthandler.cpp:888-901 no error log in loadFromNetworkFinihed; silent bad-data load |
+| kimi | ✅ LEGIT | 90 | documenthandler.cpp:888-901 loadFromNetworkFinihed ignores m_reply->error() and silently ignores empty responses. |
+| opus-ultra | ✅ LEGIT | 55 | no error log on bad/empty network data (documenthandler.cpp:888) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

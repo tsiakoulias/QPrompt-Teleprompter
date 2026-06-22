@@ -1,0 +1,34 @@
+# [KB-N02] InputsOverlay TabBar TabButtons have no focusPolicy + keyNavigationEnabled: false — keyboard dead
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `InputsOverlay.qml:57-63,85`
+- **Consensus:** 3/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** InputsOverlay.qml:57-63,85
+- **Severity:** Medium
+- **Analysis:** TabButtons default Qt.NoFocus. keyNavigationEnabled: false disables arrow-key navigation in horizontal ListView. Keyboard-only users cannot switch between Keyboard Inputs and Global Hotkeys tabs.
+- **Impact:** "Global Hotkeys" configuration panel unreachable via keyboard.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 55 | TabButtons no focusPolicy + keyNavigationEnabled:false (InputsOverlay.qml:57) |
+| gpt | ⚠️ PARTIAL | 58 | observed InputsOverlay TabBar TabButtons have no focusPolicy + keyNavigationEnabled: false - keyboard de (src/kirigami_ui/InputsOverlay.qml:57) |
+| deepseek | ✅ LEGIT | 85 | TabButtons default Qt.NoFocus + keyNavigationEnabled:false; keyboard users cannot switch tabs |
+| glm | ✅ LEGIT | 65 | InputsOverlay.qml:57-63 85 TabBar TabButtons have no focusPolicy + keyNavigationEnabled: false; keyboard dead |
+| kimi | ❌ FALSE | 65 | InputsOverlay.qml TabButtons use default focusPolicy; keyNavigationEnabled:false only disables arrow-key tab switching |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — TabButtons no focusPolicy + keyNavigationEnabled:false (InputsOverlay.qml:57) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

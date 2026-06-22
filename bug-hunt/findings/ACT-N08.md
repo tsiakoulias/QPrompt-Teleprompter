@@ -1,0 +1,36 @@
+# [ACT-N08] All checkable Labs.MenuItems inherit R2-EDT-03 binding-break pattern
+
+- **Status:** OPEN
+- **Severity:** Medium (masked — Labs.MenuBar dead per IMP-N01)
+- **Category:** 
+- **Location:** `main.qml:617-922`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** main.qml:617-922
+- **Severity:** Medium (masked — Labs.MenuBar dead per IMP-N01)
+- **Analysis:** Every checkable Labs.MenuItem (Bold/Italic/Underline, Full Screen, Indicators, Position items, scroll/dial) has `checked: binding` + `onTriggered: property = checked`. On first click, native checkmark toggles imperatively → QML binding breaks. Currently masked because Qt 6 drops Qt.labs.platform Menu/MenuBar.
+- **Impact:** If ever migrated to working native menu API, ALL checkable items decay after first use.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 55 | checkable Labs.MenuItems inherit checked-binding-break (R2-EDT-03 family) (main.qml:617) |
+| gpt | ⚠️ PARTIAL | 58 | observed All checkable Labs.MenuItems inherit R2-EDT-03 binding-break pattern (src/kirigami_ui/main.qml:617) |
+| deepseek | ⚠️ PARTIAL | 50 | claims Labs.MenuBar binding-break pattern; Labs.MenuBar already dead per IMP-N01 (main.qml:617-922) |
+| glm | ⚠️ PARTIAL | 65 | main.qml:617-922 checkable Labs.MenuItems inherit binding-break pattern; Labs platform is valid in Qt 6 |
+| kimi | ✅ LEGIT | 75 | main.qml:693-889 contains many checkable Labs.MenuItem items using checked:<binding> plus onTriggered:<property>=checked; first user click breaks the declarative binding. |
+| opus-ultra | ✅ LEGIT | 55 | checkable Labs.MenuItems inherit checked-binding-break (R2-EDT-03 family) (main.qml:617) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

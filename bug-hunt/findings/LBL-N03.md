@@ -1,0 +1,36 @@
+# [LBL-N03] PrompterView 3× height overflow in theforce debug mode
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `PrompterPage.qml:739`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PrompterPage.qml:739
+- **Severity:** Low
+- **Analysis:** `height: (root.theforce ? 3 : 1) * parent.height`. At minimum window (291px), produces 873px — far exceeding window. Oversized Flickable allocates and renders off-screen content.
+- **Impact:** 3× memory/layout overhead in debug mode; visual corruption on small windows.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | PrompterView height overflow in theforce debug mode (PrompterPage.qml:739) |
+| gpt | ⚠️ PARTIAL | 58 | observed PrompterView 3× height overflow in theforce debug mode (src/kirigami_ui/PrompterPage.qml:739) |
+| deepseek | ✅ LEGIT | 85 | PrompterPage.qml:739: when root.theforce debug mode active height=3*parent.height; at min window (291px) produces 873px — off-screen render overhead |
+| glm | ⚠️ PARTIAL | 55 | PrompterPage.qml:739 PrompterView 3x height overflow in theforce debug mode; debug-only |
+| kimi | ✅ LEGIT | 70 | PrompterPage.qml:739 height=(root.theforce?3:1)*parent.height creates 3x overflow in theforce debug mode. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — PrompterView height overflow in theforce debug mode (PrompterPage.qml:739) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

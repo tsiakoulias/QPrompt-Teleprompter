@@ -1,0 +1,37 @@
+# [R3-DOC-06] reload() leaks m_reloading=true on URL mismatch
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Logic
+- **Location:** `src/documenthandler.cpp:857-865`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:857-865
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** Unconditionally sets m_reloading=true at 859, only calls load() (which clears it) if url==m_fileUrl. Encoding differences between raw file:// string and QUrl normalization → load() never called → m_reloading permanently true → all future loads skip clearUndoRedoStacks().
+- **Impact:** Undo stacks accumulate across document loads; stale undo data causes crash.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 90 | reload leaks m_reloading on url mismatch (documenthandler.cpp:857) |
+| gpt | ✅ LEGIT | 78 | reload() leaks m_reloading=true on URL mismatch (src/documenthandler.cpp:857) |
+| deepseek | ✅ LEGIT | 85 | documenthandler.cpp:859 sets m_reloading=true; only cleared if url==m_fileUrl(863); URL mismatch=leak true forever; documenthandler.cpp:1034-1037 skips clearUndoRedoStacks |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:857-865 reload sets m_reloading=true but if URL mismatches it returns without resetting |
+| kimi | ✅ LEGIT | 90 | documenthandler.cpp:857-865 sets m_reloading=true and returns early when url!=m_fileUrl, never resetting it; leaked true state. |
+| opus-ultra | ✅ LEGIT | 90 | reload leaks m_reloading on url mismatch (documenthandler.cpp:857) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

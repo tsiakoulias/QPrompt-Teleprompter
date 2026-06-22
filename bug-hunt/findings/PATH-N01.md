@@ -1,0 +1,34 @@
+# [PATH-N01] save() fragile percent-encoding round-trip — broken for UNC paths
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:1183`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1183
+- **Severity:** Medium
+- **Analysis:** `QUrl::toPercentEncoding()`→`toStdString()`→`fromStdString()`→`setUrl()` chain is unnecessary. UNC paths (`//server/share/file.html`) mangled because setUrl() interprets leading `//` as authority delimiter. Should be `QUrl::fromLocalFile(fileName)`.
+- **Impact:** save() produces broken URLs for Windows UNC paths.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | save() percent-encoding round-trip fragile for UNC (documenthandler.cpp:1183) |
+| gpt | ✅ LEGIT | 78 | save() fragile percent-encoding round-trip - broken for UNC paths (src/documenthandler.cpp:1183) |
+| deepseek | ✅ LEGIT | 85 | documenthandler.cpp:1183: toPercentEncoding->toStdString->fromStdString->setUrl() round-trip fragile; UNC paths (//server/share) mangled because setUrl interprets leading // as authority |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:1183 save() fragile percent-encoding round-trip; broken for UNC paths |
+| kimi | ✅ LEGIT | 80 | documenthandler.cpp:1183 save() round-trips fileName through toPercentEncoding/toStdString/fromStdString/setUrl instead of fromLocalFile. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — save() percent-encoding round-trip fragile for UNC (documenthandler.cpp:1183) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

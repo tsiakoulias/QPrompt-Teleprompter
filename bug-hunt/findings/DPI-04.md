@@ -1,0 +1,34 @@
+# [DPI-04] InputsOverlay.qml:33 height:680 hardcoded
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `InputsOverlay.qml:33`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** InputsOverlay.qml:33
+- **Severity:** Medium
+- **Analysis:** Overlay height 680px hardcoded. On 1920x1080 at 200% DPI, overlay exceeds screen height.
+- **Impact:** Content clipped or unreachable on small HiDPI screens.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | InputsOverlay height:680 hardcoded (InputsOverlay.qml:33) |
+| gpt | ⚠️ PARTIAL | 58 | visual issue is plausible but depends on theme or device (src/kirigami_ui/InputsOverlay.qml:33) |
+| deepseek | ✅ LEGIT | 90 | Hardcoded 680px height at InputsOverlay.qml:33 — exceeds screen on HiDPI at 1080p |
+| glm | ✅ LEGIT | 80 | InputsOverlay.qml:33 height:680 hardcoded (duplicate of DSZ-01) |
+| kimi | ✅ LEGIT | 80 | InputsOverlay.qml:33 fixed logical height 680 exceeds small-screen phones, causing clipping. |
+| opus-ultra | ✅ LEGIT | 60 | InputsOverlay height:680 hardcoded (InputsOverlay.qml:33) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

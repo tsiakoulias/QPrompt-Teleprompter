@@ -1,0 +1,34 @@
+# [SCRL-N04] __speed non-zero when __i=0 and __curvature=0 (Math.pow(0,0)===1)
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `Prompter.qml:118-119`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** Prompter.qml:118-119
+- **Severity:** Low
+- **Analysis:** ECMAScript: `Math.pow(0,0) === 1`. When curvature slider at minimum and velocity stopped, `__speed = __baseSpeed * 1` instead of 0. Masked in main animation path (__destination==position when __i==0, timeToArrival==0). But TimerClock.updateTimer() fallback produces inconsistent ETA.
+- **Impact:** Inconsistent time-to-end display when curvature=0.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 55 | Math.pow(0,0)===1 -> __speed nonzero when __i=0,__curvature=0 (Prompter.qml:118) |
+| gpt | ✅ LEGIT | 78 | speed non-zero when i=0 and curvature=0 (Math.pow(0,0)===1) (src/prompter/Prompter.qml:118) |
+| deepseek | ✅ LEGIT | 85 | Math.pow(0 0)===1 in JS so __speed=__baseSpeed*1 when __i=0 __curvature=0 (Prompter.qml:118-119) |
+| glm | ✅ LEGIT | 75 | Prompter.qml:118-119 __speed non-zero when __i=0 and __curvature=0 because Math.pow(0 0)===1 |
+| kimi | ✅ LEGIT | 95 | Prompter.qml:118 uses Math.pow(Math.abs(__i),__curvature); Math.pow(0,0)===1, so __speed is __baseSpeed when __i=0 and curvature=0, leaving TimerClock ETA fallback inconsistent. |
+| opus-ultra | ✅ LEGIT | 55 | Math.pow(0 |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

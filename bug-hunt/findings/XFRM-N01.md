@@ -1,0 +1,34 @@
+# [XFRM-N01] PrompterView.qml Rotation permanently overridden by PrompterPage.qml
+
+- **Status:** NEEDS-INFO
+- **Severity:** Low
+- **Category:** 
+- **Location:** `PrompterView.qml:53-58 vs PrompterPage.qml:750-765`
+- **Consensus:** 1/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PrompterView.qml:53-58 vs PrompterPage.qml:750-765
+- **Severity:** Low
+- **Analysis:** PrompterView declares `transform: Rotation { angle: 77; axis { x: root.theforce?1:0 } }` for 3D perspective tilt debug feature. PrompterPage unconditionally sets `transform: Rotation {...}` on the PrompterView instance — overriding the internal Rotation. "theforce" 3D perspective tilt is dead code, never renders.
+- **Impact:** Debug feature never shows intended visual effect. Dead code in release.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❔ UNSURE | 45 | PrompterView Rotation overridden by PrompterPage; domain (PrompterView.qml:53) |
+| gpt | ❔ UNSURE | 39 | runtime/platform behavior is not decidable from the cited snippet (src/prompter/PrompterView.qml:53) |
+| deepseek | ⚠️ PARTIAL | 45 | Rotation overridden by PrompterPage is expected parent-child transform layering (PrompterView.qml:53-58) |
+| glm | ⚠️ PARTIAL | 60 | PrompterView.qml:53-58 vs PrompterPage.qml:750-765 Rotation permanently overridden by PrompterPage |
+| kimi | ✅ LEGIT | 85 | PrompterView.qml:53-58 defines a Rotation transform, but PrompterPage.qml:750-765 sets transform on the same viewport, overriding it. |
+| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — PrompterView Rotation overridden by PrompterPage; domain (PrompterView.qml:53) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

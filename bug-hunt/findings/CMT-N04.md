@@ -1,0 +1,34 @@
+# [CMT-N04] Comment masks invalid enum bug — 2 - value produces out-of-range LayoutDirection
+
+- **Status:** REJECTED
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `main.cpp:165`
+- **Consensus:** 1/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** main.cpp:165
+- **Severity:** Medium
+- **Analysis:** Comment "Substract from 2 because order inverted" explains intent, masks that `2 - 0 = 2` is invalid enum value (valid range 0-1). Bug: TYP-02. Comment itself actively misleading. Typo "Substract."
+- **Impact:** Masks real bug behind innocent explanation.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 55 | claims invalid enum but 2=LayoutDirectionAuto is valid (dup TYP-02) (main.cpp:165) |
+| gpt | ❌ FALSE | 76 | the value 2 is Qt::LayoutDirectionAuto not an invalid enum (src/main.cpp:165) |
+| deepseek | ✅ LEGIT | 85 | 'Substract from 2' comment at main.cpp:165 masks that 2-0=2 is out-of-range LayoutDirection enum |
+| glm | ⚠️ PARTIAL | 60 | main.cpp:165 comment masks invalid enum bug; 2-value produces valid LayoutDirection for 0/1 input |
+| kimi | ❌ FALSE | 75 | The comment explains intent; the real enum-range issue is already captured by TYP-02, not a separate bug. |
+| opus-ultra | ❌ FALSE | 55 | claims invalid enum but 2=LayoutDirectionAuto is valid (dup TYP-02) (main.cpp:165) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

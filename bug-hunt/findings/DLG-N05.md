@@ -1,0 +1,34 @@
+# [DLG-N05] loadFromNetworkFinihed() silently ignores empty response
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:888-902`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** documenthandler.cpp:888-902
+- **Severity:** Medium
+- **Analysis:** Empty reply (dropped connection, empty 200) silently does nothing. No error signal, no notification.
+- **Impact:** Silent failure on network errors returning empty body.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 55 | empty network response silently ignored (if document!='') (documenthandler.cpp:892) |
+| gpt | ✅ LEGIT | 78 | loadFromNetworkFinihed() silently ignores empty response (src/documenthandler.cpp:888) |
+| deepseek | ✅ LEGIT | 90 | Empty response silently ignored at documenthandler.cpp:892 — no error signal for empty body |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:888-902 loadFromNetworkFinihed silently ignores empty response |
+| kimi | ✅ LEGIT | 85 | documenthandler.cpp:888-902 ignores empty network replies (document == \\") with no error path." |
+| opus-ultra | ✅ LEGIT | 55 | empty network response silently ignored (if document!='') (documenthandler.cpp:892) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

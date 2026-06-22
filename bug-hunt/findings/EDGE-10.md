@@ -1,0 +1,39 @@
+# [EDGE-10] globalShortcutKey() switch without default — fallthrough to Q_UNREACHABLE
+
+- **Status:** REJECTED
+- **Severity:** Low
+- **Category:** 
+- **Location:** `src/globalhotkeys.cpp:513-515`
+- **Consensus:** 2/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** src/globalhotkeys.cpp:513-515
+- **Severity:** Low
+- **Code:**
+  ```cpp
+      };
+      Q_UNREACHABLE();
+  ```
+- **Analysis:** Under certain preprocessor configurations (`!QHotkey_FOUND && !Use_GlobalAccel`), all cases are break-only with no return. If a new enum value is added without updating all guards, `Q_UNREACHABLE()` is hit.
+- **Impact:** UB in release — low probability, requires both preprocessor edge case and enum mismatch.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 85 | early return guards it; switch not compiled (globalhotkeys.cpp:111) |
+| gpt | ⚠️ PARTIAL | 58 | Q_UNREACHABLE is after compiled switch cases; only future enums matter (src/globalhotkeys.cpp:513) |
+| deepseek | ⚠️ PARTIAL | 50 | Q_UNREACHABLE at globalhotkeys.cpp:514 reachable when only QHotkey on Wayland; but depends on specific preprocessor+platform combo — plausible but narrow |
+| glm | ✅ LEGIT | 80 | globalhotkeys.cpp:513-515 switch without default falls through to Q_UNREACHABLE; UB if unknown enum value passed |
+| kimi | ✅ LEGIT | 70 | globalhotkeys.cpp:513-515 switch lacks default and can fall through to Q_UNREACHABLE on new enum value. |
+| opus-ultra | ❌ FALSE | 85 | early return guards it; switch not compiled (globalhotkeys.cpp:111) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

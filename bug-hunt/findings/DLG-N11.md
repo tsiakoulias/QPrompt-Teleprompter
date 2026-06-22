@@ -1,0 +1,34 @@
+# [DLG-N11] PrompterPage ColorDialogs — dead acceptedColor property binding
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `PrompterPage.qml:1010,1025, PrompterView.qml:240-241`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PrompterPage.qml:1010,1025, PrompterView.qml:240-241
+- **Severity:** Low
+- **Analysis:** Both colorDialog and highlightDialog declare `property color acceptedColor` but never assign it. PrompterView binds prompter.textColor/textBackground to acceptedColor — binding receives default/uninitialized value. Currently masked by direct setTextColor() call in onAccepted.
+- **Impact:** Dead binding. Would silently break color changes if refactored to rely on binding.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | ColorDialogs dead acceptedColor binding (PrompterPage.qml:1010) |
+| gpt | ✅ LEGIT | 78 | PrompterPage ColorDialogs - dead acceptedColor property binding (src/kirigami_ui/PrompterPage.qml:1010) |
+| deepseek | ✅ LEGIT | 90 | PrompterPage.qml:1010/1025: acceptedColor declared but never assigned; PrompterView.qml:240-241 binds prompter.textColor/textBackground to dead property — masked by direct setTextColor() in onAccepted |
+| glm | ✅ LEGIT | 75 | PrompterPage.qml:1010 1025 PrompterView.qml:240-241 ColorDialogs have dead acceptedColor property binding |
+| kimi | ✅ LEGIT | 70 | PrompterPage.qml:1010,1025 ColorDialogs declare acceptedColor but never assign; PrompterView.qml:240-241 binds to the default value. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — ColorDialogs dead acceptedColor binding (PrompterPage.qml:1010) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

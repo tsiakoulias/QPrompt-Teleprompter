@@ -1,0 +1,41 @@
+# [EDGE-12] QTextBlock::iterator scope fragility in parse()
+
+- **Status:** REJECTED
+- **Severity:** Low
+- **Category:** 
+- **Location:** `src/documenthandler.cpp:1648,1662-1663`
+- **Consensus:** 1/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:1648,1662-1663
+- **Severity:** Low
+- **Code:**
+  ```cpp
+  QTextBlock::iterator jt;
+  for (jt = it.begin(); !jt.atEnd(); ++jt) { ... }
+  ```
+- **Analysis:** Iterator declared outside loop. If a `continue` is ever added inside without being careful, or an exception is thrown before `++jt`, the iterator never advances — infinite loop. Currently harmless but fragile.
+- **Impact:** None currently. Anti-pattern.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | iterator-outside-loop anti-pattern; report admits 'None currently' (documenthandler.cpp:1648) |
+| gpt | ⚠️ PARTIAL | 58 | observed QTextBlock::iterator scope fragility in parse() (src/documenthandler.cpp:1648) |
+| deepseek | ❌ FALSE | 40 | Iterator declared outside loop at doc.cpp:1648/1662 is C++ pattern; no continue inside for-body currently; fragile but not a bug without evidence of misuse |
+| glm | ⚠️ PARTIAL | 60 | documenthandler.cpp:1648 1662-1663 QTextBlock::iterator jt declared outside loop but reinitialized each iteration; scope is fine |
+| kimi | ✅ LEGIT | 60 | documenthandler.cpp:1648,1662-1663 QTextBlock::iterator declared outside loop; fragile anti-pattern but harmless now. |
+| opus-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — iterator-outside-loop anti-pattern; report admits 'None currently' (documenthandler.cpp:16 |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

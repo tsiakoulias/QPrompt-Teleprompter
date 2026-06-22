@@ -1,0 +1,41 @@
+# [QML-01] 26 references to undefined `pointerSettings` ID in ReadRegionOverlay
+
+- **Status:** REJECTED
+- **Severity:** Critical
+- **Category:** 
+- **Location:** `src/prompter/ReadRegionOverlay.qml:239,246,261,268,293-395`
+- **Consensus:** 1/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** src/prompter/ReadRegionOverlay.qml:239,246,261,268,293-395
+- **Severity:** Critical
+- **Code:**
+  ```qml
+  running: !pointerSettings.debug
+  source: pointerSettings.pointerKind === PointerSettings.States.QML
+  value: pointerSettings.colorsEditing
+  ```
+  (+23 more references)
+- **Analysis:** `pointerSettings` is an `id` declared in `PointerSettings.qml` (separate file). QML IDs are file-scoped; not visible across component boundaries. No C++ context property bridges it.
+- **Impact:** Entire pointer/indicator system in the reading overlay is non-functional — no pointer indicators render, no colors apply, debug tools broken.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 90 | pointerSettings resolves via context hierarchy (PrompterPage.qml:1442) |
+| gpt | ❌ FALSE | 90 | id exists in PrompterPage; overlay uses same parent context (src/prompter/ReadRegionOverlay.qml:239) |
+| deepseek | ❔ UNSURE | 30 | pointerSettings id in ReadRegionOverlay.qml may be resolved via C++ context property or parent hierarchy; cannot verify cross-file QML id scope without full component tree |
+| glm | ❌ FALSE | 85 | ReadRegionOverlay.qml:239+ references pointerSettings which resolves through QML context hierarchy from ancestor PointerSettings component |
+| kimi | ✅ LEGIT | 90 | ReadRegionOverlay.qml:239-395 references pointerSettings id declared only in PrompterPage.qml/PointerSettings.qml; separate-file component cannot resolve it. |
+| opus-ultra | ❌ FALSE | 90 | pointerSettings resolves via context hierarchy (PrompterPage.qml:1442) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

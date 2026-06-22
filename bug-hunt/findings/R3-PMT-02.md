@@ -1,0 +1,37 @@
+# [R3-PMT-02] OBS WebSocket no onError handler, no reconnection logic
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Edge Case
+- **Location:** `src/prompter/Prompter.qml:353-389`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/prompter/Prompter.qml:353-389
+- **Severity:** Medium
+- **Category:** Edge Case
+- **Analysis:** WebSocket has no onError handler, no onStatusChanged for WebSocket.Error. Connection failure silently ignored. No reconnection attempt.
+- **Impact:** Silent failure of OBS scene switching; user has no indication connection is broken.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | OBS WebSocket has no onError/reconnect handler (Prompter.qml:353) |
+| gpt | ✅ LEGIT | 78 | OBS WebSocket no onError handler, no reconnection logic (src/prompter/Prompter.qml:353) |
+| deepseek | ✅ LEGIT | 90 | Prompter.qml:353-389 WebSocket has onStatusChanged but no onError handler and zero reconnection logic — silent failure |
+| glm | ✅ LEGIT | 80 | Prompter.qml:353-389 WebSocket has no onError handler and no reconnection logic |
+| kimi | ✅ LEGIT | 90 | WebSocket has only status logging; no onError handler or reconnection logic in Prompter.qml:353-389 |
+| opus-ultra | ✅ LEGIT | 60 | OBS WebSocket has no onError/reconnect handler (Prompter.qml:353) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

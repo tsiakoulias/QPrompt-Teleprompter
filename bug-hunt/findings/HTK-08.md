@@ -1,0 +1,69 @@
+# [HTK-08] key/modifiers parameters silently discarded mid-function on non-Wayland
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `globalhotkeys.cpp:1123-1127`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** globalhotkeys.cpp:1123-1127
+- **Severity:** Low
+- **Analysis:** By-value params overwritten to unknown/NoModifier. Function signature misleadingly suggests original values are used.
+- **Impact:** Code clarity/auditability hazard; obscured HTK-01/HTK-03 during audit.
+
+---
+
+### QML Scope/Context (20 files referencing ApplicationWindow properties from wrong root)
+
+These component files reference `root.__isMobile`, `root.shadows`, `root.pageStack`, `root.theforce`, etc. — but their root items are plain Item/Flickable/MouseArea/ToolBar/etc., not ApplicationWindow. They depend on outer-scope `id: root` resolution:
+
+| Bug | File | Missing properties (via root.xxx) |
+|---|---|---|
+| SCP-01 | ReadRegionOverlay.qml:191 | `root.isMobile` typo (should be `__isMobile` with double underscore) |
+| SCP-02 | ReadRegionOverlay.qml:145 | `root.shadows` |
+| SCP-03 | PrompterView.qml:50,56,115,200 | `root.__isMobile`, `root.visibility`, `root.theforce` |
+| SCP-04 | Find.qml:47,69,78 | `root.__isMobile` |
+| SCP-05 | TimerClock.qml:127 | `root.width`, `root.height` (ambiguous — Item vs Window dims) |
+| SCP-06 | CursorAutoHide.qml:28,31,43,56 | `root.pageStack`, `root.activeFocusItem` |
+| SCP-07 | ProgressIndicator.qml:34 | `root.__isMobile` |
+| SCP-08 | ProjectionsManager.qml:74,75,180,188,194,195,204 | `root.__isMobile`, `root.showMaximized()`, `root.screen`, `root.__windowStayOnTop`, `root.__translucidBackground`, `root.pageStack` |
+| SCP-09 | Countdown.qml:196 | `root.forceQtTextRenderer` |
+| SCP-10 | Prompter.qml | 40+ refs to `root.pageStack`, `root.__isMobile`, `root.onDiscard`, `root.shadows`, `root.recentDocuments`, etc. |
+| SCP-11 | PrompterBackground.qml:34,49,108 | `root.background.__backgroundColor` |
+| SCP-12 | EditorToolbar.qml | 30+ refs to `root.__isMobile`, `root.__opacity`, `root.pageStack`, etc. |
+| SCP-13 | PrompterPage.qml:559,717,739,1064,1290 | `root.shadows`, `root.__fullScreen`, `root.theforce`, `root.minimumWidth`, `root.recentDocuments` |
+| SCP-14 | TelemetryPage.qml:72-154 (11 sites) | `root.__telemetry` |
+| SCP-15 | WheelSettingsOverlay.qml:37,54,73,82,87 | `root.pageStack`, `root.__scrollAsDial`, `root.__throttleWheel`, `root.__wheelThrottleFactor` |
+| SCP-16 | LanguageSettingsOverlay.qml:37,41,65 | `root.minimumWidth`, `root.pageStack`, `root.height` |
+| SCP-17 | LayoutDirectionSettingsOverlay.qml:40,44,45 | `root.pageStack` |
+| SCP-18 | InputsOverlay.qml:32 | `root.minimumWidth` |
+| SCP-19 | PointerSettings.qml:422 | `root.minimumHeight` |
+| SCP-20 | WindowDragger.qml:41,45 | `root.x`, `root.y` (uses MouseArea's own x/y, not window position) |
+
+All depend on QML's outer-scope `id` resolution to reach `id: root` in main.qml. None declare `id: root` on their own top-level item.
+
+---
+
+### Countdown / Timer State Machine (8 bugs)
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | key/modifiers zeroed mid-function on non-Wayland; by-design (globalhotkeys.cpp:1123) |
+| gpt | ⚠️ PARTIAL | 58 | observed key/modifiers parameters silently discarded mid-function on non-Wayland (src/globalhotkeys.cpp:1123) |
+| deepseek | ✅ LEGIT | 85 | key/modifiers by-value params overwritten mid-function; misleading signature obscured HTK-01/03 (globalhotkeys.cpp:1123-1127) |
+| glm | ✅ LEGIT | 75 | globalhotkeys.cpp:1123-1127 key/modifiers parameters discarded on non-Wayland when QHotkey co-exists |
+| kimi | ✅ LEGIT | 85 | globalhotkeys.cpp:1123-1127 silently overwrite key and modifiers parameters to unknown/NoModifier on non-Wayland. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — key/modifiers zeroed mid-function on non-Wayland; by-design (globalhotkeys.cpp:1123) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

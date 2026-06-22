@@ -1,0 +1,34 @@
+# [KB-N03] +windows and +android ESC handler uses .focus instead of .activeFocus — wrong boolean
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `+windows/main.qml:483, +android/main.qml:422`
+- **Consensus:** 3/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** +windows/main.qml:483, +android/main.qml:422
+- **Severity:** Medium
+- **Analysis:** Checks `prompter.focus` (settable property, can be true without actual focus) instead of `.activeFocus`. Base main.qml correctly uses activeFocus. ESC may fail to cancel prompting mode when focus held elsewhere.
+- **Impact:** ESC key may not exit prompting on Windows/Android.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | +windows/+android ESC uses .focus where .activeFocus intended (main.qml:483) |
+| gpt | ⚠️ PARTIAL | 58 | observed +windows and +android ESC handler uses .focus instead of .activeFocus - wrong boolean (src/kirigami_ui/+windows/main.qml:483) |
+| deepseek | ❌ FALSE | 80 | Claim states 'Base main.qml correctly uses activeFocus' but base also uses .focus at lines 509 511 — factually wrong |
+| glm | ✅ LEGIT | 70 | +windows/main.qml:483 +android/main.qml:422 ESC handler uses .focus instead of .activeFocus; wrong boolean |
+| kimi | ✅ LEGIT | 90 | +windows/main.qml:483 and +android/main.qml:422 test prompter.focus instead of prompter.activeFocus for ESC |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — +windows/+android ESC uses .focus where .activeFocus intended (main.qml:483) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

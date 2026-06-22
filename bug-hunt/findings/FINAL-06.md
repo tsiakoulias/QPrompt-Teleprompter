@@ -1,0 +1,35 @@
+# [FINAL-06] CMAKE_OSX_ARCHITECTURES contains literal quotes — universal binary broken
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** Platform/Build
+- **Location:** `CMakeLists.txt:418, src/CMakeLists.txt:29`
+- **Consensus:** 4/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** CMakeLists.txt:418, src/CMakeLists.txt:29
+- **Severity:** High
+- **Category:** Platform/Build
+- **Analysis:** `set(CMAKE_OSX_ARCHITECTURES="x86_64;arm64")` — quotes become part of value. Clang receives `-arch "x86_64;arm64"` — invalid argument.
+- **Impact:** macOS universal binary silently fails; produces x86_64-only.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 90 | set(CMAKE_OSX_ARCHITECTURES=) quote bug (CMakeLists.txt:418) |
+| gpt | ⚠️ PARTIAL | 58 | observed CMAKE_OSX_ARCHITECTURES contains literal quotes - universal binary broken (CMakeLists.txt:418) |
+| deepseek | ❌ FALSE | 95 | CMakeLists.txt:418 set() with double-quoted value strips quotes per CMake parser rules — value is x86_64;arm64 without literal quotes |
+| glm | ✅ LEGIT | 85 | CMakeLists.txt:418 src/CMakeLists.txt:29 CMAKE_OSX_ARCHITECTURES set with quotes='x86_64;arm64' literal string not list |
+| kimi | ✅ LEGIT | 95 | CMakeLists.txt:418 and src/CMakeLists.txt:29 use set(CMAKE_OSX_ARCHITECTURES=\x86_64;arm64\")—literal quotes become part of value and break -arch." |
+| opus-ultra | ✅ LEGIT | 90 | set(CMAKE_OSX_ARCHITECTURES=) quote bug (CMakeLists.txt:418) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

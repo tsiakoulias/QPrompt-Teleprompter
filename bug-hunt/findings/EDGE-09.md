@@ -1,0 +1,39 @@
+# [EDGE-09] QFile::copy() return value silently ignored
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `src/spellchecker.cpp:199`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/spellchecker.cpp:199
+- **Severity:** Medium
+- **Code:**
+  ```cpp
+  QFile::copy(resourcePath, outPath);   // return value ignored
+  QFile::setPermissions(outPath, ...);  // may fail if copy failed
+  ```
+- **Analysis:** If copy fails (disk full, permissions, antivirus lock), the error is silently swallowed. `setPermissions` on non-existent file also fails silently. Caller then tries to open a non-existent dictionary — no error reported.
+- **Impact:** Spell checking silently breaks; user given no indication that a dictionary could not be loaded.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 90 | QFile::copy return ignored (spellchecker.cpp:199) |
+| gpt | ✅ LEGIT | 88 | QFile::copy() return value silently ignored (src/spellchecker.cpp:199) |
+| deepseek | ✅ LEGIT | 85 | QFile::copy() return value unchecked at spellchecker.cpp:199; if copy fails setPermissions+open fail silently; dict silently missing |
+| glm | ✅ LEGIT | 75 | spellchecker.cpp:199 QFile::copy return value not checked; copy may silently fail leaving no cached dictionary |
+| kimi | ✅ LEGIT | 85 | spellchecker.cpp:199 ignores QFile::copy() return value; setPermissions may operate on missing file. |
+| opus-ultra | ✅ LEGIT | 90 | QFile::copy return ignored (spellchecker.cpp:199) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

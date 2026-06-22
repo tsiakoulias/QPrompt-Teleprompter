@@ -1,0 +1,34 @@
+# [TRF-N01] rightWidthAdjustmentBar drag.maximumX formula broken — drag collapses to single point
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** 
+- **Location:** `Prompter.qml:2022`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Prompter.qml:2022
+- **Severity:** High
+- **Analysis:** maxX formula cancels prompter.width terms: `prompter.width - editor.x - prompter.width - 20 - 13 = -editor.x - 33`. drag.minimumX = -editor.x + 20, which is always greater. Result: drag.maximumX always equals drag.minimumX — single-point snap, handle cannot be dragged. Commented-out line 2021 shows intended formula using editor.width and drag.maximumX reference.
+- **Impact:** Right width adjustment bar is non-functional — editor right edge cannot be freely adjusted via drag.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | rightWidthAdjustmentBar maximumX collapses when minimumX>=maxX (Prompter.qml:2022) |
+| gpt | ⚠️ PARTIAL | 58 | observed rightWidthAdjustmentBar drag.maximumX formula broken - drag collapses to single point (src/prompter/Prompter.qml:2022) |
+| deepseek | ✅ LEGIT | 95 | Prompter.qml:2022: maxX=prompter.width-editor.x-parent.width-LM-13; with parent.width~=prompter.width: maxX ~= -editor.x-LM-13 < drag.minimumX always |
+| glm | ✅ LEGIT | 75 | Prompter.qml:2022 rightWidthAdjustmentBar drag.maximumX formula broken; drag collapses to single point |
+| kimi | ✅ LEGIT | 90 | Prompter.qml:2022 maxX simplifies to -editor.x-33, below minimumX -editor.x+20, collapsing the drag range |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — rightWidthAdjustmentBar maximumX collapses when minimumX>=maxX (Prompter.qml:2022) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

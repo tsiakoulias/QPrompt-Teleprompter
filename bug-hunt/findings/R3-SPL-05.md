@@ -1,0 +1,37 @@
+# [R3-SPL-05] SpellChecker has zero thread safety — all methods unprotected
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Edge Case
+- **Location:** `src/spellchecker.h:32-77`
+- **Consensus:** 2/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/spellchecker.h:32-77
+- **Severity:** Medium
+- **Category:** Edge Case
+- **Analysis:** No QMutex, QMutexLocker, or std::mutex anywhere. Multiple methods iterate m_dicts (spell, suggest) while others mutate it (setLanguage, setLanguages, removeCustomWord, unload). QSyntaxHighlighter::highlightBlock iterates m_dicts extensively; any slot calling setLanguage during highlighting → iterator invalidation. Hunspell itself is not thread-safe.
+- **Impact:** Segfault on concurrent access. Currently single-thread use; becomes immediate crash if spell-check is moved to background thread.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | SpellChecker no mutexes; speculative single-threaded (spellchecker.h:32) |
+| gpt | ⚠️ PARTIAL | 58 | observed SpellChecker has zero thread safety - all methods unprotected (src/spellchecker.h:32) |
+| deepseek | ✅ LEGIT | 85 | spellchecker.h:32-77 no QMutex/std::mutex anywhere; m_dicts iterated by highlightBlock while mutated by setLanguage/removeCustomWord — iterator invalidation risk |
+| glm | ✅ LEGIT | 85 | spellchecker.h:32-77 all methods access m_dicts/m_customWords without mutex; zero thread safety |
+| kimi | ⚠️ PARTIAL | 55 | spellchecker.h:32-77 methods mutate shared m_dicts/m_customWords without locks; no source evidence of concurrent access, so latent rather than proven bug. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — SpellChecker no mutexes; speculative single-threaded (spellchecker.h:32) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

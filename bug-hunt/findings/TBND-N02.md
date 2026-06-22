@@ -1,0 +1,34 @@
+# [TBND-N02] All CJK text marked misspelled — ideographic characters not in Hunspell dictionaries
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `spellhighlighter.cpp:53-54`
+- **Consensus:** 3/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** spellhighlighter.cpp:53-54
+- **Severity:** Medium
+- **Analysis:** `\p{L}` matches individual CJK characters as separate "words." Hunspell dictionaries have zero entries for ideographic characters. Every character returns false → solid wall of red underlines across entire CJK document.
+- **Impact:** Spell check completely unusable for Chinese, Japanese, Korean documents.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | CJK marked misspelled; ideographs not in hunspell (spellhighlighter.cpp:53) |
+| gpt | ⚠️ PARTIAL | 58 | observed All CJK text marked misspelled - ideographic characters not in Hunspell dictionaries (src/spellhighlighter.cpp:53) |
+| deepseek | ✅ LEGIT | 90 | \p{L} matches CJK chars individually; Hunspell has zero ideograph entries->all CJK flagged misspelled at spellhighlighter.cpp:53-54 |
+| glm | ✅ LEGIT | 70 | spellhighlighter.cpp:53-54 all CJK text marked misspelled; ideographic characters not in Hunspell dictionaries |
+| kimi | ❌ FALSE | 55 | CJK characters are matched by \\p{L}; all-CJK misspelled only when no suitable Hunspell dictionary is loaded |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — CJK marked misspelled; ideographs not in hunspell (spellhighlighter.cpp:53) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

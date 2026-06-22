@@ -1,0 +1,34 @@
+# [DLG-N07] 5 showPassiveNotification() calls ignore passiveNotifications preference
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `Find.qml:133,135,160, EditorToolbar.qml:627, PrompterPage.qml:890`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Find.qml:133,135,160, EditorToolbar.qml:627, PrompterPage.qml:890
+- **Severity:** Low
+- **Analysis:** Search wrap, replace-count, "No glyphs selected", velocity indicator notifications fire regardless of `root.passiveNotifications: false`.
+- **Impact:** Notification spam when user disabled notifications.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | 5 showPassiveNotification ignore preference (Find.qml:133) |
+| gpt | ✅ LEGIT | 78 | 5 showPassiveNotification() calls ignore passiveNotifications preference (src/prompter/Find.qml:133) |
+| deepseek | ✅ LEGIT | 85 | 5 showPassiveNotification calls lack root.passiveNotifications guard — fire even when disabled |
+| glm | ✅ LEGIT | 75 | Find.qml:133+ 5 showPassiveNotification calls ignore passiveNotifications preference |
+| kimi | ✅ LEGIT | 85 | Find.qml:133/135/160, EditorToolbar.qml:627, PrompterPage.qml:890 call showPassiveNotification without checking root.passiveNotifications. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — 5 showPassiveNotification ignore preference (Find.qml:133) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

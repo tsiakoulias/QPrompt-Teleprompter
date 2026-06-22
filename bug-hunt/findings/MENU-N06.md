@@ -1,0 +1,34 @@
+# [MENU-N06] Paste behavior inconsistent between context menu and global Edit menu
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `Prompter.qml:2564,2651 vs main.qml:686`
+- **Consensus:** 2/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Prompter.qml:2564,2651 vs main.qml:686
+- **Severity:** Low
+- **Analysis:** Context menu Paste → document.paste() (filters HTML). Global Edit menu Paste → editor.paste() (raw, unfiltered). Same operation, different results.
+- **Impact:** HTML from browser pasted via global Edit menu injects unfiltered HTML.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | paste inconsistent: context menu vs Edit menu (Prompter.qml:2564) |
+| gpt | ⚠️ PARTIAL | 58 | observed Paste behavior inconsistent between context menu and global Edit menu (src/prompter/Prompter.qml:2564) |
+| deepseek | ⚠️ PARTIAL | 70 | Prompter.qml vs main.qml:686: context menu Paste claimed to filter HTML while Edit menu Paste uses raw editor.paste(); not fully verified at main.qml:686 |
+| glm | ⚠️ PARTIAL | 60 | Prompter.qml:2564 2651 vs main.qml:686 paste behavior inconsistent between context menu and global Edit menu |
+| kimi | ✅ LEGIT | 85 | Prompter.qml:2651 context paste calls document.paste() filtered; main.qml:686 Edit menu calls editor.paste() unfiltered. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — paste inconsistent: context menu vs Edit menu (Prompter.qml:2564) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

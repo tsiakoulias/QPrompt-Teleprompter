@@ -1,0 +1,37 @@
+# [R3-SPL-03] removeCustomWord() silently discards all addWord() additions
+
+- **Status:** REJECTED
+- **Severity:** Medium
+- **Category:** Logic
+- **Location:** `src/spellchecker.cpp:134-140 vs 338-344`
+- **Consensus:** 3/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** src/spellchecker.cpp:134-140 vs 338-344
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** addWord() calls d.hunspell->add() but does NOT append to m_customWords. removeCustomWord() reloads all dictionaries from scratch via loadOne(), losing any words added via addWord().
+- **Impact:** User-accepted words (right-click "Add to Dictionary") vanish after removing a different custom word or changing languages.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 80 | addWord dead/uncalled; addCustomWord persists correctly (spellchecker.cpp:134) |
+| gpt | ❌ FALSE | 76 | addWord is the transient API; persisted custom words use addCustomWord (src/spellchecker.cpp:134) |
+| deepseek | ✅ LEGIT | 90 | spellchecker.cpp:134-140 addWord() calls hunspell->add() but never appends to m_customWords; spellchecker.cpp:338-344 removeCustomWord() reloads losing those words |
+| glm | ✅ LEGIT | 80 | spellchecker.cpp:134-140 addWord adds to hunspell but removeCustomWord at 328-344 reloads dicts discarding addWord effects |
+| kimi | ✅ LEGIT | 80 | spellchecker.cpp:134-140 addWord() modifies live Hunspell objects only; removeCustomWord() at 338-344 reloads dictionaries, discarding prior addWord() additions. |
+| opus-ultra | ❌ FALSE | 80 | addWord dead/uncalled; addCustomWord persists correctly (spellchecker.cpp:134) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

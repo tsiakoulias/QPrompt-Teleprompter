@@ -1,0 +1,37 @@
+# [R3-PMT-01] OBS WebSocket JSON.parse without try/catch — crash on malformed input
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** Edge Case
+- **Location:** `src/prompter/Prompter.qml:368`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/prompter/Prompter.qml:368
+- **Severity:** High
+- **Category:** Edge Case
+- **Analysis:** JSON.parse(m) in onTextMessageReceived has no error handling. Malformed JSON from OBS or non-OBS service on configured port → unhandled JS exception → application termination.
+- **Impact:** Crash-to-desktop on malformed WebSocket message.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 60 | JSON.parse no try/catch; crash-to-desktop overstated (Prompter.qml:367) |
+| gpt | ⚠️ PARTIAL | 58 | observed OBS WebSocket JSON.parse without try/catch - crash on malformed input (src/prompter/Prompter.qml:368) |
+| deepseek | ✅ LEGIT | 95 | Prompter.qml:368 JSON.parse(m) in onTextMessageReceived has no try/catch — malformed OBS WebSocket JSON causes unhandled exception/crash |
+| glm | ✅ LEGIT | 85 | Prompter.qml:368 JSON.parse(m) without try/catch; crashes on malformed WebSocket message |
+| kimi | ✅ LEGIT | 95 | WebSocket onTextMessageReceived calls JSON.parse(m) without try/catch at Prompter.qml:368 |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — JSON.parse no try/catch; crash-to-desktop overstated (Prompter.qml:367) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

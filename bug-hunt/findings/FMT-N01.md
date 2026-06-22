@@ -1,0 +1,34 @@
+# [FMT-N01] Step Speed onAccepted displays 100x correct value
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `EditorToolbar.qml:1955`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** EditorToolbar.qml:1955
+- **Severity:** Medium
+- **Analysis:** onAccepted writes raw slider value (e.g., 100.00) instead of divided value (1.00). All other code paths (onVisibleChanged, Keys handlers) correctly divide by 100.
+- **Impact:** After accepting edit, speed field shows 100x inflated value. Subsequent interactions use wrong base.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 50 | Step Speed onAccepted displays 100x value; unit scaling (EditorToolbar.qml:1955) |
+| gpt | ✅ LEGIT | 78 | Step Speed onAccepted displays 100x correct value (src/kirigami_ui/EditorToolbar.qml:1955) |
+| deepseek | ✅ LEGIT | 95 | EditorToolbar.qml:1955: onAccepted sets text=baseSpeedSlider.value (100x units) not /100; onVisibleChanged correctly divides by 100 |
+| glm | ✅ LEGIT | 75 | EditorToolbar.qml:1955 Step Speed onAccepted displays 100x correct value |
+| kimi | ✅ LEGIT | 85 | EditorToolbar.qml:1955 onAccepted writes `text = baseSpeedSlider.value` (x100) instead of `/100`; displays 100x value. |
+| opus-ultra | ✅ LEGIT | 50 | Step Speed onAccepted displays 100x value; unit scaling (EditorToolbar.qml:1955) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

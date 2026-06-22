@@ -1,0 +1,34 @@
+# [QP-N02] convert.waitForFinished() blocks GUI thread up to 30s during LibreOffice import
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:1086`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1086
+- **Severity:** Medium
+- **Analysis:** waitForFinished() with no timeout = 30000ms. Called synchronously on main thread from import() → file open.
+- **Impact:** App frozen unresponsive for up to 30s during ODT/DOCX/DOC/RTF import.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 65 | convert.waitForFinished blocks GUI thread up to 30s on import (documenthandler.cpp:1086) |
+| gpt | ✅ LEGIT | 78 | convert.waitForFinished() blocks GUI thread up to 30s during LibreOffice import (src/documenthandler.cpp:1086) |
+| deepseek | ✅ LEGIT | 90 | documenthandler.cpp:1086: waitForFinished() with no timeout=30000ms; synchronous on main thread; up to 30s UI freeze |
+| glm | ✅ LEGIT | 75 | documenthandler.cpp:1086 convert.waitForFinished() blocks GUI thread up to 30s during LibreOffice import |
+| kimi | ✅ LEGIT | 95 | documenthandler.cpp:1086 calls waitForFinished() with no timeout, blocking the GUI thread for up to 30s |
+| opus-ultra | ✅ LEGIT | 65 | convert.waitForFinished blocks GUI thread up to 30s on import (documenthandler.cpp:1086) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

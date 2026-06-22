@@ -1,0 +1,36 @@
+# [FD-N01] || should be && in autoReload guard — user preference ignored for non-binary files
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:1025`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1025
+- **Severity:** Medium
+- **Analysis:** `if (!skipAutoReload || autoReload())` — for non-binary files (skipAutoReload=false), always true regardless of user preference. Should be `&&`.
+- **Impact:** When auto-reload disabled, external changes to HTML/text files still trigger reloads — user preference silently ignored.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 55 | !skipAutoReload \|\| autoReload() likely should be &&; ambiguous (documenthandler.cpp:1025) |
+| gpt | ⚠️ PARTIAL | 58 | observed \|\| should be && in autoReload guard - user preference ignored for non-binary files (src/documenthandler.cpp:1025) |
+| deepseek | ✅ LEGIT | 90 | !skipAutoReload\|\|autoReload() always true when skipAutoReload=false; user autoReload setting ignored at documenthandler.cpp:1025 |
+| glm | ✅ LEGIT | 65 | documenthandler.cpp:1025 \|\| should be && in autoReload guard; user preference ignored for non-binary files |
+| kimi | ✅ LEGIT | 85 | documenthandler.cpp:1025 watcher is added when !skipAutoReload\|\|autoReload(), so autoReload=false is ignored for normal files |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — !skipAutoReload \|\| autoReload() likely should be &&; ambiguous (documenthandler.cpp:1025) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,34 @@
+# [LDR-N01] InputsOverlay typeof null guard fails — null.item crash on rapid close
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `InputsOverlay.qml:105-112,562-569`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** InputsOverlay.qml:105-112,562-569
+- **Severity:** Medium
+- **Analysis:** `typeof children[i].item !== "undefined"` — `typeof null === "object"`, so the guard passes when Loader.item is null. `item.checked = false` throws TypeError. Reachable when overlay closes before async Loaders complete.
+- **Impact:** Crash on rapid overlay open/close.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | typeof null guard can still hit null.item on rapid close (InputsOverlay.qml:105) |
+| gpt | ⚠️ PARTIAL | 58 | observed InputsOverlay typeof null guard fails - null.item crash on rapid close (src/kirigami_ui/InputsOverlay.qml:105) |
+| deepseek | ✅ LEGIT | 85 | typeof null==='object' at InputsOverlay.qml:107 — guard passes when Loader.item is null TypeError on .checked |
+| glm | ✅ LEGIT | 80 | InputsOverlay.qml:105-112 562-569 typeof null guard fails; typeof null==='object' so null.item crashes |
+| kimi | ✅ LEGIT | 90 | InputsOverlay.qml:105-112/562-569 uses typeof item !== 'undefined'; Loader.item is null while async loading, so null.checked access can crash |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — typeof null guard can still hit null.item on rapid close (InputsOverlay.qml:105) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

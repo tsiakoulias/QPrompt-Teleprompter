@@ -1,0 +1,34 @@
+# [POP-N01] ESC cascade missing dictionariesSheet — undismissable by keyboard
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `PrompterPage.qml:1512, all 3 main.qml ESC handlers`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PrompterPage.qml:1512, all 3 main.qml ESC handlers
+- **Severity:** Medium
+- **Analysis:** dictionariesSheet has no property alias and is not in ESC handler chain. StandardKey.Cancel Shortcut intercepts Escape before OverlaySheet CloseOnEscape. ESC falls through to restoreFocus() — sheet remains open.
+- **Impact:** Keyboard-only users cannot dismiss dictionary selection overlay.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | ESC cascade omits dictionariesSheet (PrompterPage.qml:1512) |
+| gpt | ⚠️ PARTIAL | 58 | observed ESC cascade missing dictionariesSheet - undismissable by keyboard (src/kirigami_ui/PrompterPage.qml:1512) |
+| deepseek | ✅ LEGIT | 90 | ESC handler at main.qml:476-518 checks 9 sheets but omits dictionariesSheet (PrompterPage.qml:1512); no alias no ESC chain entry |
+| glm | ✅ LEGIT | 75 | PrompterPage.qml:1512 dictionariesSheet not in ESC cascade; undismissable by keyboard |
+| kimi | ✅ LEGIT | 90 | ESC cascade in main.qml variants omits dictionariesSheet defined at PrompterPage.qml:1512. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — ESC cascade omits dictionariesSheet (PrompterPage.qml:1512) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

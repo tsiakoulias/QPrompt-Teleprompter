@@ -1,0 +1,37 @@
+# [R2-AND-05] Android loadTelemetryPage passes no properties object to pageStack push
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** QML/UI
+- **Location:** `src/kirigami_ui/+android/main.qml:162`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/kirigami_ui/+android/main.qml:162
+- **Severity:** Low
+- **Category:** QML/UI
+- **Analysis:** Android passes telemetryPageComponent with no second argument to push(). Windows (line 176) and base (line 189) pass `{}`. In Qt 6.x strict mode, missing properties object could cause warning or incorrect initialization.
+- **Impact:** If telemetry page is ever un-commented, Android may fail to open it correctly.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | +android loadTelemetryPage push no properties obj (main.qml:162) |
+| gpt | ⚠️ PARTIAL | 58 | observed Android loadTelemetryPage passes no properties object to pageStack push (src/kirigami_ui/+android/main.qml:162) |
+| deepseek | ❔ UNSURE | 25 | Telemetry page push missing props — commented-out component; no current impact |
+| glm | ✅ LEGIT | 80 | +android/main.qml:162 layers.push(telemetryPageComponent) missing {} second arg unlike sibling calls |
+| kimi | ✅ LEGIT | 60 | +android/main.qml:162 pushes telemetryPageComponent without {} properties object used in base/windows. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — +android loadTelemetryPage push no properties obj (main.qml:162) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

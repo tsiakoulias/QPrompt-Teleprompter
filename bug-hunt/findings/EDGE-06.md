@@ -1,0 +1,38 @@
+# [EDGE-06] Null pointer dereference: `textDocument()` unchecked in `parse()`
+
+- **Status:** OPEN
+- **Severity:** Critical
+- **Category:** 
+- **Location:** `src/documenthandler.cpp:1634`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:1634
+- **Severity:** Critical
+- **Code:**
+  ```cpp
+  for (QTextBlock it = this->textDocument()->begin(); it != this->textDocument()->end(); ...)
+  ```
+- **Analysis:** Called from `previousMarker()`/`nextMarker()` → QML/keyboard shortcuts. No null guard before the loop.
+- **Impact:** Null pointer dereference crash on marker navigation with no document loaded.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 90 | textDocument()->begin unchecked (documenthandler.cpp:1634) |
+| gpt | ✅ LEGIT | 88 | Null pointer dereference: textDocument() unchecked in parse() (src/documenthandler.cpp:1634) |
+| deepseek | ✅ LEGIT | 92 | this->textDocument()->begin() at doc.cpp:1634; called from previousMarker/nextMarker via QML; no null check — crash confirmed |
+| glm | ✅ LEGIT | 90 | documenthandler.cpp:1634 parse() calls textDocument()->begin() without null check on textDocument() |
+| kimi | ✅ LEGIT | 95 | documenthandler.cpp:1634 parse() loops over this->textDocument() without null guard. |
+| opus-ultra | ✅ LEGIT | 90 | textDocument()->begin unchecked (documenthandler.cpp:1634) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

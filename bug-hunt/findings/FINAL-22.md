@@ -1,0 +1,37 @@
+# [FINAL-22] Behavior.onRunningChanged calls toggle() from within animation handler — re-entrant state change
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** Logic
+- **Location:** `src/prompter/Prompter.qml:855`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/prompter/Prompter.qml:855
+- **Severity:** High
+- **Category:** Logic
+- **Analysis:** toggle() called inside the Behavior animation's onRunningChanged signal handler. Triggers state machine transition while animation system mid-processing.
+- **Impact:** Undefined behavior at AtEndActions.Exit; PropertyChanges may not apply correctly; focus/play/property state inconsistent.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | toggle() in animation onRunningChanged; likely intended end-of-scroll (Prompter.qml:855) |
+| gpt | ⚠️ PARTIAL | 58 | observed Behavior.onRunningChanged calls toggle() from within animation handler - re-entrant state chang (src/prompter/Prompter.qml:855) |
+| deepseek | ✅ LEGIT | 85 | Prompter.qml:855 return prompter.toggle() inside Behavior.onRunningChanged animation handler — re-entrant state change during animation callback |
+| glm | ✅ LEGIT | 80 | Prompter.qml:855 Behavior.onRunningChanged calls toggle() from within animation handler; re-entrant state change |
+| kimi | ✅ LEGIT | 85 | Prompter.qml:855 calls prompter.toggle() inside Behavior on position onRunningChanged handler, causing re-entrant state transition. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — toggle() in animation onRunningChanged; likely intended end-of-scroll (Prompter.qml:855) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

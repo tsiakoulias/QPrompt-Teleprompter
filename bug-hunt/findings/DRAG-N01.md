@@ -1,0 +1,33 @@
+# [DRAG-N01] Image resize body drag: cursor shows OpenHandCursor until drag threshold exceeded
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `Prompter.qml:1651`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Prompter.qml:1651
+- **Severity:** Low
+- **Analysis:** `cursorShape: dragTarget.manualDrag ? ClosedHandCursor : OpenHandCursor` — manualDrag becomes true only after mouse moves >8px. From press to threshold, shows wrong cursor. leftWidthAdjustmentBar correctly checks pressed || drag.active.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | image-resize body drag cursor until threshold (Prompter.qml:1651) |
+| gpt | ⚠️ PARTIAL | 58 | observed Image resize body drag: cursor shows OpenHandCursor until drag threshold exceeded (src/prompter/Prompter.qml:1651) |
+| deepseek | ✅ LEGIT | 80 | dragTarget.manualDrag=false until threshold; cursorShape shows OpenHandCursor during press-to-drag phase at Prompter.qml:1651 |
+| glm | ✅ LEGIT | 65 | Prompter.qml:1651 Image resize body drag: cursor shows OpenHandCursor until drag threshold exceeded |
+| kimi | ✅ LEGIT | 60 | Prompter.qml image-resize body MouseArea defaults to OpenHandCursor; only changes on active drag |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — image-resize body drag cursor until threshold (Prompter.qml:1651) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

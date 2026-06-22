@@ -1,0 +1,33 @@
+# [META-N14] ModernToolkit removed from AppStream spec — validation error
+
+- **Status:** NEEDS-INFO
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `appdata.xml:66`
+- **Consensus:** 1/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** appdata.xml:66
+- **Severity:** Medium
+- **Impact:** AppStream validation failure. GNOME Software / KDE Discover may reject metadata.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❔ UNSURE | 45 | ModernToolkit removed from AppStream spec; needs validator (appdata.xml:66) |
+| gpt | ⚠️ PARTIAL | 58 | observed ModernToolkit removed from AppStream spec - validation error (com.cuperino.qprompt.appdata.xml:66) |
+| deepseek | ✅ LEGIT | 80 | appdata.xml:66 uses ModernToolkit kudo; ModernToolkit removed from AppStream spec checklist in recent versions; validator may reject |
+| glm | ⚠️ PARTIAL | 60 | appdata.xml:66 ModernToolkit removed from AppStream spec; may cause validation warning |
+| kimi | ❔ UNSURE | 60 | appdata.xml:66 uses <kudo>ModernToolkit</kudo>; its current AppStream validity cannot be confirmed from source alone |
+| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — ModernToolkit removed from AppStream spec; needs validator (appdata.xml:66) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

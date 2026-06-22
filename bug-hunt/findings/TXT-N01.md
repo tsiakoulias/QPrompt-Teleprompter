@@ -1,0 +1,34 @@
+# [TXT-N01] Find/replace fields missing persistentSelection: true
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `Find.qml:182,230`
+- **Consensus:** 2/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Find.qml:182,230
+- **Severity:** Low
+- **Analysis:** Both SearchField and replaceField set `selectByMouse: true` but omit `persistentSelection: true`. Selected text disappears on focus loss. Main editor (Prompter.qml:972) correctly enables it.
+- **Impact:** User-selected find/replace text vanishes on focus loss.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | find/replace fields missing persistentSelection (Find.qml:182) |
+| gpt | ⚠️ PARTIAL | 58 | observed Find/replace fields missing persistentSelection: true (src/prompter/Find.qml:182) |
+| deepseek | ⚠️ PARTIAL | 40 | persistentSelection missing is UX preference not functional defect (Find.qml:182 230) |
+| glm | ✅ LEGIT | 75 | Find.qml:182 230 Find/replace fields missing persistentSelection: true |
+| kimi | ✅ LEGIT | 95 | Find.qml:182 searchField and Find.qml:230 replaceField set selectByMouse:true but omit persistentSelection:true, so user selections vanish on focus loss. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — find/replace fields missing persistentSelection (Find.qml:182) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

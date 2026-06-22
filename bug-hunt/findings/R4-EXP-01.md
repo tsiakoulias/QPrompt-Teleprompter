@@ -1,0 +1,37 @@
+# [R4-EXP-01] No XSS sanitization — script tags, event handlers, javascript: URLs unfiltered
+
+- **Status:** OPEN
+- **Severity:** Critical
+- **Category:** Security
+- **Location:** `src/documenthandler.cpp:1246-1334`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:1246-1334
+- **Severity:** Critical
+- **Category:** Security
+- **Analysis:** filterHtml() applies only CSS-property regex filters. None of the 6 regexes remove script/iframe/object/embed/svg tags, onerror/onload/onclick event handlers, or javascript: URLs. Qt's QTextHtmlImporter preserves event handler attributes on known tags, re-exported verbatim by toHtml().
+- **Impact:** Malicious HTML imported/pasted/dropped injects executable JavaScript into exported documents. Event handlers survive round-trip save/load.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 55 | filterHtml doesn't strip scripts but Qt richtext runs no JS (documenthandler.cpp:1246) |
+| gpt | ⚠️ PARTIAL | 58 | observed No XSS sanitization - script tags, event handlers, javascript: URLs unfiltered (src/documenthandler.cpp:1246) |
+| deepseek | ✅ LEGIT | 95 | documenthandler.cpp:1246-1334 filterHtml applies 6 CSS-property regexes only; no removal of script/iframe/object/embed/event-handlers or javascript: URLs |
+| glm | ✅ LEGIT | 85 | documenthandler.cpp:1246-1334 filterHtml doesn't sanitize script tags event handlers or javascript: URLs |
+| kimi | ✅ LEGIT | 85 | filterHtml at documenthandler.cpp:1246-1334 strips CSS/IDs only; no script tag/event handler/javascript URL sanitization |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — filterHtml doesn't strip scripts but Qt richtext runs no JS (documenthandler.cpp:1246) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

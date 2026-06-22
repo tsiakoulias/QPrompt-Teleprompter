@@ -1,0 +1,34 @@
+# [RAII-N03] QProcess orphan — child process detached on waitForFinished() timeout
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:1083-1089`
+- **Consensus:** 3/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1083-1089
+- **Severity:** Medium
+- **Analysis:** Stack QProcess started (LibreOffice child). If waitForFinished times out (30s default), function returns early, QProcess dtor runs. Qt docs: "child process may continue running after QProcess destroyed." No kill()/terminate() before return. Orphan child process leaks.
+- **Impact:** Zombie LibreOffice process left running indefinitely after import timeout.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | QProcess child may linger if waitForFinished times out (documenthandler.cpp:1083) |
+| gpt | ✅ LEGIT | 78 | QProcess orphan - child process detached on waitForFinished() timeout (src/documenthandler.cpp:1083) |
+| deepseek | ❌ FALSE | 70 | QProcess stack object destructor calls close()/kill() in Qt6; no orphan on timeout (documenthandler.cpp:1083-1089) |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:1083-1089 QProcess orphan; child process detached on waitForFinished() timeout |
+| kimi | ❌ FALSE | 70 | Local QProcess goes out of scope after waitForFinished failure and its destructor terminates any still-running child process. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — QProcess child may linger if waitForFinished times out (documenthandler.cpp:1083) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,36 @@
+# [SHDR-N02] id: shadow collides with property ShaderEffectSource shadow — ambiguous resolution in blur chain
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `Prompter.qml:746,752,754,759,762`
+- **Consensus:** 4/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** Prompter.qml:746,752,754,759,762
+- **Severity:** Medium
+- **Analysis:** ShaderEffect has both `id: shadow` AND `readonly property ShaderEffectSource shadow` — same name. Inner blur chain references `shadow.source` which is ambiguous: self-reference to property → null → broken blur dimensions. ReadRegionOverlay avoids this by using distinct id.
+- **Impact:** When shadows enabled, prompter shadow may use degenerate (0×0) blur dimensions — corrupted/missing shadows.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | id: shadow collides with property ShaderEffectSource shadow (Prompter.qml:746) |
+| gpt | ⚠️ PARTIAL | 58 | observed id: shadow collides with property ShaderEffectSource shadow - ambiguous resolution in blur chai (src/prompter/Prompter.qml:746) |
+| deepseek | ❌ FALSE | 85 | id:shadow takes priority over property shadow in QML scope; shadow.source correctly resolves to prompterShadowSource not self-ref |
+| glm | ✅ LEGIT | 65 | Prompter.qml:746 752 754 759 762 id: shadow collides with property ShaderEffectSource shadow; ambiguous resolution |
+| kimi | ✅ LEGIT | 85 | Prompter.qml:746 id:shadow collides with the readonly property ShaderEffectSource shadow declared at :752 |
+| opus-ultra | ✅ LEGIT | 60 | id: shadow collides with property ShaderEffectSource shadow (Prompter.qml:746) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,34 @@
+# [PLAT-N04] "ipados" is not valid Qt.platform.os string — 18 dead guards across 5 files
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `main.qml (7), +windows (6), +android (3), EditorToolbar.qml, ReadRegionOverlay.qml`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **Files:** main.qml (7), +windows (6), +android (3), EditorToolbar.qml, ReadRegionOverlay.qml
+- **Severity:** Medium
+- **Analysis:** Qt.platform.os returns "ios" for both iPhone and iPad. No separate "ipados" string exists. All 18 guards are dead code.
+- **Impact:** Full-screen buttons wrongly shown on iPad. Read region placement defaults wrong. System font button wrongly enabled on iPad. Since 'ios' is already in all 18 arrays alongside 'ipados', fix is to delete 'ipados' entries.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 65 | Qt.platform.os returns 'ios' on iPadOS, never 'ipados' -> guards dead (multi-file) |
+| gpt | ✅ LEGIT | 78 | "ipados" is not valid Qt.platform.os string - 18 dead guards across 5 files (src/kirigami_ui/main.qml:45) |
+| deepseek | ✅ LEGIT | 90 | 'Qt.platform.os returns "ios" for iPad; "ipados" not a valid string; main.qml:45 and others include dead "ipados" in 18+ guards' |
+| glm | ✅ LEGIT | 75 | 'ipados' is not valid Qt.platform.os string; 18 dead guards across 5 files |
+| kimi | ✅ LEGIT | 90 | Qt.platform.os returns 'ios' on iPad; 18 guards across main.qml/+windows/+android/EditorToolbar/ReadRegionOverlay check 'ipados' and are dead. |
+| opus-ultra | ✅ LEGIT | 65 | Qt.platform.os returns 'ios' on iPadOS |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

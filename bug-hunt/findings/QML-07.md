@@ -1,0 +1,38 @@
+# [QML-07] `Text.CurveRendering` enum requires Qt >= 6.7
+
+- **Status:** REJECTED
+- **Severity:** High
+- **Category:** 
+- **Location:** `src/prompter/Countdown.qml:196`
+- **Consensus:** 0/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/prompter/Countdown.qml:196
+- **Severity:** High
+- **Code:**
+  ```qml
+  renderType: ... ? Text.CurveRendering : Text.NativeRendering
+  ```
+- **Analysis:** `Text.CurveRendering` was introduced in Qt 6.7. File imports `QtCore 6.5`. On Qt 6.5, this enum value does not exist.
+- **Impact:** Countdown number text may fail to render or use unintended rendering path.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 95 | CurveRendering exists on Qt 6.8.2 target (CMakeLists.txt:57) |
+| gpt | ❌ FALSE | 90 | Qt target is 6.8.2, so CurveRendering is available (src/prompter/Countdown.qml:196) |
+| deepseek | ❌ FALSE | 85 | QT_MIN_VERSION=6.8.2 at CMakeLists.txt:57; CurveRendering added in Qt 6.7; project can use it; QML import QtCore 6.5 is minimum version not exact |
+| glm | ⚠️ PARTIAL | 60 | Countdown.qml:196 Text.CurveRendering requires Qt 6.7+ but CMakeLists.txt:57 targets Qt 6.8.2 so this is fine |
+| kimi | ❌ FALSE | 85 | CMakeLists.txt:57 sets QT_MIN_VERSION 6.8.2; Text.CurveRendering (Qt 6.7) is available, so no mismatch. |
+| opus-ultra | ❌ FALSE | 95 | CurveRendering exists on Qt 6.8.2 target (CMakeLists.txt:57) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

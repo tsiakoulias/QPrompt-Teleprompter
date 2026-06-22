@@ -1,0 +1,41 @@
+# [LOG-08] DataPoint default constructor leaves three members uninitialized
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `src/promptsession.h:31,38-41`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/promptsession.h:31,38-41
+- **Severity:** Low
+- **Code:**
+  ```cpp
+  DataPoint() {}        // empty default constructor
+  int prompterWidth;    // no = initializer
+  int lineWidth;        // no = initializer
+  int lineHeight;       // no = initializer
+  ```
+- **Analysis:** While `time` and `position` have `= 0` initializers, `prompterWidth`, `lineWidth`, and `lineHeight` have none. Default-constructing produces indeterminate values.
+- **Impact:** Garbage values in telemetry/session data.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 100 | 3 int members uninitialized (promptsession.h:38-40) |
+| gpt | ✅ LEGIT | 88 | DataPoint default constructor leaves three members uninitialized (src/promptsession.h:31) |
+| deepseek | ✅ LEGIT | 85 | DataPoint default ctor{} at promptsess.h:31; prompterWidth/lineWidth/lineHeight uninitialized fields with no =0 defaults — UB on default construct |
+| glm | ⚠️ PARTIAL | 55 | promptsession.h:31 DataPoint default ctor leaves prompterWidth/lineWidth/lineHeight uninitialized but code paths always construct with explicit values |
+| kimi | ✅ LEGIT | 90 | promptsession.h:31,38-40 DataPoint default ctor leaves prompterWidth/lineWidth/lineHeight uninitialized. |
+| opus-ultra | ✅ LEGIT | 100 | 3 int members uninitialized (promptsession.h:38-40) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

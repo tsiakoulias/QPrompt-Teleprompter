@@ -1,0 +1,34 @@
+# [TB-N02] baseSpeedSlider/baseAccelerationSlider onMoved yanks focus to prompter instead of restoreFocus()
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `EditorToolbar.qml:2009-2010,2128-2129`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** EditorToolbar.qml:2009-2010,2128-2129
+- **Severity:** Medium
+- **Analysis:** Uses `viewport.prompter.focus = true` instead of `restoreFocus()`. All other toolbar actions correctly restore prior focus. User typing in editor loses focus on slider adjustment.
+- **Impact:** Editor focus lost on speed slider adjustment; user must click back into editor.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | slider onMoved yanks focus to prompter (EditorToolbar.qml:2009) |
+| gpt | ⚠️ PARTIAL | 58 | observed baseSpeedSlider/baseAccelerationSlider onMoved yanks focus to prompter instead of restoreFocus( (src/kirigami_ui/EditorToolbar.qml:2009) |
+| deepseek | ✅ LEGIT | 90 | EditorToolbar.qml:2009-2010 2128-2129: baseSpeed/AccelerationSlider onMoved sets viewport.prompter.focus=true instead of restoreFocus(); editor loses focus |
+| glm | ✅ LEGIT | 70 | EditorToolbar.qml:2009-2010 2128-2129 baseSpeedSlider/baseAccelerationSlider onMoved yanks focus to prompter instead of restoreFocus() |
+| kimi | ✅ LEGIT | 75 | EditorToolbar.qml:2009-2010 and :2128-2129 onMoved set prompter.focus=true instead of restoreFocus() |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — slider onMoved yanks focus to prompter (EditorToolbar.qml:2009) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

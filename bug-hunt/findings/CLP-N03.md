@@ -1,0 +1,34 @@
+# [CLP-N03] DropArea external drop: URLs consumed preferentially — text silently lost
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `Prompter.qml:1370-1378`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Prompter.qml:1370-1378
+- **Severity:** Medium
+- **Analysis:** hasUrls branch handles ONLY images via insertImageAt() and never falls through to hasHtml/hasText. Browser drags with both URLs and HTML lose all text content.
+- **Impact:** Drag-and-drop from web browsers inserts only images; all text silently lost.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | external drop consumes URLs preferentially, text lost (Prompter.qml:1370) |
+| gpt | ⚠️ PARTIAL | 58 | observed DropArea external drop: URLs consumed preferentially - text silently lost (src/prompter/Prompter.qml:1370) |
+| deepseek | ✅ LEGIT | 90 | Prompter.qml:1370-1378: hasUrls branch processes ONLY images via insertImageAt(); else-if chain prevents fallthrough to hasHtml/hasText — drag from browser loses all text |
+| glm | ✅ LEGIT | 75 | Prompter.qml:1370-1378 DropArea external drop: URLs consumed preferentially; text silently lost |
+| kimi | ✅ LEGIT | 90 | Prompter.qml:1370-1378 drop.hasUrls branch consumes URLs and skips html/text branches. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — external drop consumes URLs preferentially |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

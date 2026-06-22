@@ -1,0 +1,34 @@
+# [ERR-N02] insertImageAt() async callback silently discards 3 failure modes
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:1744-1752`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1744-1752
+- **Severity:** Medium
+- **Analysis:** Network error, null downloaded image, null textDocument — all three silently return without emitting error(). User sees nothing happen.
+- **Impact:** Silent failure when pasting remote images; no way to know operation failed.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 55 | insertImageAt async callback returns silently on 3 failure modes (documenthandler.cpp:1744) |
+| gpt | ⚠️ PARTIAL | 58 | observed insertImageAt() async callback silently discards 3 failure modes (src/documenthandler.cpp:1744) |
+| deepseek | ✅ LEGIT | 95 | documenthandler.cpp:1744-1752: async callback three silent returns — reply error (1744) null image (1748) null doc (1751); none emit error() — user sees nothing |
+| glm | ✅ LEGIT | 75 | documenthandler.cpp:1744-1752 insertImageAt async callback silently discards 3 failure modes |
+| kimi | ✅ LEGIT | 80 | documenthandler.cpp:1744-1752 insertImageAt async callback returns silently on network error, null image or null document. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — insertImageAt async callback returns silently on 3 failure modes (documenthandler.cpp:1744 |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

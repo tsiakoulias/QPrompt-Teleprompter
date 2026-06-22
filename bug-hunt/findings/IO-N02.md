@@ -1,0 +1,34 @@
+# [IO-N02] save() constructs QUrl without file:// scheme — broken on non-Windows
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** 
+- **Location:** `documenthandler.cpp:1183-1184`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1183-1184
+- **Severity:** High
+- **Analysis:** `QUrl::setUrl(QUrl::toPercentEncoding(fileName, "/:"))` passes raw path like `C:/Users/...` without `file://` prefix. `QUrl::setUrl()` parses drive letter as URL scheme. `toLocalFile()` garbled on Linux/macOS — Ctrl+S broken for files with absolute paths.
+- **Impact:** Save-in-place broken on Linux/macOS.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 50 | save() builds QUrl lacking file:// scheme (documenthandler.cpp:1183) |
+| gpt | ✅ LEGIT | 84 | save() constructs QUrl without file:// scheme - broken on non-Windows (src/documenthandler.cpp:1183) |
+| deepseek | ✅ LEGIT | 85 | QUrl::setUrl() without file:// at documenthandler.cpp:1183 — drive letter parsed as scheme broken on Linux |
+| glm | ✅ LEGIT | 85 | documenthandler.cpp:1183-1184 save() constructs QUrl without file:// scheme via toPercentEncoding; broken on non-Windows |
+| kimi | ✅ LEGIT | 95 | documenthandler.cpp:1183 constructs a QUrl from a raw local path with no file:// scheme; QUrl parses the drive letter as the scheme. |
+| opus-ultra | ✅ LEGIT | 50 | save() builds QUrl lacking file:// scheme (documenthandler.cpp:1183) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

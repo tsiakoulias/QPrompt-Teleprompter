@@ -1,0 +1,33 @@
+# [RESO-N02] Scrollbar width 6dp-13dp — below minimum 44dp touch target
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `ProgressIndicator.qml:39`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** ProgressIndicator.qml:39
+- **Severity:** Low
+- **Impact:** Scrollbar very difficult to grab on touch devices.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | scrollbar 6-13dp below 44dp touch target (ProgressIndicator.qml:39) |
+| gpt | ⚠️ PARTIAL | 48 | visual issue is plausible but depends on theme or device (src/prompter/ProgressIndicator.qml:39) |
+| deepseek | ✅ LEGIT | 80 | ProgressIndicator.qml:39: implicitWidth 6-13dp; well below minimum 44dp touch target per accessibility guidelines |
+| glm | ✅ LEGIT | 65 | ProgressIndicator.qml:39 scrollbar width 6dp-13dp below minimum 44dp touch target |
+| kimi | ✅ LEGIT | 80 | ProgressIndicator.qml:39 sets scrollbar width to 6 or 13, well below the 44dp touch-target guideline |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — scrollbar 6-13dp below 44dp touch target (ProgressIndicator.qml:39) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

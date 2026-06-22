@@ -1,0 +1,34 @@
+# [CMB-N03] LanguageSettingsOverlay ListView currentIndex always -1 — wrong indexOf() call
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `LanguageSettingsOverlay.qml:73`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** LanguageSettingsOverlay.qml:73
+- **Severity:** Medium
+- **Analysis:** `currentIndex: languageSelector.model.indexOf(languageSelector.currentIndex)` — Array.indexOf() uses strict equality (===). Searches for number in array of objects `{text:..., value:...}` — never matches. Returns -1 always. Correct pattern used elsewhere: `comboBox.highlightedIndex`.
+- **Impact:** Selected language never highlighted in dropdown popup.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 85 | currentIndex always -1 wrong indexOf (dup R2-OVL-02) (LanguageSettingsOverlay.qml:73) |
+| gpt | ✅ LEGIT | 78 | LanguageSettingsOverlay ListView currentIndex always -1 - wrong indexOf() call (src/kirigami_ui/LanguageSettingsOverlay.qml:73) |
+| deepseek | ✅ LEGIT | 85 | indexOf(currentIndex) passes int to search model data; currentIndex always -1 (LanguageSettingsOverlay.qml:73) |
+| glm | ✅ LEGIT | 80 | LanguageSettingsOverlay.qml:73 ListView currentIndex always -1 due to wrong indexOf() call |
+| kimi | ✅ LEGIT | 95 | LanguageSettingsOverlay.qml:73 sets ListView currentIndex to languageSelector.model.indexOf(languageSelector.currentIndex); array-of-objects cannot match a number, always -1 |
+| opus-ultra | ✅ LEGIT | 85 | currentIndex always -1 wrong indexOf (dup R2-OVL-02) (LanguageSettingsOverlay.qml:73) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

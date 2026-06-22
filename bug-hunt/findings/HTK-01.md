@@ -1,0 +1,34 @@
+# [HTK-01] KGlobalAccel default permanently destroyed on first user customization
+
+- **Status:** NEEDS-INFO
+- **Severity:** Critical
+- **Category:** 
+- **Location:** `globalhotkeys.cpp:1130,1138`
+- **Consensus:** 2/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** globalhotkeys.cpp:1130,1138
+- **Severity:** Critical
+- **Analysis:** `removeAllShortcuts()` at line 1130 clears BOTH custom AND default. Then `defaultShortcut()` at 1138 reads already-cleared default (empty). Empty list set as permanent default at 1140. Every customization irreversibly erases factory defaults.
+- **Impact:** KDE "Defaults" button becomes destructive. Only fix: delete KGlobalAccel config file.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❔ UNSURE | 45 | KGlobalAccel default/override logic; needs customization-path trace (globalhotkeys.cpp:1130) |
+| gpt | ❔ UNSURE | 39 | runtime/platform behavior is not decidable from the cited snippet (src/globalhotkeys.cpp:1130) |
+| deepseek | ✅ LEGIT | 95 | removeAllShortcuts at 1130 clears default+user then reads already-cleared default at 1138; defaults lost (globalhotkeys.cpp:1130 1138) |
+| glm | ⚠️ PARTIAL | 65 | globalhotkeys.cpp:1130 1138 KGlobalAccel defaults overwritten on customization but setDefaultShortcut preserves them |
+| kimi | ✅ LEGIT | 95 | globalhotkeys.cpp:1130 removeAllShortcuts clears defaults; line 1138 reads already-cleared defaultShortcut, then writes empty default. |
+| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — KGlobalAccel default/override logic; needs customization-path trace (globalhotkeys.cpp:113 |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

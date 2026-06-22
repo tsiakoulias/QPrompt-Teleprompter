@@ -1,0 +1,34 @@
+# [QW-N01] Projection Window onClosing references cleared model — spurious runtime errors
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `ProjectionsManager.qml:130-133,196-201`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** ProjectionsManager.qml:130-133,196-201
+- **Severity:** Medium
+- **Analysis:** closeAll() calls projectionModel.clear() which triggers async Instantiator to destroy Windows. Each onClosing calls projectionModel.remove(model.index) on already-cleared model.
+- **Impact:** Runtime errors on every close-all.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | onClosing references cleared model (ProjectionsManager.qml:130) |
+| gpt | ⚠️ PARTIAL | 58 | observed Projection Window onClosing references cleared model - spurious runtime errors (src/prompter/ProjectionsManager.qml:130) |
+| deepseek | ✅ LEGIT | 90 | ProjectionsManager.qml:130-133: closeAll clears projectionModel; async Instantiator destruction triggers onClosing remove on cleared model |
+| glm | ✅ LEGIT | 75 | ProjectionsManager.qml:130-133 196-201 Projection Window onClosing references cleared model; spurious runtime errors |
+| kimi | ✅ LEGIT | 85 | ProjectionsManager.qml:132 clears projectionModel then onClosing at 199 calls remove(model.index) on the empty model |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — onClosing references cleared model (ProjectionsManager.qml:130) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

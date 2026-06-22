@@ -1,0 +1,35 @@
+# [DCL-N02] setKeyMarker default parameter mismatch — same pattern
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Location:** `src/documenthandler.h:213 vs .cpp:707`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/documenthandler.h:213 vs .cpp:707
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Analysis:** Empty-string default in .cpp invisible to QML callers. Intended single-arg shortcut unreachable.
+- **Impact:** setKeyMarker("") no-op from C++ but QML can't invoke without explicit empty string.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 55 | setKeyMarker default param in .cpp not header (documenthandler.h:213) |
+| gpt | ✅ LEGIT | 78 | setKeyMarker default parameter mismatch - same pattern (src/documenthandler.h:213) |
+| deepseek | ✅ LEGIT | 95 | documenthandler.h:213 setKeyMarker no default; .cpp:707 has default='' — same pattern as DCL-N01; QML cannot call with implicit empty string |
+| glm | ✅ LEGIT | 80 | documenthandler.h:213 vs .cpp:707 setKeyMarker has default param in .cpp definition but not in header declaration |
+| kimi | ✅ LEGIT | 95 | setKeyMarker header at documenthandler.h:213 declares no default; .cpp definition at documenthandler.cpp:707 sets empty-string default. |
+| opus-ultra | ✅ LEGIT | 55 | setKeyMarker default param in .cpp not header (documenthandler.h:213) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

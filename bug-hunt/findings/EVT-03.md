@@ -1,0 +1,34 @@
+# [EVT-03] velocityDragOverlay (z:7) steals clicks from control buttons (z:6)
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** 
+- **Location:** `PrompterPage.qml:914 vs PrompterView.qml:61`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PrompterPage.qml:914 vs PrompterView.qml:61
+- **Severity:** High
+- **Analysis:** Overlay at z:7 above controls at z:6. LeftButton dismisses immediately, button never gets click.
+- **Impact:** All control buttons require double-click when velocity indicator visible.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | velocityDragOverlay z:7 may steal clicks from z:6 buttons (PrompterPage.qml:914) |
+| gpt | ⚠️ PARTIAL | 58 | observed velocityDragOverlay (z:7) steals clicks from control buttons (z:6) (src/kirigami_ui/PrompterPage.qml:914) |
+| deepseek | ✅ LEGIT | 90 | velocityDragOverlay z:7 above upperControls z:6; left-click buttons requires double-click when indicator on (PrompterPage.qml:914 PrompterView.qml:61) |
+| glm | ✅ LEGIT | 80 | PrompterPage.qml:914 velocityDragOverlay z:7 steals clicks from control buttons z:6 |
+| kimi | ✅ LEGIT | 85 | PrompterPage.qml:914 velocityDragOverlay has z:7; PrompterView.qml:62/112/196 upper controls are z:6, so overlay steals clicks. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — velocityDragOverlay z:7 may steal clicks from z:6 buttons (PrompterPage.qml:914) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

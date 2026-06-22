@@ -1,0 +1,34 @@
+# [DBG-N04] qDebug() in namedMarker()/setMarker() active in release
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `documenthandler.cpp:760,793`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** documenthandler.cpp:760,793
+- **Severity:** Low
+- **Analysis:** `qDebug() << "Empty"` and `qDebug() << marker` trace every marker query/set. CMake doesn't define QT_NO_DEBUG_OUTPUT.
+- **Impact:** Production debug spam on every marker interaction.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | qDebug in namedMarker/setMarker active in release builds (documenthandler.cpp:760) |
+| gpt | ⚠️ PARTIAL | 58 | observed qDebug() in namedMarker()/setMarker() active in release (src/documenthandler.cpp:760) |
+| deepseek | ✅ LEGIT | 90 | documenthandler.cpp:760 793: qDebug() in getMarkerKey() line 760 and setMarker() line 793 active in release builds; CMake does not define QT_NO_DEBUG_OUTPUT |
+| glm | ✅ LEGIT | 70 | documenthandler.cpp:760 793 qDebug() in namedMarker()/setMarker() active in release builds |
+| kimi | ✅ LEGIT | 80 | documenthandler.cpp:760 and :793 contain unguarded qDebug() in namedMarker()/setMarker() that emit in release builds. |
+| opus-ultra | ✅ LEGIT | 60 | qDebug in namedMarker/setMarker active in release builds (documenthandler.cpp:760) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

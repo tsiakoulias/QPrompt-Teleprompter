@@ -1,0 +1,37 @@
+# [R3-DOC-04] saveAs() silently ignores write/flush failures
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** Edge Case
+- **Location:** `src/documenthandler.cpp:1164-1168`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:1164-1168
+- **Severity:** High
+- **Category:** Edge Case
+- **Analysis:** After file.write() and file.flush(), code calls doc->setModified(false) without checking return values. On full disk, permission error, or quota exhaustion, save silently fails but document marked unmodified.
+- **Impact:** Silent data loss — user believes work was saved when it wasn't.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 90 | saveAs ignores write/flush returns (documenthandler.cpp:1164) |
+| gpt | ✅ LEGIT | 84 | saveAs() silently ignores write/flush failures (src/documenthandler.cpp:1164) |
+| deepseek | ✅ LEGIT | 95 | documenthandler.cpp:1164-1168 file.write()/flush() return values unchecked; doc->setModified(false) called unconditionally — silent data loss on disk full |
+| glm | ✅ LEGIT | 85 | documenthandler.cpp:1164-1168 saveAs write/flush failures not checked; file.close() return not verified |
+| kimi | ✅ LEGIT | 85 | documenthandler.cpp:1164 file.write, :1165 flush, :1166 close ignore return values; write/flush failures go undetected. |
+| opus-ultra | ✅ LEGIT | 90 | saveAs ignores write/flush returns (documenthandler.cpp:1164) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

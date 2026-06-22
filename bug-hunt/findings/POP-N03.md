@@ -1,0 +1,34 @@
+# [POP-N03] ESC cascade missing obsConfiguration — undismissable by keyboard despite alias
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `All 3 main.qml ESC handlers`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** All 3 main.qml ESC handlers
+- **Severity:** Medium
+- **Analysis:** obsConfiguration IS aliased in PrompterPage (line 53) but not checked in ESC cascade. All other aliased sheets ARE checked — simple omission.
+- **Impact:** ESC does nothing while OBS WebSocket configuration overlay is open.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | ESC cascade omits obsConfiguration sheet (main.qml) |
+| gpt | ⚠️ PARTIAL | 58 | observed ESC cascade missing obsConfiguration - undismissable by keyboard despite alias (src/kirigami_ui/main.qml:481) |
+| deepseek | ✅ LEGIT | 85 | obsConfiguration IS aliased at PrompterPage.qml:53 but ESC handler main.qml:489-504 never checks obsConfiguration.opened |
+| glm | ✅ LEGIT | 75 | obsConfiguration not in ESC cascade despite alias; undismissable by keyboard |
+| kimi | ✅ LEGIT | 90 | ESC cascade in main.qml variants omits obsConfiguration alias/id at PrompterPage.qml:53/1447. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — ESC cascade omits obsConfiguration sheet (main.qml) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

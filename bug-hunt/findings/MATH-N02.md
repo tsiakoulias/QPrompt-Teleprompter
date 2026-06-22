@@ -1,0 +1,35 @@
+# [MATH-N02] Bitwise << on floating-point in TimerClock — precision loss
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Location:** `src/prompter/TimerClock.qml:127`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/prompter/TimerClock.qml:127
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Analysis:** `... * prompter.__vw << 3` coerces float to 32-bit int before shift. e.g., 9.6 → 9 → 72 instead of 76.8. Should use `* 8`.
+- **Impact:** Stopwatch font size loses fractional precision at certain viewport widths.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | << 3 bitwise shift truncates real fontSize to int (TimerClock.qml:127) |
+| gpt | ✅ LEGIT | 78 | Bitwise on floating-point in TimerClock - precision loss (src/prompter/TimerClock.qml:127) |
+| deepseek | ✅ LEGIT | 90 | TimerClock.qml:127 bitwise<< coerces float to 32-bit int before shift — eg 9.6->9->72 instead of 76.8; should use *8 |
+| glm | ✅ LEGIT | 80 | TimerClock.qml:127 << operator used on floating-point value; << is integer shift operation |
+| kimi | ✅ LEGIT | 90 | TimerClock.qml:127 uses bitwise << 3 on a real expression; coerces float to int and loses fractional precision. |
+| opus-ultra | ✅ LEGIT | 60 | << 3 bitwise shift truncates real fontSize to int (TimerClock.qml:127) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,36 @@
+# [LOAD-N02] reset() emits 12 NOTIFY signals when open() fails but exists() succeeds
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `documenthandler.cpp:1017-1018`
+- **Consensus:** 3/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1017-1018
+- **Severity:** Low
+- **Analysis:** reset() called outside file.open() success block but inside exists() block. File exists but unreadable → reset() fires all format NOTIFY signals with property values from unchanged document. UI churns for nothing.
+- **Impact:** Spurious formatting toolbar re-bind, animation restarts, visual flash on permission errors.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | reset() emits ~12 signals when open fails after exists() (documenthandler.cpp:1017) |
+| gpt | ✅ LEGIT | 78 | reset() emits 12 NOTIFY signals when open() fails but exists() succeeds (src/documenthandler.cpp:1017) |
+| deepseek | ❌ FALSE | 75 | reset() is inside if(file.open()) block; not called when open fails (documenthandler.cpp:1017-1018) |
+| glm | ✅ LEGIT | 75 | documenthandler.cpp:1017-1018 reset() emits 12 NOTIFY signals when open() fails but exists() succeeds |
+| kimi | ❌ FALSE | 75 | reset() at documenthandler.cpp:1018 is only reached if file.open() succeeds; no signal storm occurs when open fails. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — reset() emits ~12 signals when open fails after exists() (documenthandler.cpp:1017) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

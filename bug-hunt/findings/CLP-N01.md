@@ -1,0 +1,34 @@
+# [CLP-N01] Copy/Cut exports unfiltered HTML to system clipboard
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `Prompter.qml, EditorToolbar.qml, main.qml`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Prompter.qml, EditorToolbar.qml, main.qml
+- **Severity:** Medium
+- **Analysis:** All copy/cut paths use editor.copy()/cut() — places raw QTextDocument HTML on system clipboard. filterHtml() doesn't strip scripts/event handlers (R4-EXP-01). Malicious HTML propagates to other apps via clipboard.
+- **Impact:** Security boundary leak — dangerous HTML reaches browser/email via clipboard paste.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | copy/cut exports unfiltered HTML to clipboard (Prompter.qml) |
+| gpt | ✅ LEGIT | 78 | Copy/Cut exports unfiltered HTML to system clipboard (src/prompter/Prompter.qml:1) |
+| deepseek | ⚠️ PARTIAL | 70 | Prompter.qml/EditorToolbar.qml/main.qml: copy/cut paths use editor.copy()/cut() placing raw QTextDocument HTML on clipboard; filterHtml() doesn't strip scripts — verified pattern but not all sites |
+| glm | ✅ LEGIT | 75 | Prompter.qml EditorToolbar.qml main.qml copy/cut exports unfiltered HTML to system clipboard |
+| kimi | ✅ LEGIT | 85 | Copy/cut paths use editor.copy()/cut() which place raw QTextDocument HTML on clipboard without filterHtml. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — copy/cut exports unfiltered HTML to clipboard (Prompter.qml) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

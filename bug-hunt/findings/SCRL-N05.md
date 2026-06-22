@@ -1,0 +1,34 @@
+# [SCRL-N05] __speedLimit check is dead logic — always true
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `Prompter.qml:129,494,510`
+- **Consensus:** 1/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** Prompter.qml:129,494,510
+- **Severity:** Low
+- **Analysis:** `__speedLimit = __vw * 100` (~1920px × 100 = ~192,000). `__velocity < this.__speedLimit` (velocity typically < 100). Guard condition always true for normal operation. Mirror in decreaseVelocity also always true.
+- **Impact:** Dead code — speed limit boundary never reached.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | __speedLimit check claimed always-true; needs full expr (Prompter.qml:129) |
+| gpt | ⚠️ PARTIAL | 58 | observed speedLimit check is dead logic - always true (src/prompter/Prompter.qml:129) |
+| deepseek | ❌ FALSE | 65 | __speedLimit=__vw*100=width pixels; velocity reachable at high __i values (Prompter.qml:129 494 510) |
+| glm | ⚠️ PARTIAL | 60 | Prompter.qml:129 494 510 __speedLimit check is dead logic; always true |
+| kimi | ✅ LEGIT | 80 | Prompter.qml:129 defines __speedLimit=__vw*100 (viewport width); checks at 494/510 compare velocity against that limit but legit velocities never reach it, making guard effectively dead. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — __speedLimit check claimed always-true; needs full expr (Prompter.qml:129) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

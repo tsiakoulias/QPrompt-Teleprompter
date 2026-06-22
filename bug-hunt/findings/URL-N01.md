@@ -1,0 +1,34 @@
+# [URL-N01] reload() constructs file:// URL by string concatenation without encoding
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:860`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** documenthandler.cpp:860
+- **Severity:** Medium
+- **Analysis:** `QUrl("file://" + fileUrl)` — no percent-encoding. Paths with spaces, #, ?, or non-ASCII chars produce malformed QUrl. load() fails to round-trip back via `QQmlFile::urlToLocalFileOrQrc()`.
+- **Impact:** Auto-reload broken for files with special characters in path.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | reload file:// URL by concat without encoding (dup PATH-N02) (documenthandler.cpp:860) |
+| gpt | ⚠️ PARTIAL | 58 | observed reload() constructs file:// URL by string concatenation without encoding (src/documenthandler.cpp:860) |
+| deepseek | ✅ LEGIT | 65 | file:// URL built by string concatenation without percent-encoding (documenthandler.cpp:860) |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:860 reload() constructs file:// URL by string concatenation without encoding |
+| kimi | ✅ LEGIT | 90 | documenthandler.cpp:860 reload() builds QUrl from 'file://' + fileUrl without percent-encoding; paths with #/space/non-ASCII may break reload |
+| opus-ultra | ✅ LEGIT | 60 | reload file:// URL by concat without encoding (dup PATH-N02) (documenthandler.cpp:860) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

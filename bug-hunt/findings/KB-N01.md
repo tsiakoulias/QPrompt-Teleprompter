@@ -1,0 +1,34 @@
+# [KB-N01] Find.qml: 9 toolbar buttons missing focusPolicy — keyboard-invisible
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `Find.qml`
+- **Consensus:** 3/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** Find.qml
+- **Severity:** Medium
+- **Analysis:** All Find/Replace toolbar buttons (Close, Replace-toggle, Prev, Next, RegEx, etc.) lack focusPolicy: Qt.TabFocus. Only searchField and replaceField in tab chain. Keyboard users cannot tab to any Find toolbar button.
+- **Impact:** Find/replace toolbar completely inaccessible via keyboard Tab navigation.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | 9 Find buttons missing focusPolicy; keyboard (Find.qml) |
+| gpt | ⚠️ PARTIAL | 58 | observed Find.qml: 9 toolbar buttons missing focusPolicy - keyboard-invisible (src/prompter/Find.qml:1) |
+| deepseek | ✅ LEGIT | 85 | Find.qml ToolButtons lack focusPolicy:Qt.TabFocus; keyboard Tab navigation skips Find toolbar entirely |
+| glm | ✅ LEGIT | 65 | Find.qml 9 toolbar buttons missing focusPolicy; keyboard-invisible |
+| kimi | ❌ FALSE | 70 | Find.qml ToolButtons inherit AbstractButton default focusPolicy Qt.TabFocus; keyboard focus works |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — 9 Find buttons missing focusPolicy; keyboard (Find.qml) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

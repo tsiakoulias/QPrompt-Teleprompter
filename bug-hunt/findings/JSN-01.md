@@ -1,0 +1,34 @@
+# [JSN-01] i.d.authentication accessed without undefined guard
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** 
+- **Location:** `Prompter.qml:373-374`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** Prompter.qml:373-374
+- **Severity:** High
+- **Analysis:** Even after successful JSON.parse, code assumes i.d and i.d.authentication exist. {"op":0} (no d) → TypeError crash.
+- **Impact:** Crash on OBS v4, non-OBS services, or protocol changes.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 65 | i.d.authentication.challenge accessed with no guard for missing auth (Prompter.qml:373) |
+| gpt | ✅ LEGIT | 92 | i.d.authentication accessed without undefined guard (src/prompter/Prompter.qml:373) |
+| deepseek | ✅ LEGIT | 90 | No check for i.d before accessing i.d.authentication at Prompter.qml:373 — crashes on op:0 |
+| glm | ✅ LEGIT | 85 | Prompter.qml:373-374 i.d.authentication accessed without checking if i.d or i.d.authentication exists; crash on auth-disabled |
+| kimi | ✅ LEGIT | 90 | Prompter.qml:373-374 reads i.d.authentication.challenge/salt without checking i.d or i.d.authentication exist. |
+| opus-ultra | ✅ LEGIT | 65 | i.d.authentication.challenge accessed with no guard for missing auth (Prompter.qml:373) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

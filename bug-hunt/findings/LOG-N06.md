@@ -1,0 +1,34 @@
+# [LOG-N06] No error log when saveAs() write/flush fail — silent data loss
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:1164-1165`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** documenthandler.cpp:1164-1165
+- **Severity:** Medium
+- **Analysis:** file.write() return (-1) and file.flush() return (false) unchecked and unlogged. Combined with R3-DOC-04: silent data loss with zero diagnostics.
+- **Impact:** File I/O failures produce no log entry — impossible to diagnose in the field.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 70 | no error log when write/flush fail (R3-DOC-04 family) (documenthandler.cpp:1164) |
+| gpt | ✅ LEGIT | 78 | No error log when saveAs() write/flush fail - silent data loss (src/documenthandler.cpp:1164) |
+| deepseek | ✅ LEGIT | 95 | documenthandler.cpp:1164-1165: file.write() return (-1 on error) and file.flush() return (false) unchecked and unlogged — silent I/O data loss |
+| glm | ✅ LEGIT | 75 | documenthandler.cpp:1164-1165 no error log when saveAs write/flush fail; silent data loss |
+| kimi | ✅ LEGIT | 90 | documenthandler.cpp:1164-1166 ignores file.write/flush return values and emits no error on write failure. |
+| opus-ultra | ✅ LEGIT | 70 | no error log when write/flush fail (R3-DOC-04 family) (documenthandler.cpp:1164) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

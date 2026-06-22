@@ -1,0 +1,34 @@
+# [SIZE-N01] concentricCircles Shape has conflicting anchors.fill + anchors.centerIn
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `Countdown.qml:207-209`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** Countdown.qml:207-209
+- **Severity:** Medium
+- **Analysis:** `anchors.fill: parent` sets left/right/top/bottom. `anchors.centerIn: parent` sets horizontalCenter/verticalCenter. Both simultaneously — prohibited in Qt Quick. QML anchor conflict warning; positioning unpredictable.
+- **Impact:** Concentric circles may be mispositioned on some Qt builds.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | concentricCircles anchors.fill + anchors.centerIn conflict (Countdown.qml:207) |
+| gpt | ✅ LEGIT | 78 | concentricCircles Shape has conflicting anchors.fill + anchors.centerIn (src/prompter/Countdown.qml:207) |
+| deepseek | ✅ LEGIT | 80 | anchors.fill and anchors.centerIn on same Shape are mutually conflicting (Countdown.qml:207-209) |
+| glm | ✅ LEGIT | 75 | Countdown.qml:207-209 concentricCircles Shape has conflicting anchors.fill + anchors.centerIn |
+| kimi | ✅ LEGIT | 95 | Countdown.qml:207-209 sets both anchors.fill and anchors.centerIn on the same Shape, producing conflicting anchors. |
+| opus-ultra | ✅ LEGIT | 60 | concentricCircles anchors.fill + anchors.centerIn conflict (Countdown.qml:207) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,34 @@
+# [GEO-03] +android/main.qml no minimumWidth/minimumHeight
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `+android/main.qml`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** +android/main.qml
+- **Severity:** Low
+- **Analysis:** Unlike base and Windows variants (min 351x291), Android has no minimum size. Layout may break on very small screens.
+- **Impact:** UI layout corruption on small Android screens.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | +android no minimumWidth/Height (main.qml) |
+| gpt | ⚠️ PARTIAL | 58 | observed +android/main.qml no minimumWidth/minimumHeight (src/kirigami_ui/+android/main.qml:1) |
+| deepseek | ✅ LEGIT | 90 | +android/main.qml lacks minimumWidth/minimumHeight — base variant has 351/291 |
+| glm | ✅ LEGIT | 75 | +android/main.qml no minimumWidth/minimumHeight declarations |
+| kimi | ✅ LEGIT | 70 | +android/main.qml has no minimumWidth/minimumHeight unlike base and +windows variants. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — +android no minimumWidth/Height (main.qml) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

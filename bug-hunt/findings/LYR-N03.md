@@ -1,0 +1,35 @@
+# [LYR-N03] ContextDrawer exposes prompter actions while viewing layer pages
+
+- **Status:** NEEDS-INFO
+- **Severity:** Medium
+- **Category:** Logic
+- **Location:** `src/kirigami_ui/main.qml:929`
+- **Consensus:** 2/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** src/kirigami_ui/main.qml:929
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** Guard `depth <= 1` always true since clear() before push(). Should be `depth < 1`. Prompter actions (start prompting, screen projections) shown on About/Paths/Remote pages.
+- **Impact:** ContextDrawer shows wrong actions on secondary pages; clicking affects hidden prompter.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❔ UNSURE | 45 | ContextDrawer exposes prompter actions on layer pages; UX (main.qml:929) |
+| gpt | ✅ LEGIT | 78 | ContextDrawer exposes prompter actions while viewing layer pages (src/kirigami_ui/main.qml:929) |
+| deepseek | ✅ LEGIT | 88 | depth<=1 true after clear; prompter actions shown on About/Paths pages should be depth<1 (main.qml:929) |
+| glm | ⚠️ PARTIAL | 60 | main.qml:929 contextDrawer exposes prompter actions while viewing layer pages; may show irrelevant actions |
+| kimi | ❌ FALSE | 80 | main.qml:929 guards contextDrawer actions with layers.depth <= 1; layer pages are pushed via layers.push, so depth > 1 hides actions correctly. |
+| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — ContextDrawer exposes prompter actions on layer pages; UX (main.qml:929) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,37 @@
+# [R2-PRP-05] Potential null-item access on async Loader in namedMarkerConfiguration.onOpened
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** Edge Case
+- **Location:** `src/kirigami_ui/PrompterPage.qml:1144,1146`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/kirigami_ui/PrompterPage.qml:1144,1146
+- **Severity:** Low
+- **Category:** Edge Case
+- **Analysis:** `setMarkerKeyButton` Loader (line 1173) has `asynchronous: true`. In `onOpened`, `setMarkerKeyButton.text` is accessed via alias. If OverlaySheet content is lazily created, Loader may not be loaded when onOpened fires — `setMarkerKeyButton.item` is null → `TypeError`.
+- **Impact:** On slow systems/first launch, opening named-marker config sheet could crash with null reference error.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | async Loader null-item in namedMarkerConfiguration.onOpened (PrompterPage.qml:1144) |
+| gpt | ⚠️ PARTIAL | 52 | observed Potential null-item access on async Loader in namedMarkerConfiguration.onOpened (src/kirigami_ui/PrompterPage.qml:1144) |
+| deepseek | ❔ UNSURE | 30 | Async Loader null-item access depends on timing and QML engine behavior; cannot verify without runtime test |
+| glm | ✅ LEGIT | 80 | PrompterPage.qml:1144 1146 Loader.item access in onOpened without null check; async Loader may not have loaded yet |
+| kimi | ✅ LEGIT | 80 | PrompterPage.qml:1144,1146 accesses setMarkerKeyButton alias of asynchronous Loader before item may be ready. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — async Loader null-item in namedMarkerConfiguration.onOpened (PrompterPage.qml:1144) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

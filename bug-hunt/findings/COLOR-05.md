@@ -1,0 +1,34 @@
+# [COLOR-05] Prompter scrollbar gradient hardcodes #CCC/#998/#665 — low contrast on light backgrounds
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `Prompter.qml:1008-1009`
+- **Consensus:** 2/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Prompter.qml:1008-1009
+- **Severity:** Low
+- **Analysis:** Hardcoded warm-grey values. On light prompter backgrounds (#FAFAFA), scrollbar handle nearly invisible. No Kirigami theme color consulted.
+- **Impact:** Scrollbar handle low-contrast/invisible on light prompter backgrounds.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | scrollbar gradient hardcoded greys; contrast (Prompter.qml:1008) |
+| gpt | ⚠️ PARTIAL | 58 | visual issue is plausible but depends on theme or device (src/prompter/Prompter.qml:1008) |
+| deepseek | ⚠️ PARTIAL | 40 | hardcoded scrollbar gradient #CCC/#998/#665 is cosmetic; low contrast on light themes (Prompter.qml:1008-1009) |
+| glm | ✅ LEGIT | 70 | Prompter.qml:1008-1009 scrollbar gradient hardcodes #CCC/#998/#665; low contrast on light backgrounds |
+| kimi | ✅ LEGIT | 85 | Prompter.qml:1008-1009 hardcodes scrollbar GradientStop colors '#CCC', '#998', '#665' without consulting the theme, becoming low-contrast on light prompter backgrounds. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — scrollbar gradient hardcoded greys; contrast (Prompter.qml:1008) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

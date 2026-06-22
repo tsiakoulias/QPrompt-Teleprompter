@@ -1,0 +1,35 @@
+# [FINAL-21] clearProperty(AnchorHref/AnchorName) ineffective through mergeCharFormat
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Logic
+- **Location:** `src/documenthandler.cpp:800-801`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:800-801
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** clearProperty marks properties as unset locally. mergeCharFormat only applies set properties; unset properties silently skipped. Stale AnchorHref/AnchorNames persist.
+- **Impact:** Markers retain stale key bindings across disable/re-enable cycles.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 75 | clearProperty + mergeCharFormat leaves stale anchors (documenthandler.cpp:800) |
+| gpt | ✅ LEGIT | 78 | clearProperty(AnchorHref/AnchorName) ineffective through mergeCharFormat (src/documenthandler.cpp:800) |
+| deepseek | ✅ LEGIT | 70 | documenthandler.cpp:800-801 format.clearProperty(AnchorHref/AnchorName) merged via mergeFormatOnWordOrSelection — cleared properties may not propagate to doc |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:800-801 clearProperty(AnchorHref/AnchorName) through mergeCharFormat doesn't clear; needs setProperty with invalid |
+| kimi | ✅ LEGIT | 85 | documenthandler.cpp:800-801 clearProperty on AnchorHref/AnchorName then mergeCharFormat does not clear because unset properties are skipped. |
+| opus-ultra | ✅ LEGIT | 75 | clearProperty + mergeCharFormat leaves stale anchors (documenthandler.cpp:800) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

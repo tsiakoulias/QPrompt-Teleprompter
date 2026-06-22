@@ -1,0 +1,37 @@
+# [R2-IOS-03] UIApplication.keyWindow deprecated since iOS 13; breaks multi-window iPadOS
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Platform/Build
+- **Location:** `src/iossavedialog.mm:109, src/shakedetector.mm:114`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/iossavedialog.mm:109, src/shakedetector.mm:114
+- **Severity:** Medium
+- **Category:** Platform/Build
+- **Analysis:** Both files use `[UIApplication sharedApplication].keyWindow` to get root view controller. Deprecated in iOS 13, returns nil on iPadOS with UIScene-based lifecycle. presentViewController becomes no-op.
+- **Impact:** File save dialog and undo/redo alert silently fail to appear on iPadOS multi-window and modern iOS.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 85 | keyWindow deprecated since iOS13 (iossavedialog.mm:109) |
+| gpt | ✅ LEGIT | 78 | UIApplication.keyWindow deprecated since iOS 13; breaks multi-window iPadOS (src/iossavedialog.mm:109) |
+| deepseek | ✅ LEGIT | 75 | keyWindow deprecated iOS 13 at iossavedialog.mm:109 and shakedetector.mm:114; returns nil on iPadOS UIScene-based lifecycle — deprecated API confirmed |
+| glm | ✅ LEGIT | 80 | iossavedialog.mm:109 shakedetector.mm:114 UIApplication.keyWindow deprecated since iOS 13 |
+| kimi | ✅ LEGIT | 80 | iossavedialog.mm:109 and shakedetector.mm:114 use UIApplication.keyWindow deprecated since iOS 13. |
+| opus-ultra | ✅ LEGIT | 85 | keyWindow deprecated since iOS13 (iossavedialog.mm:109) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

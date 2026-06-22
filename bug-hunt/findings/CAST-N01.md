@@ -1,0 +1,34 @@
+# [CAST-N01] setFontCapitalization static_cast with no range validation — reachable from QML
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `documenthandler.cpp:677`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** documenthandler.cpp:677
+- **Severity:** Medium
+- **Analysis:** `static_cast<QFont::Capitalization>(capitalization)` — Q_INVOKABLE takes arbitrary int from QML. QFont::Capitalization valid range [0,4]. Passing 5, -1, 100 from QML → out-of-range enum → UB. Same class as TYP-02 (LayoutDirection) but different enum.
+- **Impact:** Undefined behavior if QML passes invalid capitalization value.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | setFontCapitalization static_cast no range check, QML-reachable (documenthandler.cpp:677) |
+| gpt | ✅ LEGIT | 78 | setFontCapitalization staticcast with no range validation - reachable from QML (src/documenthandler.cpp:677) |
+| deepseek | ✅ LEGIT | 70 | static_cast<QFont::Capitalization> without bounds check; QML int input reachable (documenthandler.cpp:677) |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:677 setFontCapitalization static_cast with no range validation; reachable from QML |
+| kimi | ✅ LEGIT | 90 | documenthandler.cpp:677 static_casts the int argument to QFont::Capitalization without range validation; QML can pass values outside [0,4]. |
+| opus-ultra | ✅ LEGIT | 60 | setFontCapitalization static_cast no range check |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

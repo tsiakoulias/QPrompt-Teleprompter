@@ -1,0 +1,34 @@
+# [SIZE-N02] Three Button children of Row have dead anchors.bottom declarations
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `PrompterView.qml:148,163,179`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** PrompterView.qml:148,163,179
+- **Severity:** Low
+- **Analysis:** Positioner children (Row) ignore manual anchors. Three `anchors.bottom: parent.bottom` declarations are silently dead.
+- **Impact:** Dead code — zero effect.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 55 | anchors.bottom on Button children of a Row is dead (PrompterView.qml:148) |
+| gpt | ✅ LEGIT | 78 | Three Button children of Row have dead anchors.bottom declarations (src/prompter/PrompterView.qml:148) |
+| deepseek | ✅ LEGIT | 75 | anchors.bottom on Button children of Row is dead; Row controls vertical layout (PrompterView.qml:148 163 179) |
+| glm | ✅ LEGIT | 70 | PrompterView.qml:148 163 179 three Button children have dead anchors.bottom declarations |
+| kimi | ✅ LEGIT | 65 | Buttons inside a vertical Column at PrompterView.qml:148,163,179 use anchors.bottom, which the Column layout ignores. |
+| opus-ultra | ✅ LEGIT | 55 | anchors.bottom on Button children of a Row is dead (PrompterView.qml:148) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

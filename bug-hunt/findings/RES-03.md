@@ -1,0 +1,41 @@
+# [RES-03] ShakeDetector::s_instance never set to nullptr on destruction (dangling pointer)
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `src/shakedetector.cpp:24,29`
+- **Consensus:** 2/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/shakedetector.cpp:24,29
+- **Severity:** Low
+- **Code:**
+  ```cpp
+  ShakeDetector::ShakeDetector(QObject *parent) : QObject(parent) {
+      s_instance = this;   // set in constructor
+  }
+  // No destructor resets s_instance to nullptr
+  ```
+- **Analysis:** Static singleton pointer never cleared on destruction. If QML engine destroys and recreates the ShakeDetector, `instance()` returns a dangling pointer. Same pattern in `IosSaveDialog`.
+- **Impact:** Use-after-free (unlikely in normal flow but detectable by ASan).
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 65 | s_instance not reset; singleton lifetime low (shakedetector.cpp:24) |
+| gpt | ⚠️ PARTIAL | 58 | observed ShakeDetector::s_instance never set to nullptr on destruction (dangling pointer) (src/shakedetector.cpp:24) |
+| deepseek | ✅ LEGIT | 85 | s_instance set in ctor at shakedetector.cpp:29 but never reset to nullptr on destruction; dangling pointer after QML engine recreate |
+| glm | ⚠️ PARTIAL | 60 | shakedetector.cpp:24 s_instance set in constructor and never nulled in destructor; dangling but QML singleton lifecycle makes this benign |
+| kimi | ✅ LEGIT | 80 | shakedetector.cpp:24,29 sets s_instance in ctor but no dtor resets it; recreated singleton returns dangling pointer. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — s_instance not reset; singleton lifetime low (shakedetector.cpp:24) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

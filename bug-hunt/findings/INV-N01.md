@@ -1,0 +1,34 @@
+# [INV-N01] QmlUtil::r() stores QML-owned QQuickItemGrabResult raw pointer — use-after-free
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `qmlutil.hpp:175-180, main.qml:1045`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** qmlutil.hpp:175-180, main.qml:1045
+- **Severity:** Medium
+- **Analysis:** `grabToImage()` returns JavaScriptOwnership result. `r()` stores raw pointer in C++ buffer. After JS callback, GC may delete object → `deleteLater()` on freed memory → crash. Or `deleteLater()` runs first → GC double-frees.
+- **Impact:** Intermittent crash during projection sessions.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | r() stores QML-owned grab-result raw ptr + deleteLater; UAF risk (qmlutil.hpp:175) |
+| gpt | ✅ LEGIT | 78 | QmlUtil::r() stores QML-owned QQuickItemGrabResult raw pointer - use-after-free (src/qmlutil.hpp:175) |
+| deepseek | ✅ LEGIT | 85 | Raw QQuickItemGrabResult* store at qmlutil.hpp:179 — QML GC may free while C++ holds pointer |
+| glm | ✅ LEGIT | 80 | qmlutil.hpp:175-180 r() stores QQuickItemGrabResult raw pointer; QML may delete the source causing use-after-free |
+| kimi | ✅ LEGIT | 85 | qmlutil.hpp:175-180 stores a JS-owned QQuickItemGrabResult* raw pointer and later calls deleteLater, risking use-after-free/double-free. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — r() stores QML-owned grab-result raw ptr + deleteLater; UAF risk (qmlutil.hpp:175) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

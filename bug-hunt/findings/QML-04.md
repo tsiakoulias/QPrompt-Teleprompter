@@ -1,0 +1,38 @@
+# [QML-04] Typo: `verticalCentertop` instead of `verticalCenter`
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** 
+- **Location:** `src/prompter/pointers/pointer_0.qml:36`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/prompter/pointers/pointer_0.qml:36
+- **Severity:** High
+- **Code:**
+  ```qml
+  anchors.verticalCenter: parent.verticalCentertop
+  ```
+- **Analysis:** `verticalCentertop` is not a valid QML property — characters from `verticalCenter` bled into `top`. Should be `parent.verticalCenter`.
+- **Impact:** Arrow pointer Shape positions at (0,0) instead of being vertically centered.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 100 | verticalCentertop typo (pointer_0.qml:36) |
+| gpt | ✅ LEGIT | 92 | Typo: verticalCentertop instead of verticalCenter (src/prompter/pointers/pointer_0.qml:36) |
+| deepseek | ✅ LEGIT | 90 | verticalCentertop at pointer_0.qml:36 is typo for verticalCenter — property name does not exist in QQuickItem |
+| glm | ✅ LEGIT | 95 | pointer_0.qml:36 verticalCentertop is a typo; should be verticalCenter. Anchor won't resolve |
+| kimi | ✅ LEGIT | 95 | pointer_0.qml:36 anchors.verticalCenter: parent.verticalCentertop is invalid QML property. |
+| opus-ultra | ✅ LEGIT | 100 | verticalCentertop typo (pointer_0.qml:36) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

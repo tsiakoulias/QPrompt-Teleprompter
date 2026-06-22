@@ -1,0 +1,35 @@
+# [IMP-N01] import Qt.labs.platform 1.1 — Menu/MenuBar/MenuItem dropped in Qt 6
+
+- **Status:** REJECTED
+- **Severity:** Critical
+- **Category:** QML/UI
+- **Location:** `src/kirigami_ui/main.qml:29,617-922`
+- **Consensus:** 0/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/kirigami_ui/main.qml:29,617-922
+- **Severity:** Critical
+- **Category:** QML/UI
+- **Analysis:** Qt 6's Qt.labs.platform no longer exports MenuBar, Menu, MenuItem. Base main.qml instantiates these for native menu bar — all undefined types.
+- **Impact:** Native File/Format/View/Help menu bar silently dead on Linux/macOS (the targets for base main.qml).
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 60 | Qt.labs.platform Menu/MenuBar/MenuItem still exist in Qt 6; ships & works (main.qml:29) |
+| gpt | ❌ FALSE | 76 | Qt.labs.platform types are still used here under Qt 6 (src/kirigami_ui/main.qml:29) |
+| deepseek | ⚠️ PARTIAL | 75 | main.qml:29 imports Qt.labs.platform 1.1 — Qt6.2+ re-added Labs Platform module with version mapping; but exact 1.1->6.x mapping depends on Qt build |
+| glm | ⚠️ PARTIAL | 65 | main.qml:29 imports Qt.labs.platform 1.1 as Labs; in Qt 6 the module is Qt.labs.platform but version should be omitted. Labs.Menu/MenuBar still exist in Qt 6. |
+| kimi | ❌ FALSE | 80 | Qt.labs.platform 1.1 still exports MenuBar/Menu/MenuItem in Qt 6.8.2 target; types are not dropped (native integration is platform-limited). |
+| opus-ultra | ❌ FALSE | 60 | Qt.labs.platform Menu/MenuBar/MenuItem still exist in Qt 6; ships & works (main.qml:29) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

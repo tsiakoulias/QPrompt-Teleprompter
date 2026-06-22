@@ -1,0 +1,41 @@
+# [LOG-07] namedMarker() fetches cursor twice — stale-content risk
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `src/documenthandler.cpp:699-705`
+- **Consensus:** 1/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:699-705
+- **Severity:** Low
+- **Code:**
+  ```cpp
+  QTextCursor cursor = textCursor();   // used only for isNull()
+  if (cursor.isNull()) return false;
+  return textCursor().charFormat().isAnchor() &&   // second cursor fetch
+         (textCursor().charFormat().anchorNames()... // third fetch
+  ```
+- **Analysis:** The local `cursor` is only null-checked. All subsequent calls to `textCursor()` fetch independent cursor objects that may not correspond to the same position.
+- **Impact:** Edge case where anchor names/format belong to a different text position than the one null-checked.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 60 | refetches textCursor() but harmless (documenthandler.cpp:699) |
+| gpt | ⚠️ PARTIAL | 52 | observed namedMarker() fetches cursor twice - stale-content risk (src/documenthandler.cpp:699) |
+| deepseek | ⚠️ PARTIAL | 50 | namedMarker fetches cursor 3x at doc.cpp:701-704; but QTextCursor copies are cheap; practical staleness risk minimal in single-thread context |
+| glm | ⚠️ PARTIAL | 60 | documenthandler.cpp:699-705 namedMarker fetches cursor twice via textCursor() but the cursor is built from current selection state so staleness risk is minimal |
+| kimi | ✅ LEGIT | 70 | documenthandler.cpp:699-705 namedMarker() null-checks one cursor then fetches fresh textCursor() twice. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — refetches textCursor() but harmless (documenthandler.cpp:699) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

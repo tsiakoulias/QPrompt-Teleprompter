@@ -1,0 +1,37 @@
+# [R2-WHE-01] `focus: true` is JavaScript label, not assignment
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** QML/UI
+- **Location:** `src/kirigami_ui/WheelSettingsOverlay.qml:90`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/kirigami_ui/WheelSettingsOverlay.qml:90
+- **Severity:** High
+- **Category:** QML/UI
+- **Analysis:** Inside onValueModified: `focus: true` uses colon instead of `=`. In JS this is a labeled statement (label `focus` with expression `true`), not assignment to SpinBox's focus property. Should be `focus = true`.
+- **Impact:** Throttle factor SpinBox never receives keyboard focus when value is modified.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 90 | focus: true is a JS label not assignment (WheelSettingsOverlay.qml:90) |
+| gpt | ✅ LEGIT | 84 | focus: true is JavaScript label, not assignment (src/kirigami_ui/WheelSettingsOverlay.qml:90) |
+| deepseek | ✅ LEGIT | 85 | focus: true at WheelSettingsOverlay.qml:90 is JS labeled statement not assignment; should be focus=true — confirmed JS syntax issue |
+| glm | ✅ LEGIT | 85 | WheelSettingsOverlay.qml:90 focus: true inside onValueModified is a JS label not assignment |
+| kimi | ✅ LEGIT | 90 | WheelSettingsOverlay.qml:90 oValueModified uses focus: true JS label instead of focus = true assignment. |
+| opus-ultra | ✅ LEGIT | 90 | focus: true is a JS label not assignment (WheelSettingsOverlay.qml:90) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

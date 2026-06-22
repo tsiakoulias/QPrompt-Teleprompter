@@ -1,0 +1,34 @@
+# [PRE-N01] Preprocessor uses `or` instead of `||` in 6 #if directives — MSVC build break
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `documenthandler.cpp:132,347,911,1057; globalhotkeys.cpp:560,832`
+- **Consensus:** 2/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** documenthandler.cpp:132,347,911,1057; globalhotkeys.cpp:560,832
+- **Severity:** Low
+- **Analysis:** `#if (defined(Q_OS_MACOS) or defined(Q_OS_IOS))` — C preprocessor doesn't recognize `or` on MSVC without `/Zc:preprocessor`. 40+ other guards use `||`.
+- **Impact:** Build failure on MSVC with `/permissive-`.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 55 | 'or' in #if non-portable for strict MSVC; their Windows build tolerates it (documenthandler.cpp:132) |
+| gpt | ⚠️ PARTIAL | 58 | observed Preprocessor uses or instead of \|\| in 6 #if directives - MSVC build break (src/documenthandler.cpp:132) |
+| deepseek | ⚠️ PARTIAL | 75 | documenthandler.cpp:132 347 911 1057; globalhotkeys.cpp:560 832: #if uses or instead of \|\|; or is standard C++ alternative token but MSVC with /permissive- rejects it |
+| glm | ❌ FALSE | 80 | documenthandler.cpp:132 347 911 1057 globalhotkeys.cpp:560 832 uses 'or' keyword which is valid C++ alternative token for \|\| |
+| kimi | ✅ LEGIT | 85 | documenthandler.cpp:132,347,911,1057 and globalhotkeys.cpp:560,832 use 'or' in #if directives, failing on MSVC /permissive-. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — 'or' in #if non-portable for strict MSVC; their Windows build tolerates it (documenthandle |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

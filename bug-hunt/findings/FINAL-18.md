@@ -1,0 +1,35 @@
+# [FINAL-18] MarkersModel extendLastMarker modifies data without emitting dataChanged
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Logic
+- **Location:** `src/markersmodel.cpp:109-114`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/markersmodel.cpp:109-114
+- **Severity:** Medium
+- **Category:** Logic
+- **Analysis:** Mutates m_data.last().text directly with no dataChanged signal. Violates QAbstractItemModel contract.
+- **Impact:** QML views show stale marker text after key-marker text extension.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 100 | extendLastMarker modifies data without dataChanged (markersmodel.cpp:109) |
+| gpt | ✅ LEGIT | 78 | MarkersModel extendLastMarker modifies data without emitting dataChanged (src/markersmodel.cpp:109) |
+| deepseek | ✅ LEGIT | 95 | markersmodel.cpp:109-114 extendLastMarker modifies m_data.last().text without emitting dataChanged() — stale view display |
+| glm | ✅ LEGIT | 85 | markersmodel.cpp:109-114 extendLastMarker modifies m_data.last().text without emitting dataChanged |
+| kimi | ✅ LEGIT | 95 | markersmodel.cpp:109-114 extendLastMarker mutates m_data.last().text without calling dataChanged(), violating model-view contract. |
+| opus-ultra | ✅ LEGIT | 100 | extendLastMarker modifies data without dataChanged (markersmodel.cpp:109) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

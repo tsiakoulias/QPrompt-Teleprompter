@@ -1,0 +1,33 @@
+# [SHT-N02] Missing StandardKey.FullScreen on Android
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `+android/main.qml (absent from base:523 and +windows:494)`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** +android/main.qml (absent from base:523 and +windows:494)
+- **Severity:** Low
+- **Impact:** External keyboard users on Android have no F11/Alt+Enter fullscreen toggle.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | missing StandardKey.FullScreen on Android (main.qml:523) |
+| gpt | ⚠️ PARTIAL | 58 | observed Missing StandardKey.FullScreen on Android (src/kirigami_ui/+android/main.qml:1) |
+| deepseek | ⚠️ PARTIAL | 75 | Android missing StandardKey.FullScreen vs base/windows but Android OS manages fullscreen natively — may be intentional |
+| glm | ✅ LEGIT | 65 | +android/main.qml missing StandardKey.FullScreen absent from base:523 and +windows:494 |
+| kimi | ✅ LEGIT | 75 | +android/main.qml:390-428 has StandardKey.Cancel but no StandardKey.FullScreen action present in base/+windows |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — missing StandardKey.FullScreen on Android (main.qml:523) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

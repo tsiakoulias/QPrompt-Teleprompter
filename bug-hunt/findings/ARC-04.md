@@ -1,0 +1,32 @@
+# [ARC-04] DocumentHandler is 2295-line god class spanning file I/O, network, HTML filtering, markers, spellcheck, drag-drop, images, search, undo, clipboard, sleep prevention, font dialog
+
+- **Status:** OPEN
+- **Severity:** 
+- **Category:** 
+- **Location:** `documenthandler.cpp (2295 lines)`
+- **Consensus:** 1/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** documenthandler.cpp (2295 lines)
+- **Analysis:** At least 6 separable concerns in a single class. Any change risks all subsystems. Test isolation impossible.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | DocumentHandler god-class; architectural/subjective |
+| gpt | ⚠️ PARTIAL | 48 | maintainability issue observed, but no direct runtime bug shown (src/documenthandler.cpp:1) |
+| deepseek | ❌ FALSE | 50 | architectural observation; large class is maintainability concern not a code defect |
+| glm | ⚠️ PARTIAL | 55 | documenthandler.cpp is 1933-line god class; architectural concern not a bug |
+| kimi | ✅ LEGIT | 60 | DocumentHandler spans file I/O, network, HTML filtering, markers, spellcheck, images, etc.; source is ~1933 lines of mixed concerns. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — DocumentHandler god-class; architectural/subjective |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

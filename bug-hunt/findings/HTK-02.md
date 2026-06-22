@@ -1,0 +1,34 @@
+# [HTK-02] User shortcuts never persisted when only Use_GlobalAccel defined (no QHotkey)
+
+- **Status:** NEEDS-INFO
+- **Severity:** High
+- **Category:** 
+- **Location:** `globalhotkeys.cpp:831`
+- **Consensus:** 3/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** globalhotkeys.cpp:831
+- **Severity:** High
+- **Analysis:** QSettings save block gated on `#ifdef QHotkey_FOUND`. On KDE-only Linux builds, shortcuts work in-session but all customizations lost on restart.
+- **Impact:** Linux users without QHotkey lose shortcuts every restart.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❔ UNSURE | 45 | QSettings save under #ifdef QHotkey; KGlobalAccel persists itself (globalhotkeys.cpp:831) |
+| gpt | ❔ UNSURE | 39 | runtime/platform behavior is not decidable from the cited snippet (src/globalhotkeys.cpp:831) |
+| deepseek | ✅ LEGIT | 92 | QSettings save gated on #ifdef QHotkey_FOUND; KDE-only builds never persist shortcuts (globalhotkeys.cpp:831) |
+| glm | ✅ LEGIT | 80 | globalhotkeys.cpp:831 when only Use_GlobalAccel is defined (no QHotkey) settings.setValue is in QHotkey ifdef block; not persisted |
+| kimi | ✅ LEGIT | 90 | globalhotkeys.cpp:831 QSettings persistence block is inside #ifdef QHotkey_FOUND, so KDE-only builds never save custom shortcuts. |
+| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — QSettings save under #ifdef QHotkey; KGlobalAccel persists itself (globalhotkeys.cpp:831) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

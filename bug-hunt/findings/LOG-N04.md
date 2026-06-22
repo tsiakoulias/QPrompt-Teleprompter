@@ -1,0 +1,34 @@
+# [LOG-N04] qWarning("reloading") fires unconditionally — misleading when URL mismatches
+
+- **Status:** REJECTED
+- **Severity:** Low
+- **Category:** 
+- **Location:** `documenthandler.cpp:862`
+- **Consensus:** 3/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** documenthandler.cpp:862
+- **Severity:** Low
+- **Analysis:** `qWarning("reloading")` at top of reload() — fires even when `load(url)` is not called due to URL mismatch. Incorrectly claims reload occurred.
+- **Impact:** Misleading diagnostic during file-watcher-triggered URL mismatch.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 70 | qWarning('reloading') is inside if(url==m_fileUrl), not unconditional (documenthandler.cpp:862) |
+| gpt | ✅ LEGIT | 78 | qWarning("reloading") fires unconditionally - misleading when URL mismatches (src/documenthandler.cpp:862) |
+| deepseek | ✅ LEGIT | 90 | documenthandler.cpp:862: qWarning('reloading') fires at top of reload() before url==m_fileUrl check at line 861; incorrectly claims reload on URL mismatch |
+| glm | ✅ LEGIT | 70 | documenthandler.cpp:862 qWarning('reloading') fires unconditionally even when URL mismatches |
+| kimi | ❌ FALSE | 90 | documenthandler.cpp:861-862 qWarning fires only when url equals m_fileUrl not unconditionally. |
+| opus-ultra | ❌ FALSE | 70 | qWarning('reloading') is inside if(url==m_fileUrl) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

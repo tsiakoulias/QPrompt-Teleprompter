@@ -1,0 +1,34 @@
+# [CMT-N03] Misleading OpenGL workaround comment — scope of impact understated
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `main.cpp:79`
+- **Consensus:** 1/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** main.cpp:79
+- **Severity:** Medium
+- **Analysis:** Comment only mentions "opacity bug in DirectX RHIs." Doesn't mention side effect: forces deprecated OpenGL backend on ALL Windows systems. Typo "Workarround."
+- **Impact:** Developer may not realize full scope of this environment variable.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 35 | OpenGL workaround comment scope; meta (main.cpp:79) |
+| gpt | ⚠️ PARTIAL | 48 | comment problem observed, but defect impact is limited (src/main.cpp:79) |
+| deepseek | ✅ LEGIT | 85 | Comment at main.cpp:79 mentions only 'opacity bug' — omits that opengl backend forces deprecated path on all Windows |
+| glm | ⚠️ PARTIAL | 60 | main.cpp:79 OpenGL workaround comment understates scope; affects all Windows not just DirectX |
+| kimi | ❌ FALSE | 70 | main.cpp:79 comment understates side effects but the environment variable is placed correctly; not a functional bug. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — OpenGL workaround comment scope; meta (main.cpp:79) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

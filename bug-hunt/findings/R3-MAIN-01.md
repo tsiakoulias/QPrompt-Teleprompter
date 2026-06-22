@@ -1,0 +1,37 @@
+# [R3-MAIN-01] Command-line positional argument description/syntax swapped
+
+- **Status:** REJECTED
+- **Severity:** Medium
+- **Category:** Platform/Build
+- **Location:** `src/main.cpp:158`
+- **Consensus:** 4/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** src/main.cpp:158
+- **Severity:** Medium
+- **Category:** Platform/Build
+- **Analysis:** addPositionalArgument("source", "file", "File to copy.") — 2nd and 3rd arguments swapped. Signature is (name, description, syntax).
+- **Impact:** --help output garbled; users can't understand expected file argument.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 75 | not swapped args; malformed QLatin1String(char*,char*) (main.cpp:158) |
+| gpt | ✅ LEGIT | 78 | Command-line positional argument description/syntax swapped (src/main.cpp:158) |
+| deepseek | ✅ LEGIT | 85 | main.cpp:158 addPositionalArgument signature is(name description syntax); passes('source' 'file' 'File to copy.') — description and syntax swapped |
+| glm | ✅ LEGIT | 80 | main.cpp:158 addPositionalArgument('source' 'file') has description/syntax swapped; 'file' should describe 'source' |
+| kimi | ✅ LEGIT | 85 | main.cpp:158 addPositionalArgument(description=file,syntax=File to copy.) swaps arguments; help output is malformed. |
+| opus-ultra | ❌ FALSE | 75 | not swapped args; malformed QLatin1String(char* |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

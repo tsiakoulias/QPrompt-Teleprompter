@@ -1,0 +1,35 @@
+# [TYP-09] Null pointer dereferences in emit textChanged related to uninitialized m_document
+
+- **Status:** REJECTED
+- **Severity:** Low
+- **Category:** 
+- **Location:** `src/documenthandler.cpp:320,325,334,343,383 (related)`
+- **Consensus:** 0/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:320,325,334,343,383 (related)
+- **Severity:** Low
+- **Code:** Various `emit textChanged()` paths that depend on `document()` being non-null.
+- **Analysis:** These are contingent on normal initialization — noted as fragile but not individually reproduced.
+- **Impact:** These are low-risk in normal usage but the empty `m_document` (`nullptr`) state has no guard in these code paths.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 90 | cited lines are #ifdef; textChanged never emitted anywhere |
+| gpt | ❌ FALSE | 76 | cited setters emit member signals; m_document is not dereferenced there (src/documenthandler.cpp:320) |
+| deepseek | ⚠️ PARTIAL | 40 | Various emit textChanged() paths depend on document() non-null at doc.cpp:320-383; but gated by m_document checks in callers — fragile but currently guarded |
+| glm | ⚠️ PARTIAL | 55 | documenthandler.cpp:320+ textCursor() returns null cursor when m_document is null; methods check cursor.isNull() so safe |
+| kimi | ❌ FALSE | 80 | documenthandler.cpp does not emit textChanged at cited lines; signal is declared but never emitted. |
+| opus-ultra | ❌ FALSE | 90 | cited lines are #ifdef; textChanged never emitted anywhere |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,39 @@
+# [TYP-10] Uninitialized marker struct fields: length defaults to 1
+
+- **Status:** REJECTED
+- **Severity:** Low
+- **Category:** 
+- **Location:** `src/marker.hpp:48`
+- **Consensus:** 1/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** src/marker.hpp:48
+- **Severity:** Low
+- **Code:**
+  ```cpp
+  int length = 1;
+  ```
+- **Analysis:** This is correctly defaulted to 1. Paired with LOG-03 showing `length` is never returned by the model — the bug is in the model, not the struct.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ❌ FALSE | 55 | length=1 default is correct; report itself says not-a-bug (marker.hpp:48) |
+| gpt | ❌ FALSE | 76 | Marker gives length a default value in the struct (src/marker.hpp:48) |
+| deepseek | ❌ FALSE | 60 | Marker::length=1 default at marker.hpp:48 is correct initialization; LOG-03 (model never returns length) is the real bug not the struct default |
+| glm | ✅ LEGIT | 80 | marker.hpp:48 length defaults to 1; Marker() constructor at :36-38 only sets position=0 leaving length=1 |
+| kimi | ❌ FALSE | 85 | marker.hpp:48 int length=1 is intentional default; LengthRole bug is in markers model (LOG-03). |
+| opus-ultra | ❌ FALSE | 55 | length=1 default is correct; report itself says not-a-bug (marker.hpp:48) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

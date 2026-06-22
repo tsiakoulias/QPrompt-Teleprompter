@@ -1,0 +1,34 @@
+# [LAY-N01] 10 Labels with Layout.margins but inside MouseArea, not direct layout child — dead
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `EditorToolbar.qml (10 Labels)`
+- **Consensus:** 2/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** EditorToolbar.qml (10 Labels)
+- **Severity:** Low
+- **Analysis:** opacityLabel, fontSizeLabel, lineHeightLabel, paragraphSpacingLabel, wordSpacingLabel, overlayOpacityLabel, overlayBrightnessLabel, letterSpacingLabel, baseSpeedLabel, baseAccelerationLabel declare Layout.topMargin/bottomMargin/rightMargin/leftMargin but are children of MouseArea, not the surrounding RowLayout. Layout attached properties only apply to direct layout children. Negative bottomMargins (-14) meant to tighten vertical spacing are silently ignored.
+- **Impact:** Labels appear at default positions without intended spacing adjustments.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | Labels with Layout.margins inside MouseArea not layout child; dead (EditorToolbar.qml) |
+| gpt | ⚠️ PARTIAL | 58 | observed 10 Labels with Layout.margins but inside MouseArea, not direct layout child - dead (src/kirigami_ui/EditorToolbar.qml:1) |
+| deepseek | ❔ UNSURE | 50 | LAY-N01: labels inside MouseArea children not direct RowLayout children so Layout.margins dead; structure plausible but not fully traced in EditorToolbar.qml hierarchy |
+| glm | ✅ LEGIT | 70 | EditorToolbar.qml 10 Labels with Layout.margins inside MouseArea not direct layout child; dead |
+| kimi | ✅ LEGIT | 80 | EditorToolbar.qml Labels are children of MouseArea, not the surrounding RowLayout, so their Layout.margins are ignored. |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — Labels with Layout.margins inside MouseArea not layout child; dead (EditorToolbar.qml) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,34 @@
+# [POP-N02] ESC cascade missing customWordsSheet — undismissable by keyboard
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `PrompterPage.qml:1589, all 3 main.qml ESC handlers`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PrompterPage.qml:1589, all 3 main.qml ESC handlers
+- **Severity:** Medium
+- **Analysis:** Same as POP-N01 — no alias, not in ESC chain.
+- **Impact:** Keyboard-only users cannot dismiss custom words editor overlay.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | ESC cascade omits customWordsSheet (PrompterPage.qml:1589) |
+| gpt | ⚠️ PARTIAL | 58 | observed ESC cascade missing customWordsSheet - undismissable by keyboard (src/kirigami_ui/PrompterPage.qml:1589) |
+| deepseek | ✅ LEGIT | 90 | ESC handler at main.qml:476-518 omits customWordsSheet (PrompterPage.qml:1589); identical to POP-N01 |
+| glm | ✅ LEGIT | 75 | PrompterPage.qml:1589 customWordsSheet not in ESC cascade; undismissable by keyboard |
+| kimi | ✅ LEGIT | 90 | ESC cascade in main.qml variants omits customWordsSheet defined at PrompterPage.qml:1589. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — ESC cascade omits customWordsSheet (PrompterPage.qml:1589) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

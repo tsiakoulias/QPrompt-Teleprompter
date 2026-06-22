@@ -1,0 +1,34 @@
+# [TMR-03] dissolveIn animation re-triggered entering Running from Ready — flicker
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `Countdown.qml:274-276,289-291`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** Countdown.qml:274-276,289-291
+- **Severity:** Medium
+- **Analysis:** Both Ready and Running states set dissolveIn.running=true. Ready→Running: dissolveIn restarts from 0 while opacity=1, causing 1→0→1 flicker.
+- **Impact:** Visible flash when "Begin countdown" clicked.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 50 | dissolveIn re-triggered Ready->Running; flicker (Countdown.qml:274) |
+| gpt | ⚠️ PARTIAL | 58 | observed dissolveIn animation re-triggered entering Running from Ready - flicker (src/prompter/Countdown.qml:274) |
+| deepseek | ✅ LEGIT | 85 | dissolveIn.running:true in both Ready and Running states; Ready->Running restarts from 0 causing flicker (Countdown.qml:274-276 289-291) |
+| glm | ✅ LEGIT | 75 | Countdown.qml:274-276 289-291 dissolveIn re-triggered entering Running from Ready; visual flicker |
+| kimi | ✅ LEGIT | 85 | Countdown.qml:274-276 (Ready) and 289-291 (Running) both set dissolveIn.running=true, re-triggering it on Ready->Running. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — dissolveIn re-triggered Ready->Running; flicker (Countdown.qml:274) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

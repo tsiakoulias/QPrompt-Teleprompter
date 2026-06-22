@@ -1,0 +1,41 @@
+# [LOG-03] MarkersModel::data returns data.position for LengthRole instead of data.length
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `src/markersmodel.cpp:48-49`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/markersmodel.cpp:48-49
+- **Severity:** Medium
+- **Code:**
+  ```cpp
+  else if (role == PositionRole)
+      return data.position;
+  else if (role == LengthRole)
+      return data.position;  // BUG: should be data.length
+  ```
+- **Analysis:** Copy-paste error. Both `PositionRole` and `LengthRole` return `data.position`. The `Marker` struct has a distinct `length` field that is never returned by the model.
+- **Impact:** Code consuming the `length` role gets the position value instead, showing incorrect marker sizes.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 100 | LengthRole returns data.position (markersmodel.cpp:49) |
+| gpt | ✅ LEGIT | 78 | LengthRole returns position instead of length (src/markersmodel.cpp:48) |
+| deepseek | ✅ LEGIT | 98 | LengthRole returns data.position at markersmodel.cpp:48-49; should be data.length — unambiguous copy-paste error |
+| glm | ✅ LEGIT | 95 | markersmodel.cpp:48-49 LengthRole returns data.position instead of data.length; copy-paste error |
+| kimi | ✅ LEGIT | 95 | markersmodel.cpp:48-49 LengthRole returns data.position instead of data.length. |
+| opus-ultra | ✅ LEGIT | 100 | LengthRole returns data.position (markersmodel.cpp:49) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

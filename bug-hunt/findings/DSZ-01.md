@@ -1,0 +1,33 @@
+# [DSZ-01] InputsOverlay hardcoded height:680 — overflows on phones
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `InputsOverlay.qml:33`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** InputsOverlay.qml:33
+- **Severity:** Medium
+- **Analysis:** No Math.min with screen height. On phones (~500dp usable), content exceeds viewport with no scroll.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 60 | hardcoded height:680 overflows small phones (dup DPI-04) (InputsOverlay.qml:33) |
+| gpt | ⚠️ PARTIAL | 58 | visual issue is plausible but depends on theme or device (src/kirigami_ui/InputsOverlay.qml:33) |
+| deepseek | ✅ LEGIT | 88 | hardcoded height:680 no Math.min; on phones(~500dp usable) content exceeds viewport (InputsOverlay.qml:33) |
+| glm | ✅ LEGIT | 80 | InputsOverlay.qml:33 height:680 hardcoded; overflows on phones |
+| kimi | ✅ LEGIT | 80 | InputsOverlay.qml:33 hardcodes height:680, which overflows the usable height on phones and small screens. |
+| opus-ultra | ✅ LEGIT | 60 | hardcoded height:680 overflows small phones (dup DPI-04) (InputsOverlay.qml:33) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,34 @@
+# [DLG-N10] TimerClock ColorDialog selectedColor never initialized from persisted settings
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `TimerClock.qml:198-210`
+- **Consensus:** 5/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** TimerClock.qml:198-210
+- **Severity:** Medium
+- **Analysis:** onVisibleChanged syncs custom `color` but never `selectedColor` — the property the dialog actually displays. On app restart, dialog shows Qt's runtime default instead of persisted QSettings color.
+- **Impact:** Timer color picker shows wrong starting color on first open after restart.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | ColorDialog selectedColor not init from settings (TimerClock.qml:198) |
+| gpt | ✅ LEGIT | 78 | TimerClock ColorDialog selectedColor never initialized from persisted settings (src/prompter/TimerClock.qml:198) |
+| deepseek | ✅ LEGIT | 90 | TimerClock.qml:198-210: onVisibleChanged sets custom 'color' prop but never selectedColor (the dialog's actual display property); dialog shows Qt default on first open |
+| glm | ✅ LEGIT | 75 | TimerClock.qml:198-210 ColorDialog selectedColor never initialized from persisted settings |
+| kimi | ✅ LEGIT | 85 | TimerClock.qml:198-210 ColorDialog initializes custom 'color' but not 'selectedColor' which the dialog displays. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — ColorDialog selectedColor not init from settings (TimerClock.qml:198) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

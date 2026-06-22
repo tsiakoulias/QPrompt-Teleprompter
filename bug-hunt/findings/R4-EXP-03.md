@@ -1,0 +1,37 @@
+# [R4-EXP-03] loadFromNetwork() destroys URL for relative URLs — host/path swapped
+
+- **Status:** OPEN
+- **Severity:** High
+- **Category:** Logic
+- **Location:** `src/documenthandler.cpp:870-878`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:870-878
+- **Severity:** High
+- **Category:** Logic
+- **Analysis:** For relative URLs, url.path() (full string like "example.com/path") assigned to setHost(). Path never set. Result: host="example.com/path", path empty. DNS failure.
+- **Impact:** All relative URL network loads fail with DNS errors.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 85 | setHost(url.path()) host/path swap (documenthandler.cpp:873) |
+| gpt | ✅ LEGIT | 84 | loadFromNetwork() destroys URL for relative URLs - host/path swapped (src/documenthandler.cpp:870) |
+| deepseek | ✅ LEGIT | 90 | documenthandler.cpp:870-878 relative URL: url.path()('example.com/path') assigned to setHost(); path never set — DNS failure for relative URLs |
+| glm | ✅ LEGIT | 85 | documenthandler.cpp:870-878 for relative URLs sets host to url.path() and leaves path empty; host/path swapped |
+| kimi | ✅ LEGIT | 95 | loadFromNetwork sets hostname from url.path() and never sets path for relative URLs; documenthandler.cpp:870-878 |
+| opus-ultra | ✅ LEGIT | 85 | setHost(url.path()) host/path swap (documenthandler.cpp:873) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

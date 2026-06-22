@@ -1,0 +1,34 @@
+# [DPR-N01] Prompter.qml uses Screen.devicePixelRatio (global) instead of screen.devicePixelRatio (window)
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** 
+- **Location:** `Prompter.qml:994`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** Prompter.qml:994
+- **Severity:** Medium
+- **Analysis:** `Screen.devicePixelRatio` (capital S) is application-global singleton returning primary screen's DPR. On multi-monitor with different DPIs (laptop + 4K external), text renderer selection uses wrong monitor's DPR. Countdown.qml:196 correctly uses lowercase `screen`.
+- **Impact:** Wrong text rendering path on multi-DPI multi-monitor systems.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 55 | global Screen.devicePixelRatio vs window's screen.* on multi-monitor (Prompter.qml:994) |
+| gpt | ✅ LEGIT | 78 | Prompter.qml uses Screen.devicePixelRatio (global) instead of screen.devicePixelRatio (window) (src/prompter/Prompter.qml:994) |
+| deepseek | ✅ LEGIT | 70 | global Screen.devicePixelRatio ignores per-window DPI on multi-monitor setups (Prompter.qml:994) |
+| glm | ✅ LEGIT | 75 | Prompter.qml:994 uses Screen.devicePixelRatio (global) instead of screen.devicePixelRatio (window-specific) |
+| kimi | ✅ LEGIT | 80 | Prompter.qml:994 uses Screen.devicePixelRatio (global singleton) instead of lowercase screen.devicePixelRatio for the window's screen. |
+| opus-ultra | ✅ LEGIT | 55 | global Screen.devicePixelRatio vs window's screen.* on multi-monitor (Prompter.qml:994) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

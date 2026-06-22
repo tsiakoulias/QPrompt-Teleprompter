@@ -1,0 +1,37 @@
+# [R2-REC-01] File URI prefix strip off-by-one on Windows
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** QML/UI
+- **Location:** `src/kirigami_ui/RecentDocuments.qml:70`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** src/kirigami_ui/RecentDocuments.qml:70
+- **Severity:** Low
+- **Category:** QML/UI
+- **Analysis:** `uri.substring(7)` strips 7 chars. Windows file URIs have 3 slashes (`file:///C:/...`), so substring(7) leaves leading `/` on path → `/C:/Users/...` instead of `C:/Users/...`.
+- **Impact:** Recent document tooltips on Windows display malformed path with leading forward slash.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 85 | substring(7) leaves leading / on Windows (RecentDocuments.qml:70) |
+| gpt | ✅ LEGIT | 92 | File URI prefix strip off-by-one on Windows (src/kirigami_ui/RecentDocuments.qml:70) |
+| deepseek | ⚠️ PARTIAL | 60 | Windows file:// URL has 3 slashes (file:///C:...); substring(7) strips 7 chars leaving /C: — off-by-one for 3-slash URIs confirmed |
+| glm | ⚠️ PARTIAL | 60 | RecentDocuments.qml:70 URI prefix strip off-by-one on Windows; file:// is 7 chars but stripping may include extra char |
+| kimi | ✅ LEGIT | 80 | RecentDocuments.qml:70 uri.substring(7) on Windows file:///C:/... leaves leading slash in tooltip path. |
+| opus-ultra | ✅ LEGIT | 85 | substring(7) leaves leading / on Windows (RecentDocuments.qml:70) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

@@ -1,0 +1,32 @@
+# [RESO-N04] Projection-window margins fixed 10dp/5dp — near-flush on large screens
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `ProjectionsManager.qml:324-325`
+- **Consensus:** 2/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** ProjectionsManager.qml:324-325
+- **Severity:** Low
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | projection margins fixed 10/5dp (ProjectionsManager.qml:324) |
+| gpt | ⚠️ PARTIAL | 48 | visual issue is plausible but depends on theme or device (src/prompter/ProjectionsManager.qml:324) |
+| deepseek | ✅ LEGIT | 75 | ProjectionsManager.qml:324-325: margins fixed 10dp/5dp; near-flush on large projection screens; minor |
+| glm | ⚠️ PARTIAL | 55 | ProjectionsManager.qml:324-325 projection-window margins fixed 10dp/5dp; near-flush on large screens |
+| kimi | ✅ LEGIT | 70 | ProjectionsManager.qml:324-325 hardcode anchors.leftMargin:10 and bottomMargin:5 |
+| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — projection margins fixed 10/5dp (ProjectionsManager.qml:324) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

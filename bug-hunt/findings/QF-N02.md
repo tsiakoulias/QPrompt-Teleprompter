@@ -1,0 +1,34 @@
+# [QF-N02] QDir::entryList missing QDir::Readable in availableDictionaries()
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `spellchecker.cpp:254`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** spellchecker.cpp:254
+- **Severity:** Low
+- **Analysis:** `QDir::Files` lists unreadable .dic files as available. Hunspell fails to open them with only qWarning, no user feedback.
+- **Impact:** Broken-permission dictionaries pollute available list.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | entryList missing QDir::Readable filter (spellchecker.cpp:254) |
+| gpt | ⚠️ PARTIAL | 58 | observed QDir::entryList missing QDir::Readable in availableDictionaries() (src/spellchecker.cpp:254) |
+| deepseek | ✅ LEGIT | 85 | spellchecker.cpp:254: QDir::entryList uses QDir::Files without QDir::Readable; unreadable .dic files pollute available list causing Hunspell open failure with only qWarning |
+| glm | ✅ LEGIT | 70 | spellchecker.cpp:254 QDir::entryList missing QDir::Readable in availableDictionaries filters |
+| kimi | ✅ LEGIT | 70 | spellchecker.cpp:254 entryList uses QDir::Files without QDir::Readable, listing dictionaries that may be unreadable. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — entryList missing QDir::Readable filter (spellchecker.cpp:254) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

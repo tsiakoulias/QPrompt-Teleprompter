@@ -1,0 +1,34 @@
+# [TXT-N02] TimerClock default text color #AAA on #131619 — fails WCAG AA contrast
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `TimerClock.qml:93,138,151,163`
+- **Consensus:** 4/6 agents LEGIT · CONFLICT
+
+## Original report claim
+
+- **File:** TimerClock.qml:93,138,151,163
+- **Severity:** Low
+- **Analysis:** Default `timerSettings.color = "#AAA"` on background `#131619` — contrast ratio ~3.16:1, below WCAG AA minimum 4.5:1. Timer text is small (viewport-scaled), compounding legibility issues.
+- **Impact:** Stopwatch/ETA text hard to read for visually impaired users under default settings.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 40 | #AAA on #131619 contrast (TimerClock.qml:93) |
+| gpt | ✅ LEGIT | 78 | TimerClock default text color #AAA on #131619 - fails WCAG AA contrast (src/prompter/TimerClock.qml:93) |
+| deepseek | ✅ LEGIT | 75 | #AAA on #131619 yields ~2.5:1 contrast ratio failing WCAG AA 4.5:1 minimum (TimerClock.qml:93 138) |
+| glm | ✅ LEGIT | 75 | TimerClock.qml:93 138 151 163 #AAA text on #131619 background fails WCAG AA contrast |
+| kimi | ❌ FALSE | 90 | TimerClock.qml:93 default color '#AAA' on background '#131619' (very dark) gives a high-contrast light-on-dark pairing; the claimed 3.16:1 WCAG failure is incorrect. |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — #AAA on #131619 contrast (TimerClock.qml:93) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

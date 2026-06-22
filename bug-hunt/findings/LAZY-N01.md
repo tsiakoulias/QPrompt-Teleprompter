@@ -1,0 +1,34 @@
+# [LAZY-N01] namedMarkerConfiguration Loader double-loads KeyInputButton — first load wasted
+
+- **Status:** OPEN
+- **Severity:** Low
+- **Category:** 
+- **Location:** `PrompterPage.qml:1172-1179`
+- **Consensus:** 4/6 agents LEGIT · split
+
+## Original report claim
+
+- **File:** PrompterPage.qml:1172-1179
+- **Severity:** Low
+- **Analysis:** Both source: and setSource() on same Loader. Async load from source starts first, setSource cancels and reloads.
+- **Impact:** Component loaded twice; first async load wasted.
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ⚠️ PARTIAL | 45 | namedMarkerConfiguration Loader double-loads KeyInputButton (PrompterPage.qml:1172) |
+| gpt | ⚠️ PARTIAL | 58 | observed namedMarkerConfiguration Loader double-loads KeyInputButton - first load wasted (src/kirigami_ui/PrompterPage.qml:1172) |
+| deepseek | ✅ LEGIT | 85 | source:'KeyInputButton.qml' starts async load; Component.onCompleted setSource() cancels+reloads — first load wasted |
+| glm | ✅ LEGIT | 65 | PrompterPage.qml:1172-1179 namedMarkerConfiguration Loader double-loads KeyInputButton; first load wasted |
+| kimi | ✅ LEGIT | 85 | PrompterPage.qml:1172 Loader already sets source, then onCompleted:1179 calls setSource again, reloading KeyInputButton |
+| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — namedMarkerConfiguration Loader double-loads KeyInputButton (PrompterPage.qml:1172) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+

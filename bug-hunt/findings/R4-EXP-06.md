@@ -1,0 +1,37 @@
+# [R4-EXP-06] UTF-8 BOM not stripped — becomes phantom character at position 0
+
+- **Status:** OPEN
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Location:** `src/documenthandler.cpp:955,960,1007`
+- **Consensus:** 6/6 agents LEGIT · AGREE
+
+## Original report claim
+
+- **File:** src/documenthandler.cpp:955,960,1007
+- **Severity:** Medium
+- **Category:** Type Safety
+- **Analysis:** QString::fromUtf8() does not strip BOM (\xEF\xBB\xBF). Decoded as U+FEFF at document position 0. Shifts all cursor positions by 1. save() exports without BOM (round-trip changes file).
+- **Impact:** Hidden leading character; cursor positions off by one; file hash changes on save.
+
+---
+
+## Agent assessments
+
+| Agent | Verdict | Conf | Rationale |
+|---|---|---|---|
+| opus | ✅ LEGIT | 70 | UTF-8 BOM not stripped by fromUtf8 (documenthandler.cpp:955) |
+| gpt | ✅ LEGIT | 78 | UTF-8 BOM not stripped - becomes phantom character at position 0 (src/documenthandler.cpp:955) |
+| deepseek | ✅ LEGIT | 95 | documenthandler.cpp:955/960/1007 QString::fromUtf8() does NOT strip BOM — U+FEFF becomes phantom character at position 0 shifts all cursors |
+| glm | ✅ LEGIT | 80 | documenthandler.cpp:955 960 1007 fromUtf8 called on data that may start with BOM; BOM becomes phantom character |
+| kimi | ✅ LEGIT | 80 | fromUtf8 is used without stripping UTF-8 BOM; documenthandler.cpp:955 |
+| opus-ultra | ✅ LEGIT | 70 | UTF-8 BOM not stripped by fromUtf8 (documenthandler.cpp:955) |
+
+## Patch  _(fill when fixing)_
+
+- **Root cause:**
+- **Fix:**
+- **Files changed:**
+- **Verification:**
+- **Commit / PR:**
+
