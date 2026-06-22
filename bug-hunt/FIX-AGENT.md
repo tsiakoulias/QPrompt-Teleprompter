@@ -22,7 +22,7 @@ python bug-hunt/bughunt.py next                 # the #1 unfixed, rigor-confirme
 # Step 1 — verify it's real, and REPORT YOUR VERDICT before writing any code.
 # Only if it is a real bug, continue:
 git checkout main && git pull --ff-only         # always start from an up-to-date main
-git checkout -b fix/<ID>-<short-slug>           # one branch per fix, named from the fix
+git checkout -b fix/<descriptive-slug>          # name from the FIX itself — never the ticket ID
 
 # ... fix it (steps below) ...
 
@@ -60,8 +60,19 @@ fix is isolated and starts clean — never build a fix on top of another fix or 
 
 ```sh
 git checkout main && git pull --ff-only
-git checkout -b fix/<ID>-<short-slug>     # e.g. fix/EDGE-04-null-textdocument-guard
+git checkout -b fix/<descriptive-slug>    # e.g. fix/android-internet-permission, fix/projection-screen-reconnect
 ```
+
+**Naming — outward-facing, no internal IDs.** The branch, the commit message, and the PR are public and
+go to the upstream maintainer. **Never put a ticket ID (e.g. `AND-CRIT-01`) in a branch name, commit
+message, or PR title/body** — those IDs are our private triage labels and mean nothing to the project.
+Name everything from the *change itself*: a concise kebab-case slug for the branch, an imperative
+`fix(<area>): …` subject for the commit, a plain-English title for the PR. If the fix resolves a
+*tracked upstream GitHub issue*, reference that number instead (`Fixes #312`) — external issue refs are
+welcome; internal IDs are not. The ticket↔branch mapping lives only in `bug-hunt/findings/<ID>.md`.
+
+The commit must carry **no `Co-Authored-By` trailer, no "Generated with…" line, and no tool or AI
+attribution of any kind**. Branch, commit, and PR all read as the author's own natural work.
 
 Keep the branch scoped to this one bug. When you commit, **stage only the files your fix touched**
 (explicit paths) — never `git add -A` / `git add .` — so unrelated or generated files (build output,
@@ -103,9 +114,9 @@ Don't claim success without evidence.
 
 ## Step 6 — Record and close
 
-- Commit on your `fix/<ID>-…` branch: **one** focused commit, conventional message (e.g.
-  `fix(documenthandler): guard null textDocument before clearUndoRedoStacks`). Stage only the fix's
-  files by explicit path — one ticket = one bug = one branch = one commit.
+- Commit on your `fix/<descriptive-slug>` branch: **one** focused commit, conventional message (e.g.
+  `fix(documenthandler): guard null textDocument before clearUndoRedoStacks`) — no ticket ID in the
+  subject or body. Stage only the fix's files by explicit path — one ticket = one bug = one branch = one commit.
 - Fill the ticket's `## Patch` section: root cause, the fix, files changed, how you verified, branch/PR.
   The ticket bookkeeping (Patch edits + `status`) is project metadata — keep it **out** of the fix
   commit so the branch/PR is purely the code change.
@@ -117,7 +128,7 @@ Don't claim success without evidence.
 ## The bar (every fix must clear all of these)
 - [ ] Invoked the `superpowers` skill first, and applied the relevant skills (debugging, TDD, verification).
 - [ ] Independently verified the defect is real in current code, and reported the verdict (or correctly marked WONTFIX).
-- [ ] On a `fix/<ID>-…` branch cut fresh from an up‑to‑date `main`; staged only the fix's files (no `git add -A`).
+- [ ] On a `fix/<descriptive-slug>` branch (named from the change, **no ticket ID**) cut fresh from an up‑to‑date `main`; staged only the fix's files (no `git add -A`).
 - [ ] Fixes the **root cause**, completely.
 - [ ] **Minimal diff** — touches only what the fix needs; no unrelated changes.
 - [ ] Idiomatic and indistinguishable in style from the surrounding code.
@@ -129,6 +140,8 @@ Don't claim success without evidence.
 ## Hard "don't"s
 - Don't trust the ticket and patch blindly — verify first, and report the verdict before coding.
 - Don't work on `main`, reuse a branch across bugs, or branch off anything but a fresh `main`.
+- Don't put internal ticket IDs (e.g. `AND-CRIT-01`) in a branch name, commit message, or PR — they're outward-facing; name from the change, and reference upstream issue numbers only.
+- Don't add a `Co-Authored-By` trailer, a "Generated with…" line, or any tool/AI attribution to the commit or PR.
 - Don't `git add -A` / `git add .` — stage the fix's files by explicit path so nothing unrelated is committed.
 - Don't fix the symptom, refactor unrelated code, or "improve" things outside this bug.
 - Don't add speculative generality, options, or a framework/dependency for a small fix.
