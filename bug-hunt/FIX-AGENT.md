@@ -7,6 +7,11 @@ overengineer. Effort goes into reasoning and verification; the resulting diff is
 
 Read this whole file once, then start.
 
+**First action, always:** invoke the **`superpowers`** skill (`using-superpowers`) before anything
+else — it establishes how to find and apply the right skills for the work. Then use the relevant ones
+throughout: `systematic-debugging` to find the root cause, `test-driven-development` if you add a test,
+`verification-before-completion` before you claim it's done. This is mandatory on every bug, every time.
+
 ---
 
 ## The loop
@@ -68,7 +73,7 @@ Trace it to the source. Read enough of the surrounding code to understand (a) th
 (b) why the current code is wrong, and (c) the blast radius of a change. Fix the cause, never the
 symptom.
 
-## Step 3 — Fix it: minimal, correct, idiomatic
+## Step 4 — Fix it: minimal, correct, idiomatic
 
 - **Smallest change that fully fixes the root cause.** Nothing more. No drive-by refactors, no
   reformatting, no renaming unrelated things.
@@ -85,7 +90,7 @@ symptom.
   one reported instance — but stay within this bug's scope.
 - Handle the edge cases your change introduces or exposes (null/empty/error paths it now touches).
 
-## Step 4 — Prove it works
+## Step 5 — Prove it works
 
 Don't claim success without evidence.
 
@@ -96,17 +101,23 @@ Don't claim success without evidence.
   introduce a test framework or harness where none exists for a single fix.
 - Confirm you didn't regress the code you touched.
 
-## Step 5 — Record and close
+## Step 6 — Record and close
 
-- Fill the ticket's `## Patch` section: root cause, the fix, files changed, how you verified, commit/PR.
-- One focused commit, conventional message (e.g. `fix(documenthandler): guard null textDocument before
-  clearUndoRedoStacks`). One ticket = one bug = one commit.
-- `python bug-hunt/bughunt.py status <ID> FIXED "summary + sha"`.
+- Commit on your `fix/<ID>-…` branch: **one** focused commit, conventional message (e.g.
+  `fix(documenthandler): guard null textDocument before clearUndoRedoStacks`). Stage only the fix's
+  files by explicit path — one ticket = one bug = one branch = one commit.
+- Fill the ticket's `## Patch` section: root cause, the fix, files changed, how you verified, branch/PR.
+  The ticket bookkeeping (Patch edits + `status`) is project metadata — keep it **out** of the fix
+  commit so the branch/PR is purely the code change.
+- `python bug-hunt/bughunt.py status <ID> FIXED "summary + branch/sha"`. Leave the branch for review;
+  don't merge to `main` yourself unless told to.
 
 ---
 
 ## The bar (every fix must clear all of these)
-- [ ] Independently verified the defect is real in current code (or correctly marked WONTFIX).
+- [ ] Invoked the `superpowers` skill first, and applied the relevant skills (debugging, TDD, verification).
+- [ ] Independently verified the defect is real in current code, and reported the verdict (or correctly marked WONTFIX).
+- [ ] On a `fix/<ID>-…` branch cut fresh from an up‑to‑date `main`; staged only the fix's files (no `git add -A`).
 - [ ] Fixes the **root cause**, completely.
 - [ ] **Minimal diff** — touches only what the fix needs; no unrelated changes.
 - [ ] Idiomatic and indistinguishable in style from the surrounding code.
@@ -116,7 +127,9 @@ Don't claim success without evidence.
 - [ ] You can explain, in one or two sentences, why this is the correct fix and why nothing smaller suffices.
 
 ## Hard "don't"s
-- Don't trust the ticket and patch blindly — verify first.
+- Don't trust the ticket and patch blindly — verify first, and report the verdict before coding.
+- Don't work on `main`, reuse a branch across bugs, or branch off anything but a fresh `main`.
+- Don't `git add -A` / `git add .` — stage the fix's files by explicit path so nothing unrelated is committed.
 - Don't fix the symptom, refactor unrelated code, or "improve" things outside this bug.
 - Don't add speculative generality, options, or a framework/dependency for a small fix.
 - Don't change public API or user-visible behavior beyond what the bug requires.
