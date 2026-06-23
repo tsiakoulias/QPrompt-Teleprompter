@@ -35,6 +35,22 @@ The work order (a ticket in `bug-hunt/findings/<ID>.md`) gives you the original 
 `file:line`, and six independent AI reviewers' verdicts + rationales. Use it as a lead — **not as
 truth.**
 
+## Step 0 — Don't collide with an open PR
+
+Fixes are reviewed and merged one at a time, and a file should be under only one in-flight change at a
+time. **Before committing to the `next` bug, check its `Location` against the files already changed by
+open (unmerged) fix branches / PRs.** Overlapping edits create merge conflicts and make each PR
+impossible to review in isolation.
+
+```sh
+git for-each-ref --format='%(refname:short)' refs/heads/fix/* \
+  | while read b; do git diff --name-only main "$b"; done | sort -u   # the off-limits files
+```
+
+If the `next` bug's file is already in flight, **skip it and take the next-highest-priority bug that
+lands in an untouched file.** Once the colliding PR merges, that file is fair game again. (One commit =
+one bug still holds; this only governs *which* bug you pick up next.)
+
 ## Step 1 — Verify the bug is real (non-negotiable)
 
 These findings are AI-generated; a meaningful fraction are false positives or misdiagnosed even in
@@ -143,6 +159,7 @@ Don't claim success without evidence.
 ## Hard "don't"s
 - Don't trust the ticket and patch blindly — verify first, and report the verdict before coding.
 - Don't work on `main`, reuse a branch across bugs, or branch off anything but a fresh `main`.
+- Don't start a bug whose fix touches a file already changed by an open PR / fix branch — skip it and take the next-priority bug in a free file (Step 0).
 - Don't put internal ticket IDs (e.g. `AND-CRIT-01`) in a branch name, commit message, or PR — they're outward-facing; name from the change, and reference upstream issue numbers only.
 - Don't add a `Co-Authored-By` trailer, a "Generated with…" line, or any tool/AI attribution to the commit or PR.
 - Don't open or submit the PR yourself (no `gh pr create`) — the author opens every PR manually; your last step is handing over the PR Title + PR Text.
