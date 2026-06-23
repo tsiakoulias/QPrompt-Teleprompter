@@ -122,6 +122,9 @@ Don't claim success without evidence.
   commit so the branch/PR is purely the code change.
 - `python bug-hunt/bughunt.py status <ID> FIXED "summary + branch/sha"`. Leave the branch for review;
   don't merge to `main` yourself unless told to.
+- **The author opens the PR — not you.** Push the branch, then **stop** at handing over the **PR Title
+  and PR Text** (human-toned, no internal IDs, no attribution) for them to open manually. Never run
+  `gh pr create` or otherwise open/submit a PR. Providing the title + text is your final step.
 
 ---
 
@@ -142,6 +145,7 @@ Don't claim success without evidence.
 - Don't work on `main`, reuse a branch across bugs, or branch off anything but a fresh `main`.
 - Don't put internal ticket IDs (e.g. `AND-CRIT-01`) in a branch name, commit message, or PR — they're outward-facing; name from the change, and reference upstream issue numbers only.
 - Don't add a `Co-Authored-By` trailer, a "Generated with…" line, or any tool/AI attribution to the commit or PR.
+- Don't open or submit the PR yourself (no `gh pr create`) — the author opens every PR manually; your last step is handing over the PR Title + PR Text.
 - Don't `git add -A` / `git add .` — stage the fix's files by explicit path so nothing unrelated is committed.
 - Don't fix the symptom, refactor unrelated code, or "improve" things outside this bug.
 - Don't add speculative generality, options, or a framework/dependency for a small fix.
