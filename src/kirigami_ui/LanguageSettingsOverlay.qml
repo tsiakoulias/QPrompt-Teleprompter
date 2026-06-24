@@ -90,6 +90,10 @@ Kirigami.OverlaySheet {
                         "text": "Deutsch",
                         "value": "de_DE"
                     },
+                    // {
+                    //     "text": "Ελληνικά",
+                    //     "value": "el_GR"
+                    // },
                     {
                         "text": "English",
                         "value": "en_US"
