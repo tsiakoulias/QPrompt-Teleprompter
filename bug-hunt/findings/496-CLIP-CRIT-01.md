@@ -1,6 +1,6 @@
 # [496-CLIP-CRIT-01] Paste via toolbar button and File menu bypasses HTML sanitization
 
-- **Status:** FIXED  (routed toolbar+menu paste through document.paste(); commit 9da5d07 on fix/toolbar-menu-paste-filtering)
+- **Status:** FIXED  (routed toolbar+menu paste through document.paste(); commit 9da5d07 on fix/toolbar-menu-paste-filtering; merged upstream PR #478)
 - **Severity:** Critical
 - **Category:** 
 - **Location:** `EditorToolbar.qml:345, main.qml:686`

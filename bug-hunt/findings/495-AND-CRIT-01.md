@@ -1,6 +1,6 @@
 # [495-AND-CRIT-01] Missing android.permission.INTERNET — all network silently fails
 
-- **Status:** FIXED  (INTERNET permission added; commit 76c55a9 on fix/android-internet-permission)
+- **Status:** FIXED  (INTERNET permission added; commit 76c55a9 on fix/android-internet-permission; merged upstream PR #477)
 - **Severity:** Critical
 - **Category:** 
 - **Location:** `AndroidManifest.xml:47-53`
