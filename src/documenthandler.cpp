@@ -956,7 +956,9 @@ void DocumentHandler::load(const QUrl &fileUrl)
                     updateContents(html, Qt::RichText);
                 }
 #if QT_VERSION >= 0x050F00
-                else if (mime.inherits(QLatin1String("text/markdown")))
+                // Qt's bundled MIME DB (Windows/macOS) reports text/x-web-markdown for .md.
+                else if (mime.inherits(QLatin1String("text/markdown"))
+                         || mime.inherits(QLatin1String("text/x-web-markdown")))
                     updateContents(QString::fromUtf8(data), Qt::MarkdownText);
 #endif
                 // File formats imported using external software
