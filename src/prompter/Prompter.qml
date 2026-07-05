@@ -2191,6 +2191,17 @@ Flickable {
         property bool delayedStart: true
         property real positionBackup: 0
 
+        function isSaveableInPlace(url) {
+            const lower = String(url).toLowerCase()
+            const extensions = Qt.platform.os !== "android"
+                ? ["html", "htm", "xhtml", "txt", "text"]
+                : ["html", "htm", "xhtml"]
+            for (const extension of extensions)
+                if (lower.endsWith("." + extension))
+                    return true
+            return false
+        }
+
         function resetDocumentPosition() {
             if (editor.resetPosition) {
                 prompter.position = -(overlay.__readRegionPlacement*(overlay.height-overlay.readRegionHeight)+overlay.readRegionHeight/2)
@@ -2236,7 +2247,7 @@ Flickable {
             root.onDiscard = Prompter.CloseActions.Open
             document.close()
             document.load(editor.lastDocument)
-            isNewFile = false
+            isNewFile = !isSaveableInPlace(editor.lastDocument)
             prompter.position = 0
             if (root.passiveNotifications && !(Qt.platform.os === "ios" || Qt.platform.os === "android" || Qt.platform.os === "wasm"))
                 showPassiveNotification(qsTr("Loaded: %1").arg(editor.lastDocument))
@@ -2270,7 +2281,7 @@ Flickable {
                 document.loadFromNetwork(url)
                 editor.lastDocument = ""
             } else {
-                document.isNewFile = false
+                document.isNewFile = !document.isSaveableInPlace(url)
                 document.load(url)
                 editor.lastDocument = document.fileUrl
                 editor.resetPosition = true
@@ -2432,16 +2443,7 @@ Flickable {
         fileMode: FileDialog.OpenFile
         onAccepted: {
             document.close()
-            const extensionList = Qt.platform.os!=="android" ?
-                ["html", "htm", "xhtml", "HTML", "HTM", "XHTML", "txt", "text", "TXT", "TEXT"] :
-                ["html", "htm", "xhtml", "HTML", "HTM", "XHTML"]
-            document.isNewFile = true;
-            for (const extension of extensionList) {
-                if (String(openDialog.currentFile).endsWith("." + extension)) {
-                    document.isNewFile = false;
-                    break;
-                }
-            }
+            document.isNewFile = !document.isSaveableInPlace(openDialog.currentFile)
             document.load(openDialog.currentFile)
             editor.lastDocument = document.fileUrl;
             editor.resetPosition = true;
