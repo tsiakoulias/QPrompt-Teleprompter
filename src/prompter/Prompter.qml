@@ -271,6 +271,7 @@ Flickable {
     Settings {
         category: "files"
         property alias lastDocument: editor.lastDocument
+        property alias warnOnLossySave: document.warnOnLossySave
     }
     Settings {
         category: "obs"
@@ -2187,6 +2188,7 @@ Flickable {
         id: document
 
         property bool isNewFile: false
+        property bool warnOnLossySave: true
         property bool quitOnSave: false
         property bool delayedStart: true
         property real positionBackup: 0
@@ -2200,6 +2202,10 @@ Flickable {
                 if (lower.endsWith("." + extension))
                     return true
             return false
+        }
+        function isLossyFormat(url) {
+            const lower = String(url).toLowerCase()
+            return lower.endsWith(".txt") || lower.endsWith(".text")
         }
 
         function resetDocumentPosition() {
@@ -2304,28 +2310,32 @@ Flickable {
             if (document.modified) {
                 if (document.isNewFile)
                     saveAsDialog()
-                else {
-                    document.modified = false
-                    if (Qt.platform.os==="android" || visibility===ApplicationWindow.FullScreen) {
-                        if (document.isNewFile)
-                            showPassiveNotification(qsTr("Saved %1", "Saved FILE_NAME").arg(document.fileUrl))
-                        else
-                            showPassiveNotification(qsTr("Saved"))
-                    }
-                    document.saveAs(document.fileUrl)
-                    //if (quit)
-                        //Qt.quit()
-                    //else
-                    switch (parseInt(root.onDiscard)) {
-                        case Prompter.CloseActions.LoadGuide: document.loadGuide(); break;
-                        case Prompter.CloseActions.LoadNew: document.newDocument(); break;
-                        case Prompter.CloseActions.Open: document.open(); break;
-                        case Prompter.CloseActions.Network: document.openFromNetwork(); break;
-                        case Prompter.CloseActions.RecentLocal: document.loadRecent(root.pendingRecentUrl, false); break;
-                        case Prompter.CloseActions.RecentRemote: document.loadRecent(root.pendingRecentUrl, true); break;
-                        case Prompter.CloseActions.Quit: Qt.quit()
-                    }
-                }
+                else if (document.warnOnLossySave && isLossyFormat(document.fileUrl))
+                    lossySaveDialog.open()
+                else
+                    commitInPlaceSave()
+            }
+        }
+        function commitInPlaceSave() {
+            document.modified = false
+            if (Qt.platform.os==="android" || visibility===ApplicationWindow.FullScreen) {
+                if (document.isNewFile)
+                    showPassiveNotification(qsTr("Saved %1", "Saved FILE_NAME").arg(document.fileUrl))
+                else
+                    showPassiveNotification(qsTr("Saved"))
+            }
+            document.saveAs(document.fileUrl)
+            //if (quit)
+                //Qt.quit()
+            //else
+            switch (parseInt(root.onDiscard)) {
+                case Prompter.CloseActions.LoadGuide: document.loadGuide(); break;
+                case Prompter.CloseActions.LoadNew: document.newDocument(); break;
+                case Prompter.CloseActions.Open: document.open(); break;
+                case Prompter.CloseActions.Network: document.openFromNetwork(); break;
+                case Prompter.CloseActions.RecentLocal: document.loadRecent(root.pendingRecentUrl, false); break;
+                case Prompter.CloseActions.RecentRemote: document.loadRecent(root.pendingRecentUrl, true); break;
+                case Prompter.CloseActions.Quit: Qt.quit()
             }
         }
 
@@ -2491,6 +2501,58 @@ Flickable {
                 case Prompter.CloseActions.Network: document.modified = false; document.openFromNetwork(); break;
                 case Prompter.CloseActions.Quit: Qt.quit()
                 //default: Qt.quit();
+            }
+        }
+    }
+
+    Dialog {
+        id: lossySaveDialog
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        modal: true
+        width: Math.min(prompter.width - 40, 440)
+        title: qsTr("Save as plain text?")
+        closePolicy: Popup.CloseOnEscape
+
+        ColumnLayout {
+            width: parent.width
+            spacing: 10
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: qsTr("Plain-text files can't store formatting. Saving will keep the text but discard fonts, colours, sizes and alignment.\n\nSave as HTML instead to keep the formatting.")
+            }
+            CheckBox {
+                id: lossySaveDontWarn
+                text: qsTr("Don't warn me again")
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                Item { Layout.fillWidth: true }
+                Button {
+                    text: qsTr("Cancel")
+                    onClicked: lossySaveDialog.close()
+                }
+                Button {
+                    text: qsTr("Save as plain text")
+                    onClicked: {
+                        if (lossySaveDontWarn.checked)
+                            document.warnOnLossySave = false
+                        lossySaveDialog.close()
+                        document.commitInPlaceSave()
+                    }
+                }
+                Button {
+                    text: qsTr("Save as HTML…")
+                    highlighted: true
+                    onClicked: {
+                        if (lossySaveDontWarn.checked)
+                            document.warnOnLossySave = false
+                        lossySaveDialog.close()
+                        document.saveAsDialog()
+                    }
+                }
             }
         }
     }
