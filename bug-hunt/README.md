@@ -2,7 +2,9 @@
 
 This directory is a triaged backlog of **723 candidate bugs** in the QPrompt source, each
 independently reviewed by **6 AI agents** (opus, opus-ultra, gpt, deepseek, glm, kimi) and turned
-into a self-contained, patch-ready ticket.
+into a self-contained, patch-ready ticket. A 7th agent, **fable-5-ultra**, is registered as
+pending (see `assessments.csv`) — its review hasn't run yet, so it isn't counted in any
+verdict, consensus, or corroboration numbers below until it does.
 
 > **Fixing bugs?** Read [`FIX-AGENT.md`](FIX-AGENT.md) — the operating brief (standards, the
 > verify-first rule, the fix protocol). It's the one file to hand a coding agent.
