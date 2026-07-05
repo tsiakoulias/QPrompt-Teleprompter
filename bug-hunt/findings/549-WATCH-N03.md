@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❔ UNSURE | 45 | watcher stale after atomic-save inotify swap; Linux-specific (documenthandler.cpp:857) |
-| gpt | ✅ LEGIT | 78 | Watcher not refreshed after fileChanged - stale inotify on Linux atomic saves (src/documenthandler.cpp:857) |
-| deepseek | ✅ LEGIT | 90 | documenthandler.cpp:857-864: reload() loads document but watcher not re-added after fileChanged; next atomic save undetected |
-| glm | ✅ LEGIT | 75 | documenthandler.cpp:857-864 1020-1027 watcher not refreshed after fileChanged; stale inotify on Linux atomic saves |
-| kimi | ✅ LEGIT | 70 | documenthandler.cpp reload() / load() calls removePath/addPath on new path but fileChanged handler does not re-add; atomic-save inode change can lose events. |
-| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — watcher stale after atomic-save inotify swap; Linux-specific (documenthandler.cpp:857) |
+| opus-4.8-extra | ❔ UNSURE | 45 | watcher stale after atomic-save inotify swap; Linux-specific (documenthandler.cpp:857) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | Watcher not refreshed after fileChanged - stale inotify on Linux atomic saves (src/documenthandler.cpp:857) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | documenthandler.cpp:857-864: reload() loads document but watcher not re-added after fileChanged; next atomic save undetected |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | documenthandler.cpp:857-864 1020-1027 watcher not refreshed after fileChanged; stale inotify on Linux atomic saves |
+| kimi-k2.7-code | ✅ LEGIT | 70 | documenthandler.cpp reload() / load() calls removePath/addPath on new path but fileChanged handler does not re-add; atomic-save inode change can lose events. |
+| opus-4.8-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — watcher stale after atomic-save inotify swap; Linux-specific (documenthandler.cpp:857) |
 
 ## Patch  _(fill when fixing)_
 

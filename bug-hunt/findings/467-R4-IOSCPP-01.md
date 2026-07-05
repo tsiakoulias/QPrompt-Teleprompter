@@ -20,12 +20,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | QTemporaryDir by-value member on all platforms (iossavedialog.h:49) |
-| gpt | ⚠️ PARTIAL | 58 | observed QTemporaryDir created on all platforms including non-iOS where unused (src/iossavedialog.h:49) |
-| deepseek | ✅ LEGIT | 90 | iossavedialog.h:49 QTemporaryDir m_tempDir by-value member — default constructor creates temp dir on ALL platforms even non-iOS |
-| glm | ⚠️ PARTIAL | 60 | iossavedialog.h:49 QTemporaryDir m_tempDir created on all platforms; unused on non-iOS but minimal waste |
-| kimi | ✅ LEGIT | 85 | iossavedialog.h:49 QTemporaryDir m_tempDir member default-constructs a real temp directory for every app start on all platforms. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — QTemporaryDir by-value member on all platforms (iossavedialog.h:49) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | QTemporaryDir by-value member on all platforms (iossavedialog.h:49) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed QTemporaryDir created on all platforms including non-iOS where unused (src/iossavedialog.h:49) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | iossavedialog.h:49 QTemporaryDir m_tempDir by-value member — default constructor creates temp dir on ALL platforms even non-iOS |
+| glm-5.2-xhigh | ⚠️ PARTIAL | 60 | iossavedialog.h:49 QTemporaryDir m_tempDir created on all platforms; unused on non-iOS but minimal waste |
+| kimi-k2.7-code | ✅ LEGIT | 85 | iossavedialog.h:49 QTemporaryDir m_tempDir member default-constructs a real temp directory for every app start on all platforms. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — QTemporaryDir by-value member on all platforms (iossavedialog.h:49) |
 
 ## Patch  _(fill when fixing)_
 

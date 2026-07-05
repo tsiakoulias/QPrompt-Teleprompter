@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❔ UNSURE | 45 | loop cancel() vs toggle() QML batching; domain (Prompter.qml:900) |
-| gpt | ✅ LEGIT | 78 | loop animation cancel() state change overridden by toggle() due to QML batching (src/prompter/Prompter.qml:900) |
-| deepseek | ✅ LEGIT | 70 | cancel() then toggle() in same ScriptAction batch; QML batching may override cancel (Prompter.qml:900-907) |
-| glm | ⚠️ PARTIAL | 55 | Prompter.qml:900-907 loop animation cancel() state change overridden by toggle() due to QML batching |
-| kimi | ✅ LEGIT | 75 | Prompter.qml:900-907 ScriptAction calls cancel() then toggle() together, risking QML batching overriding the cancel state. |
-| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — loop cancel() vs toggle() QML batching; domain (Prompter.qml:900) |
+| opus-4.8-extra | ❔ UNSURE | 45 | loop cancel() vs toggle() QML batching; domain (Prompter.qml:900) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | loop animation cancel() state change overridden by toggle() due to QML batching (src/prompter/Prompter.qml:900) |
+| deepseek-v4-pro-max | ✅ LEGIT | 70 | cancel() then toggle() in same ScriptAction batch; QML batching may override cancel (Prompter.qml:900-907) |
+| glm-5.2-xhigh | ⚠️ PARTIAL | 55 | Prompter.qml:900-907 loop animation cancel() state change overridden by toggle() due to QML batching |
+| kimi-k2.7-code | ✅ LEGIT | 75 | Prompter.qml:900-907 ScriptAction calls cancel() then toggle() together, risking QML batching overriding the cancel state. |
+| opus-4.8-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — loop cancel() vs toggle() QML batching; domain (Prompter.qml:900) |
 
 ## Patch  _(fill when fixing)_
 

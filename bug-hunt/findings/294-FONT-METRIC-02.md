@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | FontLoader status never checked; substitution silent (Prompter.qml:995) |
-| gpt | ⚠️ PARTIAL | 58 | observed FontLoader status never checked - font substitution silently fails (src/prompter/Prompter.qml:995) |
-| deepseek | ✅ LEGIT | 85 | Prompter.qml:995-998: FontLoader source set but status never checked; corrupted/missing font silently substituted with no error |
-| glm | ✅ LEGIT | 70 | Prompter.qml:995-998 FontLoader status never checked; font substitution silently fails |
-| kimi | ✅ LEGIT | 90 | Prompter.qml:995-998 FontLoader has no status handling; font substitution failures are silent |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — FontLoader status never checked; substitution silent (Prompter.qml:995) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | FontLoader status never checked; substitution silent (Prompter.qml:995) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed FontLoader status never checked - font substitution silently fails (src/prompter/Prompter.qml:995) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | Prompter.qml:995-998: FontLoader source set but status never checked; corrupted/missing font silently substituted with no error |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | Prompter.qml:995-998 FontLoader status never checked; font substitution silently fails |
+| kimi-k2.7-code | ✅ LEGIT | 90 | Prompter.qml:995-998 FontLoader has no status handling; font substitution failures are silent |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — FontLoader status never checked; substitution silent (Prompter.qml:995) |
 
 ## Patch  _(fill when fixing)_
 

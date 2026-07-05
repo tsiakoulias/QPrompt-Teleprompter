@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 40 | no inputMethodHints on TextFields = ImhNone default; IME still works (EditorToolbar.qml) |
-| gpt | ⚠️ PARTIAL | 58 | observed Systemic absence of inputMethodHints on ALL TextFields (16 sites) (src/kirigami_ui/EditorToolbar.qml:1) |
-| deepseek | ⚠️ PARTIAL | 65 | IMH-SYS: systemic absence of inputMethodHints on TextFields is a mobile UX concern but design choice not bug; not all 16 sites individually verified |
-| glm | ✅ LEGIT | 75 | 16+ TextFields across EditorToolbar.qml PrompterPage.qml PathsPage.qml PointerSettings.qml Find.qml have no inputMethodHints |
-| kimi | ✅ LEGIT | 95 | No inputMethodHints anywhere in src QML; numeric/URL TextFields lack proper IME hints. |
-| opus-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — no inputMethodHints on TextFields = ImhNone default; IME still works (EditorToolbar.qml) |
+| opus-4.8-extra | ⚠️ PARTIAL | 40 | no inputMethodHints on TextFields = ImhNone default; IME still works (EditorToolbar.qml) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed Systemic absence of inputMethodHints on ALL TextFields (16 sites) (src/kirigami_ui/EditorToolbar.qml:1) |
+| deepseek-v4-pro-max | ⚠️ PARTIAL | 65 | IMH-SYS: systemic absence of inputMethodHints on TextFields is a mobile UX concern but design choice not bug; not all 16 sites individually verified |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | 16+ TextFields across EditorToolbar.qml PrompterPage.qml PathsPage.qml PointerSettings.qml Find.qml have no inputMethodHints |
+| kimi-k2.7-code | ✅ LEGIT | 95 | No inputMethodHints anywhere in src QML; numeric/URL TextFields lack proper IME hints. |
+| opus-4.8-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — no inputMethodHints on TextFields = ImhNone default; IME still works (EditorToolbar.qml) |
 
 ## Patch  _(fill when fixing)_
 

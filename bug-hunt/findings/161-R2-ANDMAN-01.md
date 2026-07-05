@@ -20,12 +20,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 85 | ungrantable signature permissions (AndroidManifest.xml:51) |
-| gpt | ✅ LEGIT | 78 | Ungrantable system/signature permissions bloating manifest (android/AndroidManifest.xml:51) |
-| deepseek | ✅ LEGIT | 90 | AndroidManifest.xml:51-53: MOUNT_UNMOUNT_FILESYSTEMS/MOUNT_FORMAT_FILESYSTEMS/ACCESS_CHECKIN_PROPERTIES are signature-level permissions ungrantable to third-party apps |
-| glm | ✅ LEGIT | 80 | AndroidManifest.xml:51-53 MOUNT_UNMOUNT_FILESYSTEMS and MOUNT_FORMAT_FILESYSTEMS are system/signature permissions not grantable to normal apps |
-| kimi | ✅ LEGIT | 85 | AndroidManifest.xml:51-53 declares MOUNT_UNMOUNT_FILESYSTEMS/MOUNT_FORMAT_FILESYSTEMS/ACCESS_CHECKIN_PROPERTIES; these are system/signature-level and ungrantable to third-party apps. |
-| opus-ultra | ✅ LEGIT | 85 | ungrantable signature permissions (AndroidManifest.xml:51) |
+| opus-4.8-extra | ✅ LEGIT | 85 | ungrantable signature permissions (AndroidManifest.xml:51) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | Ungrantable system/signature permissions bloating manifest (android/AndroidManifest.xml:51) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | AndroidManifest.xml:51-53: MOUNT_UNMOUNT_FILESYSTEMS/MOUNT_FORMAT_FILESYSTEMS/ACCESS_CHECKIN_PROPERTIES are signature-level permissions ungrantable to third-party apps |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | AndroidManifest.xml:51-53 MOUNT_UNMOUNT_FILESYSTEMS and MOUNT_FORMAT_FILESYSTEMS are system/signature permissions not grantable to normal apps |
+| kimi-k2.7-code | ✅ LEGIT | 85 | AndroidManifest.xml:51-53 declares MOUNT_UNMOUNT_FILESYSTEMS/MOUNT_FORMAT_FILESYSTEMS/ACCESS_CHECKIN_PROPERTIES; these are system/signature-level and ungrantable to third-party apps. |
+| opus-4.8-ultra | ✅ LEGIT | 85 | ungrantable signature permissions (AndroidManifest.xml:51) |
 
 ## Patch  _(fill when fixing)_
 

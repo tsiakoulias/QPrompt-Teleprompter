@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❌ FALSE | 50 | comesFromNetwork is intentionally read-only; WRITE not needed (documenthandler.h:121) |
-| gpt | ❌ FALSE | 76 | comesFromNetwork is exposed read-only; no WRITE is required (src/documenthandler.h:121) |
-| deepseek | ✅ LEGIT | 95 | documenthandler.h:121: Q_PROPERTY comesFromNetwork missing WRITE; setDocumentComesFromNetwork() exists (called at cpp:896) but QML property system sees read-only |
-| glm | ✅ LEGIT | 75 | documenthandler.h:121 comesFromNetwork Q_PROPERTY missing WRITE clause; read-only but setDocumentComesFromNetwork exists |
-| kimi | ✅ LEGIT | 80 | documenthandler.h:121 comesFromNetwork Q_PROPERTY lacks WRITE despite setDocumentComesFromNetwork existing and emitting NOTIFY. |
-| opus-ultra | ❌ FALSE | 50 | comesFromNetwork is intentionally read-only; WRITE not needed (documenthandler.h:121) |
+| opus-4.8-extra | ❌ FALSE | 50 | comesFromNetwork is intentionally read-only; WRITE not needed (documenthandler.h:121) |
+| gpt-5.5-xhigh | ❌ FALSE | 76 | comesFromNetwork is exposed read-only; no WRITE is required (src/documenthandler.h:121) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | documenthandler.h:121: Q_PROPERTY comesFromNetwork missing WRITE; setDocumentComesFromNetwork() exists (called at cpp:896) but QML property system sees read-only |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | documenthandler.h:121 comesFromNetwork Q_PROPERTY missing WRITE clause; read-only but setDocumentComesFromNetwork exists |
+| kimi-k2.7-code | ✅ LEGIT | 80 | documenthandler.h:121 comesFromNetwork Q_PROPERTY lacks WRITE despite setDocumentComesFromNetwork existing and emitting NOTIFY. |
+| opus-4.8-ultra | ❌ FALSE | 50 | comesFromNetwork is intentionally read-only; WRITE not needed (documenthandler.h:121) |
 
 ## Patch  _(fill when fixing)_
 

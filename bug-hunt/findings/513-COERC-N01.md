@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❔ UNSURE | 45 | parseInt('') NaN only if initial state unset; depends on default state (Prompter.qml:448) |
-| gpt | ✅ LEGIT | 84 | parseInt("") -> NaN state bootstrap - first toggle() bricks state machine (src/prompter/Prompter.qml:448) |
-| deepseek | ❌ FALSE | 85 | Prompter.qml:3088 explicitly sets state: Prompter.States.Editing(=0); parseInt('0')=0 not NaN; state is never empty string |
-| glm | ✅ LEGIT | 75 | Prompter.qml:448 parseInt(state) when state is non-numeric returns NaN; first toggle() bricks state machine |
-| kimi | ✅ LEGIT | 90 | Prompter.qml:448 `parseInt(state)` on empty string yields NaN; `(NaN+1)%4` is NaN and state comparisons fail. |
-| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — parseInt('') NaN only if initial state unset; depends on default state (Prompter.qml:448) |
+| opus-4.8-extra | ❔ UNSURE | 45 | parseInt('') NaN only if initial state unset; depends on default state (Prompter.qml:448) |
+| gpt-5.5-xhigh | ✅ LEGIT | 84 | parseInt("") -> NaN state bootstrap - first toggle() bricks state machine (src/prompter/Prompter.qml:448) |
+| deepseek-v4-pro-max | ❌ FALSE | 85 | Prompter.qml:3088 explicitly sets state: Prompter.States.Editing(=0); parseInt('0')=0 not NaN; state is never empty string |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | Prompter.qml:448 parseInt(state) when state is non-numeric returns NaN; first toggle() bricks state machine |
+| kimi-k2.7-code | ✅ LEGIT | 90 | Prompter.qml:448 `parseInt(state)` on empty string yields NaN; `(NaN+1)%4` is NaN and state comparisons fail. |
+| opus-4.8-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — parseInt('') NaN only if initial state unset; depends on default state (Prompter.qml:448) |
 
 ## Patch  _(fill when fixing)_
 

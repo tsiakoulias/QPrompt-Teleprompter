@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 60 | id: rotation shadows Item.rotation property (Prompter.qml:1280) |
-| gpt | ✅ LEGIT | 78 | id: rotation shadows Item.rotation property (src/prompter/Prompter.qml:1280) |
-| deepseek | ✅ LEGIT | 85 | Rotation id:rotation shadows Item.rotation qreal; bare rotation resolves to Rotation object not float (Prompter.qml:1280) |
-| glm | ⚠️ PARTIAL | 60 | Prompter.qml:1280 id: rotation shadows Item.rotation property; ambiguous in context |
-| kimi | ❌ FALSE | 80 | id:rotation names the Rotation transform and is correctly used as its target; current code does not confuse it with Item.rotation. |
-| opus-ultra | ✅ LEGIT | 60 | id: rotation shadows Item.rotation property (Prompter.qml:1280) |
+| opus-4.8-extra | ✅ LEGIT | 60 | id: rotation shadows Item.rotation property (Prompter.qml:1280) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | id: rotation shadows Item.rotation property (src/prompter/Prompter.qml:1280) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | Rotation id:rotation shadows Item.rotation qreal; bare rotation resolves to Rotation object not float (Prompter.qml:1280) |
+| glm-5.2-xhigh | ⚠️ PARTIAL | 60 | Prompter.qml:1280 id: rotation shadows Item.rotation property; ambiguous in context |
+| kimi-k2.7-code | ❌ FALSE | 80 | id:rotation names the Rotation transform and is correctly used as its target; current code does not confuse it with Item.rotation. |
+| opus-4.8-ultra | ✅ LEGIT | 60 | id: rotation shadows Item.rotation property (Prompter.qml:1280) |
 
 ## Patch  _(fill when fixing)_
 

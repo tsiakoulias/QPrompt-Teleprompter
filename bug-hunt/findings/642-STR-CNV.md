@@ -19,12 +19,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 45 | several toInt() without ok flag; defensive gap (documenthandler.cpp:757) |
-| gpt | ✅ LEGIT | 78 | 5 defensive validation gaps: toInt() without ok flag in getMarkerKey, parse(×2), setFontSize, and 32 hotkey reads (src/documenthandler.cpp:757) |
-| deepseek | ✅ LEGIT | 60 | multiple toInt() calls without ok flag silently discard parse failures (documenthandler.cpp:757 829) |
-| glm | ✅ LEGIT | 75 | documenthandler.cpp:757 1667 1675 829 globalhotkeys.cpp:569-698 5 defensive validation gaps: toInt() without ok flag |
-| kimi | ❌ FALSE | 60 | documenthandler.cpp:757/1667/1675 and globalhotkeys.cpp:569-698 use toInt() without ok flag, but 0 default matches intended sentinel; no defect. |
-| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — several toInt() without ok flag; defensive gap (documenthandler.cpp:757) |
+| opus-4.8-extra | ⚠️ PARTIAL | 45 | several toInt() without ok flag; defensive gap (documenthandler.cpp:757) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | 5 defensive validation gaps: toInt() without ok flag in getMarkerKey, parse(×2), setFontSize, and 32 hotkey reads (src/documenthandler.cpp:757) |
+| deepseek-v4-pro-max | ✅ LEGIT | 60 | multiple toInt() calls without ok flag silently discard parse failures (documenthandler.cpp:757 829) |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | documenthandler.cpp:757 1667 1675 829 globalhotkeys.cpp:569-698 5 defensive validation gaps: toInt() without ok flag |
+| kimi-k2.7-code | ❌ FALSE | 60 | documenthandler.cpp:757/1667/1675 and globalhotkeys.cpp:569-698 use toInt() without ok flag, but 0 default matches intended sentinel; no defect. |
+| opus-4.8-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — several toInt() without ok flag; defensive gap (documenthandler.cpp:757) |
 
 ## Patch  _(fill when fixing)_
 

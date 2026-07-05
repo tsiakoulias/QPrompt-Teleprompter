@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 45 | 13 regexes lack isValid(); all but search are author-literal (always valid) |
-| gpt | ✅ LEGIT | 78 | All 13 QRegularExpression objects lack isValid() checks (src/documenthandler.cpp:893) |
-| deepseek | ✅ LEGIT | 85 | 13 QRegularExpression objects lack isValid() checks — pattern typo silently matches nothing |
-| glm | ✅ LEGIT | 75 | 13 QRegularExpression objects across documenthandler.cpp and spellhighlighter.cpp lack isValid() checks |
-| kimi | ✅ LEGIT | 95 | documenthandler.cpp has 12 QRegularExpression objects (regex_0..regex_8, imgSrcRegex, searchRegEx) and spellhighlighter.cpp has 1 (wordRe); none call isValid() |
-| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — 13 regexes lack isValid(); all but search are author-literal (always valid) |
+| opus-4.8-extra | ⚠️ PARTIAL | 45 | 13 regexes lack isValid(); all but search are author-literal (always valid) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | All 13 QRegularExpression objects lack isValid() checks (src/documenthandler.cpp:893) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | 13 QRegularExpression objects lack isValid() checks — pattern typo silently matches nothing |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | 13 QRegularExpression objects across documenthandler.cpp and spellhighlighter.cpp lack isValid() checks |
+| kimi-k2.7-code | ✅ LEGIT | 95 | documenthandler.cpp has 12 QRegularExpression objects (regex_0..regex_8, imgSrcRegex, searchRegEx) and spellhighlighter.cpp has 1 (wordRe); none call isValid() |
+| opus-4.8-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — 13 regexes lack isValid(); all but search are author-literal (always valid) |
 
 ## Patch  _(fill when fixing)_
 

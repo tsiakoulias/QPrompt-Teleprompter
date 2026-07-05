@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 75 | setAutoReload never emits autoReloadChanged (documenthandler.cpp:909) |
-| gpt | ✅ LEGIT | 78 | setAutoReload doesn't emit autoReloadChanged NOTIFY signal (src/documenthandler.cpp:909) |
-| deepseek | ✅ LEGIT | 95 | setAutoReload at documenthandler.cpp:909 sets m_autoReload but never emits autoReloadChanged |
-| glm | ✅ LEGIT | 80 | documenthandler.cpp:909-919 setAutoReload doesn't emit autoReloadChanged NOTIFY signal |
-| kimi | ✅ LEGIT | 95 | documenthandler.cpp:909-919 sets m_autoReload but never emits autoReloadChanged despite the Q_PROPERTY NOTIFY declaration. |
-| opus-ultra | ✅ LEGIT | 75 | setAutoReload never emits autoReloadChanged (documenthandler.cpp:909) |
+| opus-4.8-extra | ✅ LEGIT | 75 | setAutoReload never emits autoReloadChanged (documenthandler.cpp:909) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | setAutoReload doesn't emit autoReloadChanged NOTIFY signal (src/documenthandler.cpp:909) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | setAutoReload at documenthandler.cpp:909 sets m_autoReload but never emits autoReloadChanged |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | documenthandler.cpp:909-919 setAutoReload doesn't emit autoReloadChanged NOTIFY signal |
+| kimi-k2.7-code | ✅ LEGIT | 95 | documenthandler.cpp:909-919 sets m_autoReload but never emits autoReloadChanged despite the Q_PROPERTY NOTIFY declaration. |
+| opus-4.8-ultra | ✅ LEGIT | 75 | setAutoReload never emits autoReloadChanged (documenthandler.cpp:909) |
 
 ## Patch  _(fill when fixing)_
 

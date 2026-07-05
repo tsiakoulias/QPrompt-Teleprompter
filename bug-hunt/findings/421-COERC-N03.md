@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | real->int truncation in WindowDragger compounds drift (FINAL-05 family) (WindowDragger.qml:28) |
-| gpt | ⚠️ PARTIAL | 58 | observed real->int truncation in WindowDragger position compounds drift (src/qt/WindowDragger.qml:28) |
-| deepseek | ✅ LEGIT | 80 | WindowDragger.qml:28-34: mouse.x (qreal) stored to prevX (int) losing fractional precision; compounds drift on each drag start |
-| glm | ✅ LEGIT | 70 | WindowDragger.qml:28-34 real→int truncation in position compounds drift |
-| kimi | ✅ LEGIT | 80 | WindowDragger.qml:28 prevX/prevY declared int; mouse.x qreal truncated each press; compounds drift. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — real->int truncation in WindowDragger compounds drift (FINAL-05 family) (WindowDragger.qml |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | real->int truncation in WindowDragger compounds drift (FINAL-05 family) (WindowDragger.qml:28) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed real->int truncation in WindowDragger position compounds drift (src/qt/WindowDragger.qml:28) |
+| deepseek-v4-pro-max | ✅ LEGIT | 80 | WindowDragger.qml:28-34: mouse.x (qreal) stored to prevX (int) losing fractional precision; compounds drift on each drag start |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | WindowDragger.qml:28-34 real→int truncation in position compounds drift |
+| kimi-k2.7-code | ✅ LEGIT | 80 | WindowDragger.qml:28 prevX/prevY declared int; mouse.x qreal truncated each press; compounds drift. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — real->int truncation in WindowDragger compounds drift (FINAL-05 family) (WindowDragger.qml |
 
 ## Patch  _(fill when fixing)_
 

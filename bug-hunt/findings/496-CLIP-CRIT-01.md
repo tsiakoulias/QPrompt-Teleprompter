@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 85 | toolbar/menu call editor.paste() (unfiltered) vs document.paste() elsewhere (EditorToolbar.qml:345, main.qml:686) |
-| gpt | ✅ LEGIT | 84 | Paste via toolbar button and File menu bypasses HTML sanitization (src/kirigami_ui/EditorToolbar.qml:345) |
-| deepseek | ✅ LEGIT | 95 | EditorToolbar.qml:345 calls editor.paste() (raw Qt); main.qml:686 same; both bypass filterHtml(); Ctrl+V correctly uses document.paste() |
-| glm | ✅ LEGIT | 80 | EditorToolbar.qml:345 main.qml:686 paste via toolbar button and File menu bypasses HTML sanitization |
-| kimi | ✅ LEGIT | 90 | EditorToolbar.qml:345 and main.qml:686 call editor.paste() instead of document.paste()/filterHtml; bypasses sanitization. |
-| opus-ultra | ✅ LEGIT | 85 | toolbar/menu call editor.paste() (unfiltered) vs document.paste() elsewhere (EditorToolbar.qml:345 |
+| opus-4.8-extra | ✅ LEGIT | 85 | toolbar/menu call editor.paste() (unfiltered) vs document.paste() elsewhere (EditorToolbar.qml:345, main.qml:686) |
+| gpt-5.5-xhigh | ✅ LEGIT | 84 | Paste via toolbar button and File menu bypasses HTML sanitization (src/kirigami_ui/EditorToolbar.qml:345) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | EditorToolbar.qml:345 calls editor.paste() (raw Qt); main.qml:686 same; both bypass filterHtml(); Ctrl+V correctly uses document.paste() |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | EditorToolbar.qml:345 main.qml:686 paste via toolbar button and File menu bypasses HTML sanitization |
+| kimi-k2.7-code | ✅ LEGIT | 90 | EditorToolbar.qml:345 and main.qml:686 call editor.paste() instead of document.paste()/filterHtml; bypasses sanitization. |
+| opus-4.8-ultra | ✅ LEGIT | 85 | toolbar/menu call editor.paste() (unfiltered) vs document.paste() elsewhere (EditorToolbar.qml:345 |
 
 ## Patch
 

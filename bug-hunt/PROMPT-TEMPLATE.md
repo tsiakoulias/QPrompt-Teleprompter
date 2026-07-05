@@ -7,7 +7,7 @@ After it returns its CSV, ingest it with:
 python multi-agent/build_review.py add <agent-name> <returned-file.csv>
 ```
 
-(e.g. `add glm`, `add kimi`, `add opus-r2` for a re-verification round). That stamps the
+(e.g. `add glm-5.2-xhigh`, `add kimi-k2.7-code`, `add opus-r2` for a re-verification round). That stamps the
 agent name, appends rows to `assessments.csv`, and rebuilds `REVIEW.md`. Adding a column
 never rewrites existing data — it only appends rows.
 

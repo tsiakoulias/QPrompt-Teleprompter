@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❌ FALSE | 65 | qnativeinterface.h exists in Qt6 QtCore; Android builds ship (documenthandler.cpp:83) |
-| gpt | ❌ FALSE | 76 | qnativeinterface.h is a Qt 6 header (src/documenthandler.cpp:83) |
-| deepseek | ✅ LEGIT | 90 | #include <qnativeinterface.h> at documenthandler.cpp:83 — header doesn't exist in Qt 5 or 6 |
-| glm | ❌ FALSE | 80 | documenthandler.cpp:83 #include <qnativeinterface.h> exists in Qt 6; valid header for Android platform |
-| kimi | ✅ LEGIT | 95 | documenthandler.cpp:83 #include <qnativeinterface.h> is not a valid Qt 6 header; the correct access is through QNativeInterface namespace. |
-| opus-ultra | ❌ FALSE | 65 | qnativeinterface.h exists in Qt6 QtCore; Android builds ship (documenthandler.cpp:83) |
+| opus-4.8-extra | ❌ FALSE | 65 | qnativeinterface.h exists in Qt6 QtCore; Android builds ship (documenthandler.cpp:83) |
+| gpt-5.5-xhigh | ❌ FALSE | 76 | qnativeinterface.h is a Qt 6 header (src/documenthandler.cpp:83) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | #include <qnativeinterface.h> at documenthandler.cpp:83 — header doesn't exist in Qt 5 or 6 |
+| glm-5.2-xhigh | ❌ FALSE | 80 | documenthandler.cpp:83 #include <qnativeinterface.h> exists in Qt 6; valid header for Android platform |
+| kimi-k2.7-code | ✅ LEGIT | 95 | documenthandler.cpp:83 #include <qnativeinterface.h> is not a valid Qt 6 header; the correct access is through QNativeInterface namespace. |
+| opus-4.8-ultra | ❌ FALSE | 65 | qnativeinterface.h exists in Qt6 QtCore; Android builds ship (documenthandler.cpp:83) |
 
 ## Patch  _(fill when fixing)_
 

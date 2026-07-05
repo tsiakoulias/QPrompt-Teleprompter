@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | image resource keyed by QUrl but format name=path string; possible mismatch (documenthandler.cpp:1766) |
-| gpt | ✅ LEGIT | 78 | insertImageAt() stores image resource with file:// key but looks up via plain path (src/documenthandler.cpp:1766) |
-| deepseek | ✅ LEGIT | 85 | addResource with file:// QUrl at documenthandler.cpp:1766 but imageFormat.setName uses plain path at 1769 |
-| glm | ✅ LEGIT | 80 | documenthandler.cpp:1766-1769 insertImageAt stores image resource with file:// key but looks up via plain path |
-| kimi | ✅ LEGIT | 95 | documenthandler.cpp:1766-1769 stores local image under file:// key but sets imageFormat.name to toLocalFile(); imageAt/imageRect lookup via QUrl(name) misses |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — image resource keyed by QUrl but format name=path string; possible mismatch (documenthandl |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | image resource keyed by QUrl but format name=path string; possible mismatch (documenthandler.cpp:1766) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | insertImageAt() stores image resource with file:// key but looks up via plain path (src/documenthandler.cpp:1766) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | addResource with file:// QUrl at documenthandler.cpp:1766 but imageFormat.setName uses plain path at 1769 |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | documenthandler.cpp:1766-1769 insertImageAt stores image resource with file:// key but looks up via plain path |
+| kimi-k2.7-code | ✅ LEGIT | 95 | documenthandler.cpp:1766-1769 stores local image under file:// key but sets imageFormat.name to toLocalFile(); imageAt/imageRect lookup via QUrl(name) misses |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — image resource keyed by QUrl but format name=path string; possible mismatch (documenthandl |
 
 ## Patch  _(fill when fixing)_
 

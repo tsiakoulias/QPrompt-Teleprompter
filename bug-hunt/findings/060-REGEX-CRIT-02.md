@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | user search regex isValid() never checked; Qt handles invalid gracefully (documenthandler.cpp:1543) |
-| gpt | ✅ LEGIT | 84 | searchRegEx.setPattern() from user input - isValid() never called (src/documenthandler.cpp:1543) |
-| deepseek | ✅ LEGIT | 95 | documenthandler.cpp:1543-1544: searchRegEx.setPattern(subString) from user QML input; no isValid() check — invalid regex causes undefined behavior in QTextDocument::find() |
-| glm | ✅ LEGIT | 85 | documenthandler.cpp:1543-1544 searchRegEx.setPattern() from user input; isValid() never called |
-| kimi | ✅ LEGIT | 90 | documenthandler.cpp:1543-1544 sets user-supplied pattern on searchRegEx without isValid(); invalid regex reaches QTextDocument::find. |
-| opus-ultra | ✅ LEGIT | 55 | user search regex isValid() never checked; Qt handles invalid gracefully (documenthandler.cpp:1543) |
+| opus-4.8-extra | ✅ LEGIT | 55 | user search regex isValid() never checked; Qt handles invalid gracefully (documenthandler.cpp:1543) |
+| gpt-5.5-xhigh | ✅ LEGIT | 84 | searchRegEx.setPattern() from user input - isValid() never called (src/documenthandler.cpp:1543) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | documenthandler.cpp:1543-1544: searchRegEx.setPattern(subString) from user QML input; no isValid() check — invalid regex causes undefined behavior in QTextDocument::find() |
+| glm-5.2-xhigh | ✅ LEGIT | 85 | documenthandler.cpp:1543-1544 searchRegEx.setPattern() from user input; isValid() never called |
+| kimi-k2.7-code | ✅ LEGIT | 90 | documenthandler.cpp:1543-1544 sets user-supplied pattern on searchRegEx without isValid(); invalid regex reaches QTextDocument::find. |
+| opus-4.8-ultra | ✅ LEGIT | 55 | user search regex isValid() never checked; Qt handles invalid gracefully (documenthandler.cpp:1543) |
 
 ## Patch  _(fill when fixing)_
 

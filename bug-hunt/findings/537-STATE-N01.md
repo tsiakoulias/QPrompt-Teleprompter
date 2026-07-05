@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❔ UNSURE | 45 | shadowed Prompting->Editing transition claim; needs state-machine trace (Prompter.qml:3119) |
-| gpt | ✅ LEGIT | 84 | Shadowed Prompting->Editing transition - velocity default never saved (src/prompter/Prompter.qml:3119) |
-| deepseek | ⚠️ PARTIAL | 50 | specific Prompting->Editing transition(line 3129) takes priority over general(line 3119) per QML rules (Prompter.qml:3119-3137) |
-| glm | ✅ LEGIT | 80 | Prompter.qml:3119-3137 Shadowed Prompting→Editing transition; velocity default never saved |
-| kimi | ❌ FALSE | 70 | Transition from Prompting to Editing at Prompter.qml:3127-3137 sets __iDefault when __i>0; generic to-Editing transition is not shadowed. |
-| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — shadowed Prompting->Editing transition claim; needs state-machine trace (Prompter.qml:3119 |
+| opus-4.8-extra | ❔ UNSURE | 45 | shadowed Prompting->Editing transition claim; needs state-machine trace (Prompter.qml:3119) |
+| gpt-5.5-xhigh | ✅ LEGIT | 84 | Shadowed Prompting->Editing transition - velocity default never saved (src/prompter/Prompter.qml:3119) |
+| deepseek-v4-pro-max | ⚠️ PARTIAL | 50 | specific Prompting->Editing transition(line 3129) takes priority over general(line 3119) per QML rules (Prompter.qml:3119-3137) |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | Prompter.qml:3119-3137 Shadowed Prompting→Editing transition; velocity default never saved |
+| kimi-k2.7-code | ❌ FALSE | 70 | Transition from Prompting to Editing at Prompter.qml:3127-3137 sets __iDefault when __i>0; generic to-Editing transition is not shadowed. |
+| opus-4.8-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — shadowed Prompting->Editing transition claim; needs state-machine trace (Prompter.qml:3119 |
 
 ## Patch  _(fill when fixing)_
 

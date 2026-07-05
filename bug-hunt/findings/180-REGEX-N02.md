@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | regex_5 [^sS][^pP][^aA][^nN] is a flawed 'not span' construct (documenthandler.cpp:1300) |
-| gpt | ✅ LEGIT | 78 | regex5 accidentally excludes 15+ HTML5 tags from background-color filtering (src/documenthandler.cpp:1300) |
-| deepseek | ✅ LEGIT | 80 | [^sS][^pP][^aA][^nN] at documenthandler.cpp:1300 excludes <strong> <script> <svg> etc from bg-color filter |
-| glm | ✅ LEGIT | 80 | documenthandler.cpp:1300 regex_5 excludes 15+ HTML5 tags from background-color filtering due to [^sS][^pP][^aA][^nN] pattern |
-| kimi | ✅ LEGIT | 95 | filterHtml regex_5 at documenthandler.cpp:1300 uses <[^sS][^pP][^aA][^nN], excluding strong/script/style/svg/section/source and leaking background colors |
-| opus-ultra | ✅ LEGIT | 55 | regex_5 [^sS][^pP][^aA][^nN] is a flawed 'not span' construct (documenthandler.cpp:1300) |
+| opus-4.8-extra | ✅ LEGIT | 55 | regex_5 [^sS][^pP][^aA][^nN] is a flawed 'not span' construct (documenthandler.cpp:1300) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | regex5 accidentally excludes 15+ HTML5 tags from background-color filtering (src/documenthandler.cpp:1300) |
+| deepseek-v4-pro-max | ✅ LEGIT | 80 | [^sS][^pP][^aA][^nN] at documenthandler.cpp:1300 excludes <strong> <script> <svg> etc from bg-color filter |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | documenthandler.cpp:1300 regex_5 excludes 15+ HTML5 tags from background-color filtering due to [^sS][^pP][^aA][^nN] pattern |
+| kimi-k2.7-code | ✅ LEGIT | 95 | filterHtml regex_5 at documenthandler.cpp:1300 uses <[^sS][^pP][^aA][^nN], excluding strong/script/style/svg/section/source and leaking background colors |
+| opus-4.8-ultra | ✅ LEGIT | 55 | regex_5 [^sS][^pP][^aA][^nN] is a flawed 'not span' construct (documenthandler.cpp:1300) |
 
 ## Patch  _(fill when fixing)_
 

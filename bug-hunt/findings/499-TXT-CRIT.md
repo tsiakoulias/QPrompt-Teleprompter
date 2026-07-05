@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❔ UNSURE | 45 | Key_V consumed only matters if handler active in editing mode; likely state-gated (Prompter.qml:2166) |
-| gpt | ❔ UNSURE | 39 | runtime/platform behavior is not decidable from the cited snippet (src/prompter/Prompter.qml:2163) |
-| deepseek | ✅ LEGIT | 85 | Prompter.qml:2163-2168: no-modifiers branch case Qt.Key_V forwards to prompter handler which only handles Ctrl+V paste; plain v keypress silently discarded — cannot type letter v |
-| glm | ✅ LEGIT | 80 | Prompter.qml:2163-2168 bare 'v'/'V' keypress forwarded to prompter even with no modifiers; letter 'v' cannot be typed in editor |
-| kimi | ✅ LEGIT | 95 | Prompter.qml:2163-2168 consumes plain Qt.Key_V and forwards to prompter handler, which has no action for unmodified 'v'; letter cannot be typed. |
-| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — Key_V consumed only matters if handler active in editing mode; likely state-gated (Prompte |
+| opus-4.8-extra | ❔ UNSURE | 45 | Key_V consumed only matters if handler active in editing mode; likely state-gated (Prompter.qml:2166) |
+| gpt-5.5-xhigh | ❔ UNSURE | 39 | runtime/platform behavior is not decidable from the cited snippet (src/prompter/Prompter.qml:2163) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | Prompter.qml:2163-2168: no-modifiers branch case Qt.Key_V forwards to prompter handler which only handles Ctrl+V paste; plain v keypress silently discarded — cannot type letter v |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | Prompter.qml:2163-2168 bare 'v'/'V' keypress forwarded to prompter even with no modifiers; letter 'v' cannot be typed in editor |
+| kimi-k2.7-code | ✅ LEGIT | 95 | Prompter.qml:2163-2168 consumes plain Qt.Key_V and forwards to prompter handler, which has no action for unmodified 'v'; letter cannot be typed. |
+| opus-4.8-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — Key_V consumed only matters if handler active in editing mode; likely state-gated (Prompte |
 
 ## Patch  _(fill when fixing)_
 

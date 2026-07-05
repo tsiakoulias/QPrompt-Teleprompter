@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | imgSrcRegex 'src' also matches inside data-src= (documenthandler.cpp:1432) |
-| gpt | ✅ LEGIT | 78 | imgSrcRegex captures wrong src when data-src follows real src (src/documenthandler.cpp:1432) |
-| deepseek | ✅ LEGIT | 90 | documenthandler.cpp:1432-1434: imgSrcRegex [^>]+ is greedy; for <img src='real' data-src='lazy'> backtracks to last src= inside data-src — wrong URL captured |
-| glm | ✅ LEGIT | 75 | documenthandler.cpp:1432-1434 imgSrcRegex captures wrong src when data-src follows real src |
-| kimi | ✅ LEGIT | 85 | documenthandler.cpp:1432-1434 imgSrcRegex greedily matches '[^>]+', backtracking to data-src= and capturing the lazy image URL. |
-| opus-ultra | ✅ LEGIT | 55 | imgSrcRegex 'src' also matches inside data-src= (documenthandler.cpp:1432) |
+| opus-4.8-extra | ✅ LEGIT | 55 | imgSrcRegex 'src' also matches inside data-src= (documenthandler.cpp:1432) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | imgSrcRegex captures wrong src when data-src follows real src (src/documenthandler.cpp:1432) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | documenthandler.cpp:1432-1434: imgSrcRegex [^>]+ is greedy; for <img src='real' data-src='lazy'> backtracks to last src= inside data-src — wrong URL captured |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | documenthandler.cpp:1432-1434 imgSrcRegex captures wrong src when data-src follows real src |
+| kimi-k2.7-code | ✅ LEGIT | 85 | documenthandler.cpp:1432-1434 imgSrcRegex greedily matches '[^>]+', backtracking to data-src= and capturing the lazy image URL. |
+| opus-4.8-ultra | ✅ LEGIT | 55 | imgSrcRegex 'src' also matches inside data-src= (documenthandler.cpp:1432) |
 
 ## Patch  _(fill when fixing)_
 

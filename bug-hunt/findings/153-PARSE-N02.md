@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 60 | keySearch match maxHits=1 finds only first same-key marker (markersmodel.cpp:120) |
-| gpt | ✅ LEGIT | 78 | MarkersModel::keySearch() hits=1 limits search to first marker only (src/markersmodel.cpp:120) |
-| deepseek | ✅ LEGIT | 85 | match(hits=1) at markersmodel.cpp:120 — only first marker found later markers with same key unreachable |
-| glm | ✅ LEGIT | 80 | markersmodel.cpp:120 keySearch match() with hits=1 limits search to first matching marker only |
-| kimi | ✅ LEGIT | 95 | markersmodel.cpp:120 keySearch calls match(...,1,...); variable implies plural results but only the first matching marker is returned |
-| opus-ultra | ✅ LEGIT | 60 | keySearch match maxHits=1 finds only first same-key marker (markersmodel.cpp:120) |
+| opus-4.8-extra | ✅ LEGIT | 60 | keySearch match maxHits=1 finds only first same-key marker (markersmodel.cpp:120) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | MarkersModel::keySearch() hits=1 limits search to first marker only (src/markersmodel.cpp:120) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | match(hits=1) at markersmodel.cpp:120 — only first marker found later markers with same key unreachable |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | markersmodel.cpp:120 keySearch match() with hits=1 limits search to first matching marker only |
+| kimi-k2.7-code | ✅ LEGIT | 95 | markersmodel.cpp:120 keySearch calls match(...,1,...); variable implies plural results but only the first matching marker is returned |
+| opus-4.8-ultra | ✅ LEGIT | 60 | keySearch match maxHits=1 finds only first same-key marker (markersmodel.cpp:120) |
 
 ## Patch  _(fill when fixing)_
 

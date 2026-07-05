@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 65 | unescaped dot in font-size regex (dup REGEX-N05) (documenthandler.cpp:894) |
-| gpt | ✅ LEGIT | 78 | Unescaped dot in font-size regex - matches any char instead of decimal (src/documenthandler.cpp:894) |
-| deepseek | ✅ LEGIT | 85 | Unescaped dot in (?:.[\\d]+) at documenthandler.cpp:894 — matches any char instead of literal dot |
-| glm | ✅ LEGIT | 75 | documenthandler.cpp:894 954 1274 unescaped dot in font-size regex matches any char instead of decimal point |
-| kimi | ✅ LEGIT | 85 | documenthandler.cpp:894/954/1274 font-size patterns use unescaped '.', matching any character instead of a literal decimal point |
-| opus-ultra | ✅ LEGIT | 65 | unescaped dot in font-size regex (dup REGEX-N05) (documenthandler.cpp:894) |
+| opus-4.8-extra | ✅ LEGIT | 65 | unescaped dot in font-size regex (dup REGEX-N05) (documenthandler.cpp:894) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | Unescaped dot in font-size regex - matches any char instead of decimal (src/documenthandler.cpp:894) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | Unescaped dot in (?:.[\\d]+) at documenthandler.cpp:894 — matches any char instead of literal dot |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | documenthandler.cpp:894 954 1274 unescaped dot in font-size regex matches any char instead of decimal point |
+| kimi-k2.7-code | ✅ LEGIT | 85 | documenthandler.cpp:894/954/1274 font-size patterns use unescaped '.', matching any character instead of a literal decimal point |
+| opus-4.8-ultra | ✅ LEGIT | 65 | unescaped dot in font-size regex (dup REGEX-N05) (documenthandler.cpp:894) |
 
 ## Patch  _(fill when fixing)_
 

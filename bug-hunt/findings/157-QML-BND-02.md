@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | clock.__iteration binding broken by -- in handler (Countdown.qml:76) |
-| gpt | ✅ LEGIT | 78 | clock.iteration binding broken by post-decrement in animation handler (src/prompter/Countdown.qml:76) |
-| deepseek | ✅ LEGIT | 90 | clock.__iteration-- at Countdown.qml:116 breaks declarative binding at line 76 |
-| glm | ✅ LEGIT | 80 | Countdown.qml:76 116 121 clock.__iteration binding broken by post-decrement in animation handler |
-| kimi | ✅ LEGIT | 85 | Countdown.qml:76 binds clock.__iteration, but lines 116/121 use -- and direct assignment, breaking the binding. |
-| opus-ultra | ✅ LEGIT | 55 | clock.__iteration binding broken by -- in handler (Countdown.qml:76) |
+| opus-4.8-extra | ✅ LEGIT | 55 | clock.__iteration binding broken by -- in handler (Countdown.qml:76) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | clock.iteration binding broken by post-decrement in animation handler (src/prompter/Countdown.qml:76) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | clock.__iteration-- at Countdown.qml:116 breaks declarative binding at line 76 |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | Countdown.qml:76 116 121 clock.__iteration binding broken by post-decrement in animation handler |
+| kimi-k2.7-code | ✅ LEGIT | 85 | Countdown.qml:76 binds clock.__iteration, but lines 116/121 use -- and direct assignment, breaking the binding. |
+| opus-4.8-ultra | ✅ LEGIT | 55 | clock.__iteration binding broken by -- in handler (Countdown.qml:76) |
 
 ## Patch  _(fill when fixing)_
 

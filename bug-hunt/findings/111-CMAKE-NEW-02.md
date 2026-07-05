@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | duplicate install() of appdata/desktop in root+src (CMakeLists.txt:408) |
-| gpt | ✅ LEGIT | 92 | Duplicate install() of appdata.xml/desktop in root and src/CMakeLists.txt (CMakeLists.txt:408) |
-| deepseek | ✅ LEGIT | 90 | appdata.xml/desktop installed at CMakeLists.txt:408 AND src/CMakeLists.txt:524 — duplicate CMP0177 error on 3.27+ |
-| glm | ✅ LEGIT | 80 | CMakeLists.txt:408-409 and src/CMakeLists.txt:524-525 both install appdata.xml/desktop; duplicate install |
-| kimi | ✅ LEGIT | 90 | CMakeLists.txt:408-409 and src/CMakeLists.txt:524-525 both install appdata.xml/desktop to the same destinations. |
-| opus-ultra | ✅ LEGIT | 55 | duplicate install() of appdata/desktop in root+src (CMakeLists.txt:408) |
+| opus-4.8-extra | ✅ LEGIT | 55 | duplicate install() of appdata/desktop in root+src (CMakeLists.txt:408) |
+| gpt-5.5-xhigh | ✅ LEGIT | 92 | Duplicate install() of appdata.xml/desktop in root and src/CMakeLists.txt (CMakeLists.txt:408) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | appdata.xml/desktop installed at CMakeLists.txt:408 AND src/CMakeLists.txt:524 — duplicate CMP0177 error on 3.27+ |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | CMakeLists.txt:408-409 and src/CMakeLists.txt:524-525 both install appdata.xml/desktop; duplicate install |
+| kimi-k2.7-code | ✅ LEGIT | 90 | CMakeLists.txt:408-409 and src/CMakeLists.txt:524-525 both install appdata.xml/desktop to the same destinations. |
+| opus-4.8-ultra | ✅ LEGIT | 55 | duplicate install() of appdata/desktop in root+src (CMakeLists.txt:408) |
 
 ## Patch  _(fill when fixing)_
 

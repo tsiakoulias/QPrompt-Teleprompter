@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | prompterShadowSource runs unconditionally; GPU waste (PrompterView.qml:230) |
-| gpt | ✅ LEGIT | 78 | ShaderEffectSource prompterShadowSource runs unconditionally - wastes GPU capture when shadows disabled (src/prompter/PrompterView.qml:230) |
-| deepseek | ✅ LEGIT | 70 | ShaderEffectSource unconditionally captures GPU regardless of shadows setting (PrompterView.qml:230-233) |
-| glm | ✅ LEGIT | 75 | PrompterView.qml:230-233 prompterShadowSource ShaderEffectSource runs unconditionally even when shadows disabled |
-| kimi | ✅ LEGIT | 80 | PrompterView.qml:230-233 instantiates prompterShadowSource with default live=true and no guard; Prompter.qml:744 only enables the consuming layer when root.shadows, so capture continues while shadows are disabled. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — prompterShadowSource runs unconditionally; GPU waste (PrompterView.qml:230) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | prompterShadowSource runs unconditionally; GPU waste (PrompterView.qml:230) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | ShaderEffectSource prompterShadowSource runs unconditionally - wastes GPU capture when shadows disabled (src/prompter/PrompterView.qml:230) |
+| deepseek-v4-pro-max | ✅ LEGIT | 70 | ShaderEffectSource unconditionally captures GPU regardless of shadows setting (PrompterView.qml:230-233) |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | PrompterView.qml:230-233 prompterShadowSource ShaderEffectSource runs unconditionally even when shadows disabled |
+| kimi-k2.7-code | ✅ LEGIT | 80 | PrompterView.qml:230-233 instantiates prompterShadowSource with default live=true and no guard; Prompter.qml:744 only enables the consuming layer when root.shadows, so capture continues while shadows are disabled. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — prompterShadowSource runs unconditionally; GPU waste (PrompterView.qml:230) |
 
 ## Patch  _(fill when fixing)_
 

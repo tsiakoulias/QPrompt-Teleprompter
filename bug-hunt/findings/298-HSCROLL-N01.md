@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | Flickable contentWidth:width vs implicitWidth (InputsOverlay.qml:95) |
-| gpt | ⚠️ PARTIAL | 58 | observed InputsOverlay Flickables use contentWidth: width instead of implicitWidth - horizontal overflow (src/kirigami_ui/InputsOverlay.qml:95) |
-| deepseek | ✅ LEGIT | 95 | InputsOverlay.qml:95 552: contentWidth set to Flickable's own width via buttonGrid.width/hotkeyGrid.width; horizontal overflow clipped |
-| glm | ✅ LEGIT | 70 | InputsOverlay.qml:95 552 Flickables use contentWidth: width instead of implicitWidth; horizontal overflow clipped |
-| kimi | ✅ LEGIT | 90 | InputsOverlay.qml:95/552 set contentWidth to grid.width (== Flickable width), preventing horizontal scroll |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — Flickable contentWidth:width vs implicitWidth (InputsOverlay.qml:95) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | Flickable contentWidth:width vs implicitWidth (InputsOverlay.qml:95) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed InputsOverlay Flickables use contentWidth: width instead of implicitWidth - horizontal overflow (src/kirigami_ui/InputsOverlay.qml:95) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | InputsOverlay.qml:95 552: contentWidth set to Flickable's own width via buttonGrid.width/hotkeyGrid.width; horizontal overflow clipped |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | InputsOverlay.qml:95 552 Flickables use contentWidth: width instead of implicitWidth; horizontal overflow clipped |
+| kimi-k2.7-code | ✅ LEGIT | 90 | InputsOverlay.qml:95/552 set contentWidth to grid.width (== Flickable width), preventing horizontal scroll |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — Flickable contentWidth:width vs implicitWidth (InputsOverlay.qml:95) |
 
 ## Patch  _(fill when fixing)_
 

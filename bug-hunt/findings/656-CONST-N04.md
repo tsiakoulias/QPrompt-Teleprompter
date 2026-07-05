@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 40 | globalShortcutKey not const; Q_INVOKABLE query (globalhotkeys.h:147) |
-| gpt | ⚠️ PARTIAL | 58 | observed GlobalHotkeys::globalShortcutKey(Action) not const - Q_INVOKABLE pure query (src/globalhotkeys.h:147) |
-| deepseek | ✅ LEGIT | 60 | Q_INVOKABLE globalShortcutKey pure query method missing const (globalhotkeys.cpp:108) |
-| glm | ✅ LEGIT | 70 | globalhotkeys.h:147 108 globalShortcutKey not const; Q_INVOKABLE pure query |
-| kimi | ❌ FALSE | 70 | globalShortcutKey() is a query method without const; this is a style issue, not a functional defect. |
-| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — globalShortcutKey not const; Q_INVOKABLE query (globalhotkeys.h:147) |
+| opus-4.8-extra | ⚠️ PARTIAL | 40 | globalShortcutKey not const; Q_INVOKABLE query (globalhotkeys.h:147) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed GlobalHotkeys::globalShortcutKey(Action) not const - Q_INVOKABLE pure query (src/globalhotkeys.h:147) |
+| deepseek-v4-pro-max | ✅ LEGIT | 60 | Q_INVOKABLE globalShortcutKey pure query method missing const (globalhotkeys.cpp:108) |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | globalhotkeys.h:147 108 globalShortcutKey not const; Q_INVOKABLE pure query |
+| kimi-k2.7-code | ❌ FALSE | 70 | globalShortcutKey() is a query method without const; this is a style issue, not a functional defect. |
+| opus-4.8-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — globalShortcutKey not const; Q_INVOKABLE query (globalhotkeys.h:147) |
 
 ## Patch  _(fill when fixing)_
 

@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | relative ../build path in install rules breaks out-of-tree (CMakeLists.txt:521) |
-| gpt | ✅ LEGIT | 78 | Relative ../build path in install rules - out-of-tree build failure (src/CMakeLists.txt:521) |
-| deepseek | ✅ LEGIT | 90 | src/CMakeLists.txt:521-522: install(DIRECTORY ../build/bin/org ...) — relative path assumes build dir named build sibling to source; out-of-tree builds resolve nonexistent path |
-| glm | ✅ LEGIT | 75 | src/CMakeLists.txt:521-522 relative ../build path in install rules; out-of-tree build failure |
-| kimi | ✅ LEGIT | 90 | src/CMakeLists.txt:521-522 hardcodes ../build/bin/org paths breaking out-of-source builds. |
-| opus-ultra | ✅ LEGIT | 55 | relative ../build path in install rules breaks out-of-tree (CMakeLists.txt:521) |
+| opus-4.8-extra | ✅ LEGIT | 55 | relative ../build path in install rules breaks out-of-tree (CMakeLists.txt:521) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | Relative ../build path in install rules - out-of-tree build failure (src/CMakeLists.txt:521) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | src/CMakeLists.txt:521-522: install(DIRECTORY ../build/bin/org ...) — relative path assumes build dir named build sibling to source; out-of-tree builds resolve nonexistent path |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | src/CMakeLists.txt:521-522 relative ../build path in install rules; out-of-tree build failure |
+| kimi-k2.7-code | ✅ LEGIT | 90 | src/CMakeLists.txt:521-522 hardcodes ../build/bin/org paths breaking out-of-source builds. |
+| opus-4.8-ultra | ✅ LEGIT | 55 | relative ../build path in install rules breaks out-of-tree (CMakeLists.txt:521) |
 
 ## Patch  _(fill when fixing)_
 

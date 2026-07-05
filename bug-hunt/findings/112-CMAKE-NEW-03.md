@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | find_package KF6Crash COMPONENTS with zero names (CMakeLists.txt:316) |
-| gpt | ✅ LEGIT | 78 | findpackage(KF6Crash ... COMPONENTS) - COMPONENTS keyword with zero names (CMakeLists.txt:316) |
-| deepseek | ✅ LEGIT | 90 | find_package(KF6Crash ... COMPONENTS) at CMakeLists.txt:316 — COMPONENTS keyword with zero args |
-| glm | ✅ LEGIT | 80 | CMakeLists.txt:316 find_package(KF6Crash ... COMPONENTS) with COMPONENTS keyword but zero component names |
-| kimi | ✅ LEGIT | 85 | CMakeLists.txt uses find_package(KF6Crash ${REQUIRED_KF6_VERSION} COMPONENTS) with empty COMPONENTS and REQUIRED_KF6_VERSION undefined. |
-| opus-ultra | ✅ LEGIT | 55 | find_package KF6Crash COMPONENTS with zero names (CMakeLists.txt:316) |
+| opus-4.8-extra | ✅ LEGIT | 55 | find_package KF6Crash COMPONENTS with zero names (CMakeLists.txt:316) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | findpackage(KF6Crash ... COMPONENTS) - COMPONENTS keyword with zero names (CMakeLists.txt:316) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | find_package(KF6Crash ... COMPONENTS) at CMakeLists.txt:316 — COMPONENTS keyword with zero args |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | CMakeLists.txt:316 find_package(KF6Crash ... COMPONENTS) with COMPONENTS keyword but zero component names |
+| kimi-k2.7-code | ✅ LEGIT | 85 | CMakeLists.txt uses find_package(KF6Crash ${REQUIRED_KF6_VERSION} COMPONENTS) with empty COMPONENTS and REQUIRED_KF6_VERSION undefined. |
+| opus-4.8-ultra | ✅ LEGIT | 55 | find_package KF6Crash COMPONENTS with zero names (CMakeLists.txt:316) |
 
 ## Patch  _(fill when fixing)_
 

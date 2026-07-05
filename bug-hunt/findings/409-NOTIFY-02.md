@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | availableDictionariesChanged NOTIFY never emitted (documenthandler.h:137) |
-| gpt | ✅ LEGIT | 78 | availableDictionariesChanged NOTIFY signal never emitted (src/documenthandler.h:137) |
-| deepseek | ⚠️ PARTIAL | 85 | availableDictionariesChanged at documenthandler.h:137 never emitted; but method is static disk-scan can't change |
-| glm | ✅ LEGIT | 80 | documenthandler.h:137 318 availableDictionariesChanged signal never emitted |
-| kimi | ✅ LEGIT | 85 | documenthandler.h:137 declares availableDictionariesChanged but no code emits it; list is static. |
-| opus-ultra | ✅ LEGIT | 55 | availableDictionariesChanged NOTIFY never emitted (documenthandler.h:137) |
+| opus-4.8-extra | ✅ LEGIT | 55 | availableDictionariesChanged NOTIFY never emitted (documenthandler.h:137) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | availableDictionariesChanged NOTIFY signal never emitted (src/documenthandler.h:137) |
+| deepseek-v4-pro-max | ⚠️ PARTIAL | 85 | availableDictionariesChanged at documenthandler.h:137 never emitted; but method is static disk-scan can't change |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | documenthandler.h:137 318 availableDictionariesChanged signal never emitted |
+| kimi-k2.7-code | ✅ LEGIT | 85 | documenthandler.h:137 declares availableDictionariesChanged but no code emits it; list is static. |
+| opus-4.8-ultra | ✅ LEGIT | 55 | availableDictionariesChanged NOTIFY never emitted (documenthandler.h:137) |
 
 ## Patch  _(fill when fixing)_
 

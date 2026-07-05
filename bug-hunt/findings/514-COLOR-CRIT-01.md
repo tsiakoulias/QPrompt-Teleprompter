@@ -19,12 +19,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❔ UNSURE | 45 | #333d9ef3 is valid #AARRGGBB (20% blue); 'reversed alpha' likely intentional (Prompter.qml:973) |
-| gpt | ❔ UNSURE | 39 | #333d9ef3 is syntactically AARRGGBB; intent is uncertain (src/prompter/Prompter.qml:973) |
-| deepseek | ✅ LEGIT | 95 | Prompter.qml:973-974: #333d9ef3 uses #AARRGGBB format but dev likely intended #RRGGBBAA; AA=0x33=20% alpha nearly invisible |
-| glm | ✅ LEGIT | 80 | Prompter.qml:973-974 selectionColor #333d9ef3 has alpha channel reversed (#AARRGGBB vs #RRGGBBAA); selection invisible |
-| kimi | ✅ LEGIT | 90 | Prompter.qml:973-974 #333d9ef3 interpreted by Qt as AARRGGBB (alpha 0x33) making selection nearly invisible. |
-| opus-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — #333d9ef3 is valid #AARRGGBB (20% blue); 'reversed alpha' likely intentional (Prompter.qml |
+| opus-4.8-extra | ❔ UNSURE | 45 | #333d9ef3 is valid #AARRGGBB (20% blue); 'reversed alpha' likely intentional (Prompter.qml:973) |
+| gpt-5.5-xhigh | ❔ UNSURE | 39 | #333d9ef3 is syntactically AARRGGBB; intent is uncertain (src/prompter/Prompter.qml:973) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | Prompter.qml:973-974: #333d9ef3 uses #AARRGGBB format but dev likely intended #RRGGBBAA; AA=0x33=20% alpha nearly invisible |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | Prompter.qml:973-974 selectionColor #333d9ef3 has alpha channel reversed (#AARRGGBB vs #RRGGBBAA); selection invisible |
+| kimi-k2.7-code | ✅ LEGIT | 90 | Prompter.qml:973-974 #333d9ef3 interpreted by Qt as AARRGGBB (alpha 0x33) making selection nearly invisible. |
+| opus-4.8-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — #333d9ef3 is valid #AARRGGBB (20% blue); 'reversed alpha' likely intentional (Prompter.qml |
 
 ## Patch  _(fill when fixing)_
 

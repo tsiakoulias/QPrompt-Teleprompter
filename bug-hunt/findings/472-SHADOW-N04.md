@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | id: frame may shadow property bool frame; latent (Countdown.qml:42) |
-| gpt | ✅ LEGIT | 78 | id: frame shadows property bool frame - latent hazard (src/prompter/Countdown.qml:42) |
-| deepseek | ✅ LEGIT | 65 | Shape id:frame shadows property bool frame; access within Countdown ambiguous (Countdown.qml:42 152) |
-| glm | ⚠️ PARTIAL | 60 | Countdown.qml:42 152 id: frame shadows property bool frame; latent hazard |
-| kimi | ❌ FALSE | 65 | Countdown.qml:42 id frame shadows bool frame, but no bare 'frame' reference exists currently; latent hazard only. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — id: frame may shadow property bool frame; latent (Countdown.qml:42) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | id: frame may shadow property bool frame; latent (Countdown.qml:42) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | id: frame shadows property bool frame - latent hazard (src/prompter/Countdown.qml:42) |
+| deepseek-v4-pro-max | ✅ LEGIT | 65 | Shape id:frame shadows property bool frame; access within Countdown ambiguous (Countdown.qml:42 152) |
+| glm-5.2-xhigh | ⚠️ PARTIAL | 60 | Countdown.qml:42 152 id: frame shadows property bool frame; latent hazard |
+| kimi-k2.7-code | ❌ FALSE | 65 | Countdown.qml:42 id frame shadows bool frame, but no bare 'frame' reference exists currently; latent hazard only. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — id: frame may shadow property bool frame; latent (Countdown.qml:42) |
 
 ## Patch  _(fill when fixing)_
 

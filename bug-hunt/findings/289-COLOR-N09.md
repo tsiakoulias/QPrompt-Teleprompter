@@ -19,12 +19,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 55 | acceptedColor transparent on startup -> initial text invisible (PrompterPage.qml:1010) |
-| gpt | ⚠️ PARTIAL | 58 | visual issue is plausible but depends on theme or device (src/kirigami_ui/PrompterPage.qml:1010) |
-| deepseek | ✅ LEGIT | 90 | PrompterPage.qml:1010 1025: acceptedColor uninitialized defaults to Qt.rgba(0 0 0 0); PrompterView.qml:240-241 binds transparent; initial text invisible |
-| glm | ✅ LEGIT | 70 | PrompterPage.qml:1010 1025 PrompterView.qml:240-241 acceptedColor binds transparent QColor on startup; initial text invisible |
-| kimi | ✅ LEGIT | 85 | PrompterPage.qml:1010/1025 ColorDialog acceptedColor defaults to transparent, making initial text formatting invisible |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — acceptedColor transparent on startup -> initial text invisible (PrompterPage.qml:1010) |
+| opus-4.8-extra | ⚠️ PARTIAL | 55 | acceptedColor transparent on startup -> initial text invisible (PrompterPage.qml:1010) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | visual issue is plausible but depends on theme or device (src/kirigami_ui/PrompterPage.qml:1010) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | PrompterPage.qml:1010 1025: acceptedColor uninitialized defaults to Qt.rgba(0 0 0 0); PrompterView.qml:240-241 binds transparent; initial text invisible |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | PrompterPage.qml:1010 1025 PrompterView.qml:240-241 acceptedColor binds transparent QColor on startup; initial text invisible |
+| kimi-k2.7-code | ✅ LEGIT | 85 | PrompterPage.qml:1010/1025 ColorDialog acceptedColor defaults to transparent, making initial text formatting invisible |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — acceptedColor transparent on startup -> initial text invisible (PrompterPage.qml:1010) |
 
 ## Patch  _(fill when fixing)_
 

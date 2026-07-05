@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | toggleButtonsOff null-check bypass on slow async Loader (InputsOverlay.qml:107) |
-| gpt | ✅ LEGIT | 78 | InputsOverlay toggleButtonsOff() null-check bypass - crash on slow async Loaders (src/kirigami_ui/InputsOverlay.qml:107) |
-| deepseek | ✅ LEGIT | 95 | InputsOverlay.qml:107 564: typeof null==='object' bypasses guard; null.checked=false throws TypeError on slow async Loader completion |
-| glm | ✅ LEGIT | 75 | InputsOverlay.qml:107 564 toggleButtonsOff() null-check bypass; crash on slow async Loaders |
-| kimi | ✅ LEGIT | 85 | InputsOverlay.qml:107,564 guard `typeof children[i].item !== 'undefined'` passes for null; null.checked TypeError. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — toggleButtonsOff null-check bypass on slow async Loader (InputsOverlay.qml:107) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | toggleButtonsOff null-check bypass on slow async Loader (InputsOverlay.qml:107) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | InputsOverlay toggleButtonsOff() null-check bypass - crash on slow async Loaders (src/kirigami_ui/InputsOverlay.qml:107) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | InputsOverlay.qml:107 564: typeof null==='object' bypasses guard; null.checked=false throws TypeError on slow async Loader completion |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | InputsOverlay.qml:107 564 toggleButtonsOff() null-check bypass; crash on slow async Loaders |
+| kimi-k2.7-code | ✅ LEGIT | 85 | InputsOverlay.qml:107,564 guard `typeof children[i].item !== 'undefined'` passes for null; null.checked TypeError. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — toggleButtonsOff null-check bypass on slow async Loader (InputsOverlay.qml:107) |
 
 ## Patch  _(fill when fixing)_
 

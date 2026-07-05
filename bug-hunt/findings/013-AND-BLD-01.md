@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 80 | apply from '../version.gradle' but file absent at root (android/build.gradle:19) |
-| gpt | ✅ LEGIT | 92 | Missing version.gradle - Gradle build fails (android/build.gradle:19) |
-| deepseek | ✅ LEGIT | 95 | apply from '../version.gradle' but version.gradle does not exist; projectVersionCode undefined (android/build.gradle:19) |
-| glm | ⚠️ PARTIAL | 65 | android/build.gradle:19 references version.gradle; configured via CMakeLists.txt:396. May work if configure_file runs. |
-| kimi | ✅ LEGIT | 95 | android/build.gradle:19 applies '../version.gradle'; version.gradle does not exist anywhere in repo (verified). |
-| opus-ultra | ✅ LEGIT | 80 | apply from '../version.gradle' but file absent at root (android/build.gradle:19) |
+| opus-4.8-extra | ✅ LEGIT | 80 | apply from '../version.gradle' but file absent at root (android/build.gradle:19) |
+| gpt-5.5-xhigh | ✅ LEGIT | 92 | Missing version.gradle - Gradle build fails (android/build.gradle:19) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | apply from '../version.gradle' but version.gradle does not exist; projectVersionCode undefined (android/build.gradle:19) |
+| glm-5.2-xhigh | ⚠️ PARTIAL | 65 | android/build.gradle:19 references version.gradle; configured via CMakeLists.txt:396. May work if configure_file runs. |
+| kimi-k2.7-code | ✅ LEGIT | 95 | android/build.gradle:19 applies '../version.gradle'; version.gradle does not exist anywhere in repo (verified). |
+| opus-4.8-ultra | ✅ LEGIT | 80 | apply from '../version.gradle' but file absent at root (android/build.gradle:19) |
 
 ## Patch  _(fill when fixing)_
 

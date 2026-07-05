@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 60 | onFinished 'running=true' breaks the running: countdown.running binding (Countdown.qml:100) |
-| gpt | ✅ LEGIT | 84 | countdownAnimation.running binding permanently broken after first iteration (src/prompter/Countdown.qml:100) |
-| deepseek | ✅ LEGIT | 90 | running=true imperatively at Countdown.qml:119 breaks declarative binding at line 100 |
-| glm | ✅ LEGIT | 80 | Countdown.qml:100 119 countdownAnimation.running binding broken after first iteration |
-| kimi | ✅ LEGIT | 90 | Countdown.qml:100 binds countdownAnimation.running, but line 119 assigns running=true imperatively, permanently breaking the binding. |
-| opus-ultra | ✅ LEGIT | 60 | onFinished 'running=true' breaks the running: countdown.running binding (Countdown.qml:100) |
+| opus-4.8-extra | ✅ LEGIT | 60 | onFinished 'running=true' breaks the running: countdown.running binding (Countdown.qml:100) |
+| gpt-5.5-xhigh | ✅ LEGIT | 84 | countdownAnimation.running binding permanently broken after first iteration (src/prompter/Countdown.qml:100) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | running=true imperatively at Countdown.qml:119 breaks declarative binding at line 100 |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | Countdown.qml:100 119 countdownAnimation.running binding broken after first iteration |
+| kimi-k2.7-code | ✅ LEGIT | 90 | Countdown.qml:100 binds countdownAnimation.running, but line 119 assigns running=true imperatively, permanently breaking the binding. |
+| opus-4.8-ultra | ✅ LEGIT | 60 | onFinished 'running=true' breaks the running: countdown.running binding (Countdown.qml:100) |
 
 ## Patch  _(fill when fixing)_
 

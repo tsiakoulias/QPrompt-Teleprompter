@@ -20,12 +20,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 45 | appendDataPoint public slot never connected; dead-code area (promptsession.h:71) |
-| gpt | ⚠️ PARTIAL | 58 | observed SessionModel::appendDataPoint declared public slot but never connected (src/prompsession.h:71) |
-| deepseek | ⚠️ PARTIAL | 60 | promptsession.h:71 appendDataPoint in public slots never connected to any signal; but QML can still invoke slots directly — signal-driven recording dead |
-| glm | ✅ LEGIT | 75 | promptsession.h:71 appendDataPoint declared as public slot but never connected via signal/slot |
-| kimi | ✅ LEGIT | 70 | promptsession.h:71 appendDataPoint is a slot but not connected externally; signal-driven path dead, yet callable from QML. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — appendDataPoint public slot never connected; dead-code area (promptsession.h:71) |
+| opus-4.8-extra | ⚠️ PARTIAL | 45 | appendDataPoint public slot never connected; dead-code area (promptsession.h:71) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed SessionModel::appendDataPoint declared public slot but never connected (src/prompsession.h:71) |
+| deepseek-v4-pro-max | ⚠️ PARTIAL | 60 | promptsession.h:71 appendDataPoint in public slots never connected to any signal; but QML can still invoke slots directly — signal-driven recording dead |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | promptsession.h:71 appendDataPoint declared as public slot but never connected via signal/slot |
+| kimi-k2.7-code | ✅ LEGIT | 70 | promptsession.h:71 appendDataPoint is a slot but not connected externally; signal-driven path dead, yet callable from QML. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — appendDataPoint public slot never connected; dead-code area (promptsession.h:71) |
 
 ## Patch  _(fill when fixing)_
 

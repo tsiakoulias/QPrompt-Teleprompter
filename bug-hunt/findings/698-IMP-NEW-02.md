@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 45 | #include \qglobal.h\" quotes + Qt5-era name; works (main.cpp:22)" |
-| gpt | ⚠️ PARTIAL | 58 | observed main.cpp:22 #include "qglobal.h" uses quotes + Qt5-era name (src/main.cpp:22) |
-| deepseek | ⚠️ PARTIAL | 80 | #include 'qglobal.h' at main.cpp:22 — quotes + Qt5 name; Qt6 canonical is <QtGlobal> harmless currently |
-| glm | ⚠️ PARTIAL | 60 | main.cpp:22 #include 'qglobal.h' uses quotes and Qt5-era name; works but non-idiomatic |
-| kimi | ❌ FALSE | 80 | main.cpp:22 #include \qglobal.h\" works because Qt still provides the header; it is non-canonical but not broken." |
-| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — #include \qglobal.h\" quotes + Qt5-era name; works (main.cpp:22)" |
+| opus-4.8-extra | ⚠️ PARTIAL | 45 | #include \qglobal.h\" quotes + Qt5-era name; works (main.cpp:22)" |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed main.cpp:22 #include "qglobal.h" uses quotes + Qt5-era name (src/main.cpp:22) |
+| deepseek-v4-pro-max | ⚠️ PARTIAL | 80 | #include 'qglobal.h' at main.cpp:22 — quotes + Qt5 name; Qt6 canonical is <QtGlobal> harmless currently |
+| glm-5.2-xhigh | ⚠️ PARTIAL | 60 | main.cpp:22 #include 'qglobal.h' uses quotes and Qt5-era name; works but non-idiomatic |
+| kimi-k2.7-code | ❌ FALSE | 80 | main.cpp:22 #include \qglobal.h\" works because Qt still provides the header; it is non-canonical but not broken." |
+| opus-4.8-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — #include \qglobal.h\" quotes + Qt5-era name; works (main.cpp:22)" |
 
 ## Patch  _(fill when fixing)_
 

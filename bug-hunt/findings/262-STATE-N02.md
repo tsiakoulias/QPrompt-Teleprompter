@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | toggle() uses !visible vs !isOpen; can desync (Find.qml:51) |
-| gpt | ✅ LEGIT | 78 | Find.toggle() uses !visible instead of !isOpen - can't close during Prompting (src/prompter/Find.qml:51) |
-| deepseek | ✅ LEGIT | 75 | toggle() uses !visible which desyncs from isOpen state machine flag (Find.qml:51) |
-| glm | ✅ LEGIT | 80 | Find.qml:51 toggle() uses !visible instead of !isOpen; can't close during Prompting |
-| kimi | ✅ LEGIT | 80 | Find.toggle() uses visible (derived from height) instead of isOpen; during Prompting height is forced 0 so toggle cannot close the bar. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — toggle() uses !visible vs !isOpen; can desync (Find.qml:51) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | toggle() uses !visible vs !isOpen; can desync (Find.qml:51) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | Find.toggle() uses !visible instead of !isOpen - can't close during Prompting (src/prompter/Find.qml:51) |
+| deepseek-v4-pro-max | ✅ LEGIT | 75 | toggle() uses !visible which desyncs from isOpen state machine flag (Find.qml:51) |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | Find.qml:51 toggle() uses !visible instead of !isOpen; can't close during Prompting |
+| kimi-k2.7-code | ✅ LEGIT | 80 | Find.toggle() uses visible (derived from height) instead of isOpen; during Prompting height is forced 0 so toggle cannot close the bar. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — toggle() uses !visible vs !isOpen; can desync (Find.qml:51) |
 
 ## Patch  _(fill when fixing)_
 

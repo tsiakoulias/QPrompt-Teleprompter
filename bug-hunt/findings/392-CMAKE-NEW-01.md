@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 45 | Remote.qml on disk but not in QML_FILES (CMakeLists.txt) |
-| gpt | ✅ LEGIT | 78 | Remote.qml exists on disk but never listed in QMLFILES (src/CMakeLists.txt:260) |
-| deepseek | ✅ LEGIT | 90 | Remote.qml on disk but not in any CMake QML_FILES — orphaned dead code |
-| glm | ✅ LEGIT | 75 | src/CMakeLists.txt Remote.qml exists on disk but not listed in QML_FILES (but is in WASM list at :132) |
-| kimi | ✅ LEGIT | 80 | src/prompter/Remote.qml exists but is not listed in any CMakeLists.txt QML_FILES/source list. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — Remote.qml on disk but not in QML_FILES (CMakeLists.txt) |
+| opus-4.8-extra | ⚠️ PARTIAL | 45 | Remote.qml on disk but not in QML_FILES (CMakeLists.txt) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | Remote.qml exists on disk but never listed in QMLFILES (src/CMakeLists.txt:260) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | Remote.qml on disk but not in any CMake QML_FILES — orphaned dead code |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | src/CMakeLists.txt Remote.qml exists on disk but not listed in QML_FILES (but is in WASM list at :132) |
+| kimi-k2.7-code | ✅ LEGIT | 80 | src/prompter/Remote.qml exists but is not listed in any CMakeLists.txt QML_FILES/source list. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — Remote.qml on disk but not in QML_FILES (CMakeLists.txt) |
 
 ## Patch  _(fill when fixing)_
 

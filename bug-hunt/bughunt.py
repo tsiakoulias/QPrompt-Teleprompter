@@ -17,7 +17,7 @@ GENERATED:
   REVIEW.md         full 6-agent matrix + divergences (bird's-eye, regenerated from assessments.csv).
 
 PRIORITY (for the backlog / `next`):
-  gate  : ticket Status == OPEN  AND  the max-rigor reviewer `opus-ultra` == LEGIT
+  gate  : ticket Status == OPEN  AND  the max-rigor reviewer `opus-4.8-ultra` == LEGIT
   rank  : severity (Critical>High>Medium>Low)  then  corroboration (# of agents calling it LEGIT)
 
 USAGE:
@@ -45,7 +45,7 @@ HDR = "id,agent,verdict,confidence,rationale"
 EMOJI = {"LEGIT": "✅", "FALSE": "❌", "PARTIAL": "⚠️", "UNSURE": "❔"}
 VERDICTS = set(EMOJI)
 SEVW = {"critical": 4, "high": 3, "medium": 2, "low": 1}
-GATE = "opus-ultra"  # the max-rigor reviewer used to triage what enters the work queue
+GATE = "opus-4.8-ultra"  # the max-rigor reviewer used to triage what enters the work queue
 STATUS_RE = re.compile(r"^- \*\*Status:\*\*\s*(\S+)", re.M)
 
 
@@ -202,9 +202,9 @@ def backlog():
         out.append(f"| {n} | {r['sev']} | {r['legit']}/{len(agents)} | "
                    f"[{r['id']}](findings/{r['id']}.md) | {r['title'].replace('|', chr(92)+'|')} |")
     # also list the non-actionable buckets so nothing is hidden
-    for label, pred in [("Minor / non-behavioral (opus-ultra = PARTIAL)", lambda r: r["gate"] == "PARTIAL"),
-                        ("Rejected (opus-ultra = FALSE)", lambda r: r["gate"] == "FALSE"),
-                        ("Needs info (opus-ultra = UNSURE)", lambda r: r["gate"] == "UNSURE"),
+    for label, pred in [("Minor / non-behavioral (opus-4.8-ultra = PARTIAL)", lambda r: r["gate"] == "PARTIAL"),
+                        ("Rejected (opus-4.8-ultra = FALSE)", lambda r: r["gate"] == "FALSE"),
+                        ("Needs info (opus-4.8-ultra = UNSURE)", lambda r: r["gate"] == "UNSURE"),
                         ("Done", lambda r: r["status"] in ("FIXED", "WONTFIX"))]:
         ids = [r["id"] for r in rows if pred(r) and r["status"] not in ("FIXED", "WONTFIX")] \
             if "Done" not in label else [r["id"] for r in rows if r["status"] in ("FIXED", "WONTFIX")]

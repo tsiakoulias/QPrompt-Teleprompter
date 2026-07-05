@@ -19,12 +19,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 55 | 50+ hardcoded Material.theme:Dark means runtime theme toggle is effectively dead (multi-file) |
-| gpt | ⚠️ PARTIAL | 58 | visual issue is plausible but depends on theme or device (src/kirigami_ui/main.qml:122) |
-| deepseek | ✅ LEGIT | 90 | Material.theme: Material.Dark hardcoded across ~50 controls in 14+ QML files; theme toggle commented out; no light mode support |
-| glm | ✅ LEGIT | 70 | 14 QML files have Material.theme: Dark hardcoded; theme toggle commented out |
-| kimi | ✅ LEGIT | 85 | Dozens of `Material.theme: Material.Dark` are hardcoded across QML files; theme toggle is commented out |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — 50+ hardcoded Material.theme:Dark means runtime theme toggle is effectively dead (multi-fi |
+| opus-4.8-extra | ⚠️ PARTIAL | 55 | 50+ hardcoded Material.theme:Dark means runtime theme toggle is effectively dead (multi-file) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | visual issue is plausible but depends on theme or device (src/kirigami_ui/main.qml:122) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | Material.theme: Material.Dark hardcoded across ~50 controls in 14+ QML files; theme toggle commented out; no light mode support |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | 14 QML files have Material.theme: Dark hardcoded; theme toggle commented out |
+| kimi-k2.7-code | ✅ LEGIT | 85 | Dozens of `Material.theme: Material.Dark` are hardcoded across QML files; theme toggle is commented out |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — 50+ hardcoded Material.theme:Dark means runtime theme toggle is effectively dead (multi-fi |
 
 ## Patch  _(fill when fixing)_
 

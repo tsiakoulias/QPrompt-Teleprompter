@@ -1,7 +1,7 @@
 # bug-hunt — multi-agent bug backlog for QPrompt
 
 This directory is a triaged backlog of **723 candidate bugs** in the QPrompt source, each
-independently reviewed by **6 AI agents** (opus, opus-ultra, gpt, deepseek, glm, kimi) and turned
+independently reviewed by **6 AI agents** (opus-4.8-extra, opus-4.8-ultra, gpt-5.5-xhigh, deepseek-v4-pro-max, glm-5.2-xhigh, kimi-k2.7-code) and turned
 into a self-contained, patch-ready ticket. A 7th agent, **fable-5-ultra**, is registered as
 pending (see `assessments.csv`) — its review hasn't run yet, so it isn't counted in any
 verdict, consensus, or corroboration numbers below until it does.
@@ -16,7 +16,7 @@ verdict, consensus, or corroboration numbers below until it does.
    python bug-hunt/bughunt.py next
    ```
    It prints the single highest-priority **OPEN** finding that the strictest reviewer
-   (`opus-ultra`) confirms is a real bug — as a complete work order: the original claim, the exact
+   (`opus-4.8-ultra`) confirms is a real bug — as a complete work order: the original claim, the exact
    `file:line`, and all six agents' verdicts + rationales. You do **not** need to re-derive anything.
    (Prefer a glanceable list? Open [`BACKLOG.md`](BACKLOG.md) — same ranking, with links.)
 
@@ -32,14 +32,14 @@ verdict, consensus, or corroboration numbers below until it does.
    That drops it out of the queue. Then go back to step 1 for the next one.
 
 ## Priority model (how "most important" is decided)
-- **Gate:** only findings where the max-rigor reviewer `opus-ultra` = **LEGIT** and Status = **OPEN**
+- **Gate:** only findings where the max-rigor reviewer `opus-4.8-ultra` = **LEGIT** and Status = **OPEN**
   enter the queue. This excludes the report's false positives (the credulous models accept many;
-  `opus-ultra` rejected **70** as not-real and flagged **63** as unverifiable).
+  `opus-4.8-ultra` rejected **70** as not-real and flagged **63** as unverifiable).
 - **Rank:** severity (Critical → Low), then **corroboration** = how many of the 6 agents also called
   it LEGIT. So #1 is the highest-severity, most-agreed, rigor-confirmed, still-open bug.
 
 ## Nothing is buried — every finding gets a second chance
-The gate keeps the *fix queue* high-precision, but `opus-ultra` is a single reviewer and can be wrong
+The gate keeps the *fix queue* high-precision, but `opus-4.8-ultra` is a single reviewer and can be wrong
 to reject. So rejected/uncertain findings are not dropped — they go to a **second-look queue**:
 ```
 python bug-hunt/bughunt.py audit
@@ -64,8 +64,8 @@ directly at any time.)
 | `PROMPT-TEMPLATE.md` | the blinded prompt to add another reviewer column later. |
 
 ## Statuses
-`OPEN` (to do) · `FIXED` · `WONTFIX` · `REJECTED` (opus-ultra says not a real bug) ·
-`NEEDS-INFO` (opus-ultra unsure / needs runtime or language verification).
+`OPEN` (to do) · `FIXED` · `WONTFIX` · `REJECTED` (opus-4.8-ultra says not a real bug) ·
+`NEEDS-INFO` (opus-4.8-ultra unsure / needs runtime or language verification).
 
 ## Maintenance
 - Re-rank the queue after marking fixes: `python bug-hunt/bughunt.py backlog`

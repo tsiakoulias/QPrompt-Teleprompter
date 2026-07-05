@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 60 | PathLine parent.width = ShapePath.width (no width) -> undefined (pointer_0.qml:60) |
-| gpt | ✅ LEGIT | 92 | pointer_0.qml PathLine parent.width resolves to undefined (ShapePath has no width) - arrow collapsed (src/prompter/pointers/pointer_0.qml:60) |
-| deepseek | ✅ LEGIT | 80 | PathLine parent=ShapePath(QObject non-Item); parent.width=undefined->arrow coordinates degenerate at pointer_0.qml:60-67 |
-| glm | ✅ LEGIT | 70 | pointer_0.qml:60-67 PathLine parent.width resolves to undefined (ShapePath has no width); arrow collapsed |
-| kimi | ✅ LEGIT | 85 | pointer_0.qml:57/61/66 uses parent.width inside ShapePath, which has no width; x resolves as undefined |
-| opus-ultra | ✅ LEGIT | 60 | PathLine parent.width = ShapePath.width (no width) -> undefined (pointer_0.qml:60) |
+| opus-4.8-extra | ✅ LEGIT | 60 | PathLine parent.width = ShapePath.width (no width) -> undefined (pointer_0.qml:60) |
+| gpt-5.5-xhigh | ✅ LEGIT | 92 | pointer_0.qml PathLine parent.width resolves to undefined (ShapePath has no width) - arrow collapsed (src/prompter/pointers/pointer_0.qml:60) |
+| deepseek-v4-pro-max | ✅ LEGIT | 80 | PathLine parent=ShapePath(QObject non-Item); parent.width=undefined->arrow coordinates degenerate at pointer_0.qml:60-67 |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | pointer_0.qml:60-67 PathLine parent.width resolves to undefined (ShapePath has no width); arrow collapsed |
+| kimi-k2.7-code | ✅ LEGIT | 85 | pointer_0.qml:57/61/66 uses parent.width inside ShapePath, which has no width; x resolves as undefined |
+| opus-4.8-ultra | ✅ LEGIT | 60 | PathLine parent.width = ShapePath.width (no width) -> undefined (pointer_0.qml:60) |
 
 ## Patch  _(fill when fixing)_
 

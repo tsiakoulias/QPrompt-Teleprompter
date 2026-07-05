@@ -19,12 +19,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 55 | clearDataPoints no empty guard before beginRemoveRows; dead code (promptsession.cpp:79) |
-| gpt | ⚠️ PARTIAL | 58 | observed SessionModel::clearDataPoints lacks empty-model guard before beginRemoveRows (src/promptsession.cpp:79) |
-| deepseek | ✅ LEGIT | 85 | promptsession.cpp:79-84: clearDataPoints calls beginRemoveRows(0 rowCount()) without empty-model guard; signals removal from empty model |
-| glm | ✅ LEGIT | 70 | promptsession.cpp:79-84 clearDataPoints lacks empty-model guard before beginRemoveRows |
-| kimi | ✅ LEGIT | 85 | promptsession.cpp:79-84 clearDataPoints calls beginRemoveRows(0,rowCount()) even when rowCount()=0; contract violation. |
-| opus-ultra | ✅ LEGIT | 55 | clearDataPoints no empty guard before beginRemoveRows; dead code (promptsession.cpp:79) |
+| opus-4.8-extra | ✅ LEGIT | 55 | clearDataPoints no empty guard before beginRemoveRows; dead code (promptsession.cpp:79) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed SessionModel::clearDataPoints lacks empty-model guard before beginRemoveRows (src/promptsession.cpp:79) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | promptsession.cpp:79-84: clearDataPoints calls beginRemoveRows(0 rowCount()) without empty-model guard; signals removal from empty model |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | promptsession.cpp:79-84 clearDataPoints lacks empty-model guard before beginRemoveRows |
+| kimi-k2.7-code | ✅ LEGIT | 85 | promptsession.cpp:79-84 clearDataPoints calls beginRemoveRows(0,rowCount()) even when rowCount()=0; contract violation. |
+| opus-4.8-ultra | ✅ LEGIT | 55 | clearDataPoints no empty guard before beginRemoveRows; dead code (promptsession.cpp:79) |
 
 ## Patch  _(fill when fixing)_
 

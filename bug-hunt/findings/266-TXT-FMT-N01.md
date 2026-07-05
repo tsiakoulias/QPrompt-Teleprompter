@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 65 | setMarkerHref('') doesn't clear AnchorHref via mergeCharFormat (FINAL-21 family) (documenthandler.cpp:769) |
-| gpt | ⚠️ PARTIAL | 58 | observed setMarkerHref("") fails to clear QTextFormat::AnchorHref - stale href persists (src/documenthandler.cpp:769) |
-| deepseek | ✅ LEGIT | 80 | setMarkerHref('') sets setAnchor(false) but skips clearProperty(AnchorHref) at documenthandler.cpp:769-774; stale href persists |
-| glm | ✅ LEGIT | 70 | documenthandler.cpp:769-774 setMarkerHref('') fails to clear QTextFormat::AnchorHref; stale href persists |
-| kimi | ✅ LEGIT | 90 | documenthandler.cpp:765-774 setMarkerHref('') never calls clearProperty(QTextFormat::AnchorHref); stale href remains |
-| opus-ultra | ✅ LEGIT | 65 | setMarkerHref('') doesn't clear AnchorHref via mergeCharFormat (FINAL-21 family) (documenthandler.cpp:769) |
+| opus-4.8-extra | ✅ LEGIT | 65 | setMarkerHref('') doesn't clear AnchorHref via mergeCharFormat (FINAL-21 family) (documenthandler.cpp:769) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed setMarkerHref("") fails to clear QTextFormat::AnchorHref - stale href persists (src/documenthandler.cpp:769) |
+| deepseek-v4-pro-max | ✅ LEGIT | 80 | setMarkerHref('') sets setAnchor(false) but skips clearProperty(AnchorHref) at documenthandler.cpp:769-774; stale href persists |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | documenthandler.cpp:769-774 setMarkerHref('') fails to clear QTextFormat::AnchorHref; stale href persists |
+| kimi-k2.7-code | ✅ LEGIT | 90 | documenthandler.cpp:765-774 setMarkerHref('') never calls clearProperty(QTextFormat::AnchorHref); stale href remains |
+| opus-4.8-ultra | ✅ LEGIT | 65 | setMarkerHref('') doesn't clear AnchorHref via mergeCharFormat (FINAL-21 family) (documenthandler.cpp:769) |
 
 ## Patch  _(fill when fixing)_
 

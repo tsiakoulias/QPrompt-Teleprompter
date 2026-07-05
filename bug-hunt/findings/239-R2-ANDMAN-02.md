@@ -22,12 +22,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 85 | MANAGE_EXTERNAL_STORAGE Play-policy risk (AndroidManifest.xml:49) |
-| gpt | ✅ LEGIT | 78 | MANAGE_EXTERNAL_STORAGE likely triggers Play Store scrutiny (android/AndroidManifest.xml:49) |
-| deepseek | ✅ LEGIT | 90 | AndroidManifest.xml:49: MANAGE_EXTERNAL_STORAGE is All Files Access restricted by Google Play policy requiring justification; teleprompter unlikely to qualify |
-| glm | ✅ LEGIT | 80 | AndroidManifest.xml:49 MANAGE_EXTERNAL_STORAGE triggers Play Store scrutiny and requires declaration |
-| kimi | ⚠️ PARTIAL | 55 | AndroidManifest.xml:49 declares MANAGE_EXTERNAL_STORAGE; valid permission but invites Play Store policy scrutiny and is an anti-pattern. |
-| opus-ultra | ✅ LEGIT | 85 | MANAGE_EXTERNAL_STORAGE Play-policy risk (AndroidManifest.xml:49) |
+| opus-4.8-extra | ✅ LEGIT | 85 | MANAGE_EXTERNAL_STORAGE Play-policy risk (AndroidManifest.xml:49) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | MANAGE_EXTERNAL_STORAGE likely triggers Play Store scrutiny (android/AndroidManifest.xml:49) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | AndroidManifest.xml:49: MANAGE_EXTERNAL_STORAGE is All Files Access restricted by Google Play policy requiring justification; teleprompter unlikely to qualify |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | AndroidManifest.xml:49 MANAGE_EXTERNAL_STORAGE triggers Play Store scrutiny and requires declaration |
+| kimi-k2.7-code | ⚠️ PARTIAL | 55 | AndroidManifest.xml:49 declares MANAGE_EXTERNAL_STORAGE; valid permission but invites Play Store policy scrutiny and is an anti-pattern. |
+| opus-4.8-ultra | ✅ LEGIT | 85 | MANAGE_EXTERNAL_STORAGE Play-policy risk (AndroidManifest.xml:49) |
 
 ## Patch  _(fill when fixing)_
 

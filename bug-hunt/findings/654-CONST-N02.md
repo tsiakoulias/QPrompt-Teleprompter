@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 40 | getMarkerHref not const; style only (documenthandler.cpp:779) |
-| gpt | ⚠️ PARTIAL | 58 | observed getMarkerHref() not const - identical pattern (src/documenthandler.h:216) |
-| deepseek | ✅ LEGIT | 60 | getMarkerHref pure reader method missing const qualifier (documenthandler.cpp:779) |
-| glm | ✅ LEGIT | 70 | documenthandler.h:216 779 getMarkerHref() not const; identical pattern |
-| kimi | ❌ FALSE | 75 | getMarkerHref() is a non-const reader; absence of const does not cause a runtime bug. |
-| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — getMarkerHref not const; style only (documenthandler.cpp:779) |
+| opus-4.8-extra | ⚠️ PARTIAL | 40 | getMarkerHref not const; style only (documenthandler.cpp:779) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed getMarkerHref() not const - identical pattern (src/documenthandler.h:216) |
+| deepseek-v4-pro-max | ✅ LEGIT | 60 | getMarkerHref pure reader method missing const qualifier (documenthandler.cpp:779) |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | documenthandler.h:216 779 getMarkerHref() not const; identical pattern |
+| kimi-k2.7-code | ❌ FALSE | 75 | getMarkerHref() is a non-const reader; absence of const does not cause a runtime bug. |
+| opus-4.8-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — getMarkerHref not const; style only (documenthandler.cpp:779) |
 
 ## Patch  _(fill when fixing)_
 

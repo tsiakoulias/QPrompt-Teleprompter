@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 40 | AboutPage imports Kirigami 2.9 vs 2.11; works (AboutPage.qml:22) |
-| gpt | ⚠️ PARTIAL | 58 | observed AboutPage.qml imports Kirigami 2.9 vs 2.11 in all other files (src/kirigami_ui/AboutPage.qml:22) |
-| deepseek | ✅ LEGIT | 90 | AboutPage.qml:22 imports Kirigami 2.9 — all other files use 2.11 CMake requires 6.9.0=2.11+ |
-| glm | ⚠️ PARTIAL | 60 | AboutPage.qml:22 imports Kirigami 2.9 vs 2.11 in other files; version difference is benign |
-| kimi | ❌ FALSE | 75 | AboutPage.qml:22 imports Kirigami 2.9; KF6 6.9 supports 2.9 imports, so it works today. |
-| opus-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — AboutPage imports Kirigami 2.9 vs 2.11; works (AboutPage.qml:22) |
+| opus-4.8-extra | ⚠️ PARTIAL | 40 | AboutPage imports Kirigami 2.9 vs 2.11; works (AboutPage.qml:22) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed AboutPage.qml imports Kirigami 2.9 vs 2.11 in all other files (src/kirigami_ui/AboutPage.qml:22) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | AboutPage.qml:22 imports Kirigami 2.9 — all other files use 2.11 CMake requires 6.9.0=2.11+ |
+| glm-5.2-xhigh | ⚠️ PARTIAL | 60 | AboutPage.qml:22 imports Kirigami 2.9 vs 2.11 in other files; version difference is benign |
+| kimi-k2.7-code | ❌ FALSE | 75 | AboutPage.qml:22 imports Kirigami 2.9; KF6 6.9 supports 2.9 imports, so it works today. |
+| opus-4.8-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — AboutPage imports Kirigami 2.9 vs 2.11; works (AboutPage.qml:22) |
 
 ## Patch  _(fill when fixing)_
 

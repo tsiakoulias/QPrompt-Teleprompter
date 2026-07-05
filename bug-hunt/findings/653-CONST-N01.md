@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 40 | getMarkerKey not const; style only (documenthandler.cpp:746) |
-| gpt | ⚠️ PARTIAL | 58 | observed getMarkerKey() not const - pure reader without side effects (src/documenthandler.h:214) |
-| deepseek | ✅ LEGIT | 60 | getMarkerKey pure reader method missing const qualifier (documenthandler.cpp:746) |
-| glm | ✅ LEGIT | 70 | documenthandler.h:214 746 getMarkerKey() not const; pure reader without side effects |
-| kimi | ❌ FALSE | 75 | getMarkerKey() is a non-const reader, but its const-correctness is a style issue with no observable misbehavior. |
-| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — getMarkerKey not const; style only (documenthandler.cpp:746) |
+| opus-4.8-extra | ⚠️ PARTIAL | 40 | getMarkerKey not const; style only (documenthandler.cpp:746) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed getMarkerKey() not const - pure reader without side effects (src/documenthandler.h:214) |
+| deepseek-v4-pro-max | ✅ LEGIT | 60 | getMarkerKey pure reader method missing const qualifier (documenthandler.cpp:746) |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | documenthandler.h:214 746 getMarkerKey() not const; pure reader without side effects |
+| kimi-k2.7-code | ❌ FALSE | 75 | getMarkerKey() is a non-const reader, but its const-correctness is a style issue with no observable misbehavior. |
+| opus-4.8-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — getMarkerKey not const; style only (documenthandler.cpp:746) |
 
 ## Patch  _(fill when fixing)_
 

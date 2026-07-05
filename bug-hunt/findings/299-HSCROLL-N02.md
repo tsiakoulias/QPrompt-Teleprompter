@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | inner Flickables missing flickableDirection (InputsOverlay.qml:92) |
-| gpt | ⚠️ PARTIAL | 58 | observed Inner Flickables missing flickableDirection: VerticalFlick - conflict with parent horizontal Li (src/kirigami_ui/InputsOverlay.qml:92) |
-| deepseek | ✅ LEGIT | 90 | InputsOverlay.qml:92 549: inner Flickables lack flickableDirection:VerticalFlick; default AutoFlickDirection intercepts horizontal tab swipes |
-| glm | ✅ LEGIT | 70 | InputsOverlay.qml:92 549 inner Flickables missing flickableDirection: VerticalFlick; conflict with parent |
-| kimi | ✅ LEGIT | 80 | InputsOverlay.qml:92/549 Flickables inside a horizontal ListView lack flickableDirection: VerticalFlick |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — inner Flickables missing flickableDirection (InputsOverlay.qml:92) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | inner Flickables missing flickableDirection (InputsOverlay.qml:92) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed Inner Flickables missing flickableDirection: VerticalFlick - conflict with parent horizontal Li (src/kirigami_ui/InputsOverlay.qml:92) |
+| deepseek-v4-pro-max | ✅ LEGIT | 90 | InputsOverlay.qml:92 549: inner Flickables lack flickableDirection:VerticalFlick; default AutoFlickDirection intercepts horizontal tab swipes |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | InputsOverlay.qml:92 549 inner Flickables missing flickableDirection: VerticalFlick; conflict with parent |
+| kimi-k2.7-code | ✅ LEGIT | 80 | InputsOverlay.qml:92/549 Flickables inside a horizontal ListView lack flickableDirection: VerticalFlick |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — inner Flickables missing flickableDirection (InputsOverlay.qml:92) |
 
 ## Patch  _(fill when fixing)_
 

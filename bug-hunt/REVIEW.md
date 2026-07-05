@@ -1,6 +1,6 @@
 # Multi-Agent Bug Review — QPrompt
 
-_723 findings · agents: opus, gpt, deepseek, glm, kimi, opus-ultra, fable-5-ultra_
+_723 findings · agents: opus-4.8-extra, gpt-5.5-xhigh, deepseek-v4-pro-max, glm-5.2-xhigh, kimi-k2.7-code, opus-4.8-ultra, fable-5-ultra_
 
 Bird's-eye matrix + divergences. Per-bug detail (incl. each agent's full rationale, the original claim, and the patch workspace) lives in `findings/<ID>.md`; the work queue is `BACKLOG.md`.
 
@@ -8,19 +8,19 @@ Bird's-eye matrix + divergences. Per-bug detail (incl. each agent's full rationa
 
 | Agent | FALSE | LEGIT | PARTIAL | UNSURE |
 |---|---|---|---|---|
-| opus | 49 | 288 | 319 | 67 |
-| gpt | 44 | 333 | 299 | 47 |
-| deepseek | 39 | 597 | 51 | 36 |
-| glm | 19 | 559 | 133 | 12 |
-| kimi | 73 | 641 | 7 | 2 |
-| opus-ultra | 70 | 496 | 94 | 63 |
+| opus-4.8-extra | 49 | 288 | 319 | 67 |
+| gpt-5.5-xhigh | 44 | 333 | 299 | 47 |
+| deepseek-v4-pro-max | 39 | 597 | 51 | 36 |
+| glm-5.2-xhigh | 19 | 559 | 133 | 12 |
+| kimi-k2.7-code | 73 | 641 | 7 | 2 |
+| opus-4.8-ultra | 70 | 496 | 94 | 63 |
 | fable-5-ultra | 0 | 0 | 0 | 0 |
 
 **Consensus** (7 agents): AGREE 192 · split 399 · CONFLICT 132
 
 ## Matrix
 
-| ID | Sev | opus | gpt | deepseek | glm | kimi | opus-ultra | fable-5-ultra | Consensus | Title |
+| ID | Sev | opus-4.8-extra | gpt-5.5-xhigh | deepseek-v4-pro-max | glm-5.2-xhigh | kimi-k2.7-code | opus-4.8-ultra | fable-5-ultra | Consensus | Title |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 042-MEM-01 | High | ✅100 | ✅88 | ✅90 | ✅90 | ✅95 | ✅100 | · | AGREE | Memory Leak: `_markersModel` allocated without parent, never deleted |
 | 043-MEM-02 | High | ✅100 | ✅88 | ✅90 | ✅90 | ✅95 | ✅100 | · | AGREE | Memory Leak: `_fileSystemWatcher` allocated without parent, never deleted |

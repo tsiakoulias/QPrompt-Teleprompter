@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 70 | id: stopwatch (Item) shadows property bool stopwatch -> timersEnabled always true (TimerClock.qml:38) |
-| gpt | ✅ LEGIT | 84 | id: stopwatch shadows property bool stopwatch - timersEnabled always true (src/prompter/TimerClock.qml:38) |
-| deepseek | ❌ FALSE | 75 | property bool stopwatch resolves before child Item id; timersEnabled correctly depends on property (TimerClock.qml:38 100 122) |
-| glm | ✅ LEGIT | 75 | TimerClock.qml:38 122 100 id: stopwatch shadows property bool stopwatch; timersEnabled always true |
-| kimi | ✅ LEGIT | 95 | TimerClock.qml:122 id stopwatch shadows property bool stopwatch; line 100 stopwatch\|\|eta resolves to Item (truthy), ignoring toggles. |
-| opus-ultra | ✅ LEGIT | 70 | id: stopwatch (Item) shadows property bool stopwatch -> timersEnabled always true (TimerClock.qml:38) |
+| opus-4.8-extra | ✅ LEGIT | 70 | id: stopwatch (Item) shadows property bool stopwatch -> timersEnabled always true (TimerClock.qml:38) |
+| gpt-5.5-xhigh | ✅ LEGIT | 84 | id: stopwatch shadows property bool stopwatch - timersEnabled always true (src/prompter/TimerClock.qml:38) |
+| deepseek-v4-pro-max | ❌ FALSE | 75 | property bool stopwatch resolves before child Item id; timersEnabled correctly depends on property (TimerClock.qml:38 100 122) |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | TimerClock.qml:38 122 100 id: stopwatch shadows property bool stopwatch; timersEnabled always true |
+| kimi-k2.7-code | ✅ LEGIT | 95 | TimerClock.qml:122 id stopwatch shadows property bool stopwatch; line 100 stopwatch\|\|eta resolves to Item (truthy), ignoring toggles. |
+| opus-4.8-ultra | ✅ LEGIT | 70 | id: stopwatch (Item) shadows property bool stopwatch -> timersEnabled always true (TimerClock.qml:38) |
 
 ## Patch  _(fill when fixing)_
 

@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ✅ LEGIT | 70 | regex_0/regex_3 use unescaped . in decimal match (any char) (documenthandler.cpp:893) |
-| gpt | ✅ LEGIT | 78 | regex0 and regex3 use . (any-char) instead of \. (literal dot) in decimal matching (src/documenthandler.cpp:893) |
-| deepseek | ✅ LEGIT | 85 | documenthandler.cpp:893-894/1274-1275: regex_0 and regex_3 use . (any-char) instead of \. (literal dot) in decimal matching; over-matches on malformed CSS but works by coincidence on well-formed input |
-| glm | ✅ LEGIT | 70 | documenthandler.cpp:893-894 1274-1275 regex_0 and regex_3 use . instead of \. for decimal matching |
-| kimi | ✅ LEGIT | 80 | documenthandler.cpp:893-894,1274-1275 regex_0 and regex_3 use unescaped '.' for decimal point, matching any character. |
-| opus-ultra | ✅ LEGIT | 70 | regex_0/regex_3 use unescaped . in decimal match (any char) (documenthandler.cpp:893) |
+| opus-4.8-extra | ✅ LEGIT | 70 | regex_0/regex_3 use unescaped . in decimal match (any char) (documenthandler.cpp:893) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | regex0 and regex3 use . (any-char) instead of \. (literal dot) in decimal matching (src/documenthandler.cpp:893) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | documenthandler.cpp:893-894/1274-1275: regex_0 and regex_3 use . (any-char) instead of \. (literal dot) in decimal matching; over-matches on malformed CSS but works by coincidence on well-formed input |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | documenthandler.cpp:893-894 1274-1275 regex_0 and regex_3 use . instead of \. for decimal matching |
+| kimi-k2.7-code | ✅ LEGIT | 80 | documenthandler.cpp:893-894,1274-1275 regex_0 and regex_3 use unescaped '.' for decimal point, matching any character. |
+| opus-4.8-ultra | ✅ LEGIT | 70 | regex_0/regex_3 use unescaped . in decimal match (any char) (documenthandler.cpp:893) |
 
 ## Patch  _(fill when fixing)_
 

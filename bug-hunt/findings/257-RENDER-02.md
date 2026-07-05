@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | pointerShadowSource runs unconditionally (ReadRegionOverlay.qml:123) |
-| gpt | ✅ LEGIT | 78 | ShaderEffectSource pointerShadowSource runs unconditionally - same pattern (src/prompter/ReadRegionOverlay.qml:123) |
-| deepseek | ✅ LEGIT | 70 | pointerShadowSource ShaderEffectSource captures unconditionally (ReadRegionOverlay.qml:123-126) |
-| glm | ✅ LEGIT | 75 | ReadRegionOverlay.qml:123-126 pointerShadowSource ShaderEffectSource runs unconditionally |
-| kimi | ✅ LEGIT | 80 | ReadRegionOverlay.qml:123-126 instantiates pointerShadowSource with default live=true and no guard; the shadow effect at line 145 is gated by layer.enabled only. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — pointerShadowSource runs unconditionally (ReadRegionOverlay.qml:123) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | pointerShadowSource runs unconditionally (ReadRegionOverlay.qml:123) |
+| gpt-5.5-xhigh | ✅ LEGIT | 78 | ShaderEffectSource pointerShadowSource runs unconditionally - same pattern (src/prompter/ReadRegionOverlay.qml:123) |
+| deepseek-v4-pro-max | ✅ LEGIT | 70 | pointerShadowSource ShaderEffectSource captures unconditionally (ReadRegionOverlay.qml:123-126) |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | ReadRegionOverlay.qml:123-126 pointerShadowSource ShaderEffectSource runs unconditionally |
+| kimi-k2.7-code | ✅ LEGIT | 80 | ReadRegionOverlay.qml:123-126 instantiates pointerShadowSource with default live=true and no guard; the shadow effect at line 145 is gated by layer.enabled only. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — pointerShadowSource runs unconditionally (ReadRegionOverlay.qml:123) |
 
 ## Patch  _(fill when fixing)_
 

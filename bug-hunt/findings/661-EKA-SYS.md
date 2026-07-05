@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 40 | no EnterKeyAction on TextFields; minor UX (PrompterPage.qml) |
-| gpt | ⚠️ PARTIAL | 58 | observed Systemic absence of EnterKeyAction on ALL TextFields (7 sites) (src/kirigami_ui/PrompterPage.qml:1) |
-| deepseek | ⚠️ PARTIAL | 65 | EKA-SYS: absence of EnterKeyAction is mobile UX polish not defect; virtual keyboard enter-key label defaults to Return — not all 7 sites verified |
-| glm | ✅ LEGIT | 70 | 7 TextFields across PrompterPage.qml Find.qml PathsPage.qml have no EnterKeyAction |
-| kimi | ✅ LEGIT | 90 | No EnterKey attached property in src QML; TextFields lack mobile return-key actions. |
-| opus-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — no EnterKeyAction on TextFields; minor UX (PrompterPage.qml) |
+| opus-4.8-extra | ⚠️ PARTIAL | 40 | no EnterKeyAction on TextFields; minor UX (PrompterPage.qml) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed Systemic absence of EnterKeyAction on ALL TextFields (7 sites) (src/kirigami_ui/PrompterPage.qml:1) |
+| deepseek-v4-pro-max | ⚠️ PARTIAL | 65 | EKA-SYS: absence of EnterKeyAction is mobile UX polish not defect; virtual keyboard enter-key label defaults to Return — not all 7 sites verified |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | 7 TextFields across PrompterPage.qml Find.qml PathsPage.qml have no EnterKeyAction |
+| kimi-k2.7-code | ✅ LEGIT | 90 | No EnterKey attached property in src QML; TextFields lack mobile return-key actions. |
+| opus-4.8-ultra | ❌ FALSE | 72 | max: code correct / claim mischaracterized — no EnterKeyAction on TextFields; minor UX (PrompterPage.qml) |
 
 ## Patch  _(fill when fixing)_
 

@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ❔ UNSURE | 45 | regex_4 may strip <body> opening tag; complex regex, hard to confirm (documenthandler.cpp:1287) |
-| gpt | ❔ UNSURE | 39 | the body-tag regex is complex; impact needs sample HTML (src/documenthandler.cpp:1287) |
-| deepseek | ✅ LEGIT | 85 | documenthandler.cpp:1287: regex_4 matches <body through last color attribute quote but stops before >; replace removes opening tag leaving orphaned >content</body> — corrupted HTML |
-| glm | ✅ LEGIT | 80 | documenthandler.cpp:1287 regex_4 destroys <body> tag; removes opening tag instead of just color attributes |
-| kimi | ✅ LEGIT | 90 | documenthandler.cpp:1287 regex_4 replace deletes from '<body' through last matched quote, destroying the opening body tag. |
-| opus-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — regex_4 may strip <body> opening tag; complex regex |
+| opus-4.8-extra | ❔ UNSURE | 45 | regex_4 may strip <body> opening tag; complex regex, hard to confirm (documenthandler.cpp:1287) |
+| gpt-5.5-xhigh | ❔ UNSURE | 39 | the body-tag regex is complex; impact needs sample HTML (src/documenthandler.cpp:1287) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | documenthandler.cpp:1287: regex_4 matches <body through last color attribute quote but stops before >; replace removes opening tag leaving orphaned >content</body> — corrupted HTML |
+| glm-5.2-xhigh | ✅ LEGIT | 80 | documenthandler.cpp:1287 regex_4 destroys <body> tag; removes opening tag instead of just color attributes |
+| kimi-k2.7-code | ✅ LEGIT | 90 | documenthandler.cpp:1287 regex_4 replace deletes from '<body' through last matched quote, destroying the opening body tag. |
+| opus-4.8-ultra | ❔ UNSURE | 45 | max: unverifiable statically (runtime/semantic) — regex_4 may strip <body> opening tag; complex regex |
 
 ## Patch  _(fill when fixing)_
 

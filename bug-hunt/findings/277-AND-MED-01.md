@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 45 | missing intent-filter for opening files (AndroidManifest.xml:29) |
-| gpt | ⚠️ PARTIAL | 58 | observed Missing intent-filter for opening files from other apps (android/AndroidManifest.xml:29) |
-| deepseek | ✅ LEGIT | 95 | AndroidManifest.xml:29-32: only LAUNCHER intent-filter; no VIEW filter for text/html or text/plain — cannot open .html scripts from file managers/email/downloads |
-| glm | ✅ LEGIT | 75 | AndroidManifest.xml:29-32 missing intent-filter for opening files from other apps |
-| kimi | ✅ LEGIT | 95 | AndroidManifest.xml:29-32 only MAIN/LAUNCHER; missing VIEW intent-filter for opening files. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — missing intent-filter for opening files (AndroidManifest.xml:29) |
+| opus-4.8-extra | ⚠️ PARTIAL | 45 | missing intent-filter for opening files (AndroidManifest.xml:29) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed Missing intent-filter for opening files from other apps (android/AndroidManifest.xml:29) |
+| deepseek-v4-pro-max | ✅ LEGIT | 95 | AndroidManifest.xml:29-32: only LAUNCHER intent-filter; no VIEW filter for text/html or text/plain — cannot open .html scripts from file managers/email/downloads |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | AndroidManifest.xml:29-32 missing intent-filter for opening files from other apps |
+| kimi-k2.7-code | ✅ LEGIT | 95 | AndroidManifest.xml:29-32 only MAIN/LAUNCHER; missing VIEW intent-filter for opening files. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — missing intent-filter for opening files (AndroidManifest.xml:29) |
 
 ## Patch  _(fill when fixing)_
 

@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 50 | projection windows may orphan on main-window close; lifecycle (main.qml:159) |
-| gpt | ⚠️ PARTIAL | 58 | observed Projection windows not closed on main window close - orphaned on Linux (src/kirigami_ui/main.qml:159) |
-| deepseek | ✅ LEGIT | 85 | main.qml:159-165/+android:144-150/+windows:154-160: onClosing only handles save dialog; no projectionManager.closeAll() or isEnabled=false — orphaned projection windows on Linux |
-| glm | ✅ LEGIT | 75 | main.qml:159-165 projection windows not closed on main window close; orphaned on Linux |
-| kimi | ✅ LEGIT | 85 | main.qml/+windows/+android onClosing handlers never close projectionManager windows. |
-| opus-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — projection windows may orphan on main-window close; lifecycle (main.qml:159) |
+| opus-4.8-extra | ⚠️ PARTIAL | 50 | projection windows may orphan on main-window close; lifecycle (main.qml:159) |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | observed Projection windows not closed on main window close - orphaned on Linux (src/kirigami_ui/main.qml:159) |
+| deepseek-v4-pro-max | ✅ LEGIT | 85 | main.qml:159-165/+android:144-150/+windows:154-160: onClosing only handles save dialog; no projectionManager.closeAll() or isEnabled=false — orphaned projection windows on Linux |
+| glm-5.2-xhigh | ✅ LEGIT | 75 | main.qml:159-165 projection windows not closed on main window close; orphaned on Linux |
+| kimi-k2.7-code | ✅ LEGIT | 85 | main.qml/+windows/+android onClosing handlers never close projectionManager windows. |
+| opus-4.8-ultra | ✅ LEGIT | 68 | max: real defect; severity is a separate axis (was PARTIAL) — projection windows may orphan on main-window close; lifecycle (main.qml:159) |
 
 ## Patch  _(fill when fixing)_
 

@@ -17,12 +17,12 @@
 
 | Agent | Verdict | Conf | Rationale |
 |---|---|---|---|
-| opus | ⚠️ PARTIAL | 40 | systemic absence of ToolTips; UX |
-| gpt | ⚠️ PARTIAL | 58 | missing tooltip is a UX gap, not a functional failure (src/prompter/Find.qml:1) |
-| deepseek | ⚠️ PARTIAL | 70 | Systemic absence of ToolTip across ~60 controls is accurate observation but subjective; some buttons use text labels; not a code defect per se |
-| glm | ✅ LEGIT | 70 | ~60+ controls across entire application missing ToolTip; systemic absence |
-| kimi | ✅ LEGIT | 75 | Source files show many ToolButtons/Actions with no tooltip; verified in Find.qml, EditorToolbar.qml, PrompterView.qml, PrompterPage.qml. |
-| opus-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — systemic absence of ToolTips; UX |
+| opus-4.8-extra | ⚠️ PARTIAL | 40 | systemic absence of ToolTips; UX |
+| gpt-5.5-xhigh | ⚠️ PARTIAL | 58 | missing tooltip is a UX gap, not a functional failure (src/prompter/Find.qml:1) |
+| deepseek-v4-pro-max | ⚠️ PARTIAL | 70 | Systemic absence of ToolTip across ~60 controls is accurate observation but subjective; some buttons use text labels; not a code defect per se |
+| glm-5.2-xhigh | ✅ LEGIT | 70 | ~60+ controls across entire application missing ToolTip; systemic absence |
+| kimi-k2.7-code | ✅ LEGIT | 75 | Source files show many ToolButtons/Actions with no tooltip; verified in Find.qml, EditorToolbar.qml, PrompterView.qml, PrompterPage.qml. |
+| opus-4.8-ultra | ⚠️ PARTIAL | 50 | max: real but non-behavioral (style/arch/non-issue) — systemic absence of ToolTips; UX |
 
 ## Patch  _(fill when fixing)_
 
